@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "top.leonx.irisflw.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MixinProgramCompiler",
+    "IrisHandlerMixin",
+    "VertexCompilerAccessor",
+    "MixinWorldProgram",
+    "MixinModelUtilLocalThreadObject"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
