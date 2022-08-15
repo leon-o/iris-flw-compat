@@ -5,7 +5,7 @@ import net.coderbot.iris.pipeline.newshader.ExtendedShader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ExtendedShader.class)
+@Mixin(value = ExtendedShader.class,remap = false)
 public interface ExtendedShaderAccessor {
     @Accessor
     GlFramebuffer getWritingToBeforeTranslucent();

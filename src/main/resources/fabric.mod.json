@@ -10,13 +10,12 @@
   ],
   "contact": {
   },
-  "accessWidener" : "irisflw.accesswidener",
   "license": "CC0-1.0",
   "icon": "assets/irisflw/icon.png",
 
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
-    "main": [
+    "client": [
       "top.leonx.irisflw.IrisFlw"
     ]
   },
@@ -28,7 +27,9 @@
     "fabricloader": ">=0.14.6",
     "fabric": "*",
     "minecraft": "~1.18.2",
-    "java": ">=17"
+    "java": ">=17",
+    "iris": "*",
+    "flywheel": "*"
   },
   "suggests": {
     "another-mod": "*"

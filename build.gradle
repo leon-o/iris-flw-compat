@@ -57,37 +57,39 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "com.jozufozu.flywheel:flywheel-fabric-1.18.2:${flywheel_version}"
-    implementation "org.joml:joml:1.10.4"
-    implementation 'org.anarres:jcpp:1.4.14'
-    modImplementation "maven.modrinth:sodium:${sodium_version}"
-    modImplementation "maven.modrinth:iris:${iris_version}"
+    modCompileOnly "com.jozufozu.flywheel:flywheel-fabric-1.18.2:${flywheel_version}"
+    compileOnly "org.joml:joml:1.10.4"
+    compileOnly 'org.anarres:jcpp:1.4.14'
 
-    dependencies(dependencies)
+    modCompileOnly "maven.modrinth:iris:${iris_version}"
+    modLocalRuntime "maven.modrinth:sodium:${sodium_version}"
+    modLocalRuntime "maven.modrinth:indium:1.0.7+mc1.18.2"
+    //modLocalRuntime "maven.modrinth:create-fabric:create-1.18.2-0.5.0c-708"
+    //dependencies(dependencies)
 }
-
-def dependencies(DependencyHandler deps) {
-    deps.modImplementation(deps.include("io.github.fabricators_of_create:Porting-Lib:${project.port_lib_version}+${project.minecraft_version}-dev.${project.port_lib_hash}"))
-    deps.modImplementation(deps.include("me.alphamode:ForgeTags:${project.forge_tags_version}"))
-    deps.modImplementation(deps.include("com.electronwill.night-config:core:${project.night_config_core_version}"))
-    deps.modImplementation(deps.include("com.electronwill.night-config:toml:${project.night_config_toml_version}"))
-    deps.modImplementation(deps.include("curse.maven:forge-config-api-port-fabric-547434:${project.config_api_id}"))
-    deps.modImplementation(deps.include("com.tterrag.registrate_fabric:Registrate:${project.registrate_version}"))
-    deps.modImplementation(deps.include("com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${project.flywheel_version}"))
-    deps.modImplementation(deps.include("com.jamieswhiteshirt:reach-entity-attributes:${project.reach_entity_attributes_version}"))
-    deps.modImplementation(deps.include("dev.cafeteria:fake-player-api:${project.fake_player_api_version}"))
-    deps.modImplementation(deps.include("io.github.tropheusj:milk-lib:${project.milk_lib_version}"))
-    deps.modImplementation(deps.include("me.luligabi:NoIndium:${project.no_indium_version}"))
-    deps.implementation(deps.include("com.google.code.findbugs:jsr305:${project.jsr305_version}"))
-
-    deps.modLocalRuntime("maven.modrinth:lazydfu:0.1.2")
-    deps.modLocalRuntime("maven.modrinth:lithium:mc1.18.2-0.7.9")
-    // used to prevent forge config api port from complaining
-    deps.modImplementation("com.github.AlphaMode:fakeconfig:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") }
-    deps.modImplementation("com.github.AlphaMode:fakeconfigtoml:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") }
-
-    deps.modImplementation("maven.modrinth:create-fabric:create-1.18.2-0.5.0c-708")
-}
+// For Test
+//def dependencies(DependencyHandler deps) {
+//    deps.modImplementation(deps.include("io.github.fabricators_of_create:Porting-Lib:${project.port_lib_version}+${project.minecraft_version}-dev.${project.port_lib_hash}"))
+//    deps.modImplementation(deps.include("me.alphamode:ForgeTags:${project.forge_tags_version}"))
+//    deps.modImplementation(deps.include("com.electronwill.night-config:core:${project.night_config_core_version}"))
+//    deps.modImplementation(deps.include("com.electronwill.night-config:toml:${project.night_config_toml_version}"))
+//    deps.modImplementation(deps.include("curse.maven:forge-config-api-port-fabric-547434:${project.config_api_id}"))
+//    deps.modImplementation(deps.include("com.tterrag.registrate_fabric:Registrate:${project.registrate_version}"))
+//    deps.modImplementation(deps.include("com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${project.flywheel_version}"))
+//    deps.modImplementation(deps.include("com.jamieswhiteshirt:reach-entity-attributes:${project.reach_entity_attributes_version}"))
+//    deps.modImplementation(deps.include("dev.cafeteria:fake-player-api:${project.fake_player_api_version}"))
+//    deps.modImplementation(deps.include("io.github.tropheusj:milk-lib:${project.milk_lib_version}"))
+//    deps.modImplementation(deps.include("me.luligabi:NoIndium:${project.no_indium_version}"))
+//    deps.implementation(deps.include("com.google.code.findbugs:jsr305:${project.jsr305_version}"))
+//
+//    deps.modLocalRuntime("maven.modrinth:lazydfu:0.1.2")
+//    deps.modLocalRuntime("maven.modrinth:lithium:mc1.18.2-0.7.9")
+//    // used to prevent forge config api port from complaining
+//    deps.modImplementation("com.github.AlphaMode:fakeconfig:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") }
+//    deps.modImplementation("com.github.AlphaMode:fakeconfigtoml:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") }
+//
+//    deps.modImplementation("maven.modrinth:create-fabric:create-1.18.2-0.5.0c-708")
+//}
 
 processResources {
     inputs.property "version", project.version
