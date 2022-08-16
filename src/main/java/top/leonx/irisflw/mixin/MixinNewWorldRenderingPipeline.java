@@ -43,7 +43,7 @@ public abstract class MixinNewWorldRenderingPipeline implements NewWorldRenderin
 
     @Invoker(remap = false)
     @Override
-    public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isIntensity, boolean isFullbright) throws IOException;
+    public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isIntensity,boolean isFullbright) throws IOException;
 
 //    @Override
 //    public IrisShaderProgram getFlwShaderProgram(ProgramContext context) {

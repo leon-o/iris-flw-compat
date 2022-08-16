@@ -1,164 +1,233 @@
+buildscript {
+    repositories {
+        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
+    }
+    dependencies {
+
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+
+        // MixinGradle:
+        classpath 'org.spongepowered:mixingradle:0.7.+'
+    }
+}
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 plugins {
-    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'eclipse'
     id 'maven-publish'
 }
+apply plugin: 'net.minecraftforge.gradle'
+// MixinGradle:
+apply plugin: 'org.spongepowered.mixin'
 
-version = project.mod_version
-group = project.maven_group
+
+version = "${minecraft_version}-${mod_version}"
+group = 'top.leonx.irisflw' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "${project.archives_base_name}"
+
+// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+minecraft {
+    // The mappings can be changed at any time and must be in the following format.
+    // Channel:   Version:
+    // official   MCVersion             Official field/method names from Mojang mapping files
+    // parchment  YYYY.MM.DD-MCVersion  Open community-sourced parameter names and javadocs layered on top of official
+    //
+    // You must be aware of the Mojang license when using the 'official' or 'parchment' mappings.
+    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
+    //
+    // Parchment is an unofficial project maintained by ParchmentMC, separate from MinecraftForge
+    // Additional setup is needed to use their mappings: https://github.com/ParchmentMC/Parchment/wiki/Getting-Started
+    //
+    // Use non-default mappings at your own risk. They may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    mappings channel: 'official', version: "${minecraft_version}"
+
+
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            property 'forge.enabledGameTestNamespaces', 'irisflw'
+
+            mods {
+                irisflw {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            property 'forge.enabledGameTestNamespaces', 'irisflw'
+
+            mods {
+                irisflw {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        // This run config launches GameTestServer and runs all registered gametests, then exits.
+        // By default, the server will crash when no gametests are provided.
+        // The gametest system is also enabled by default for other run configs under the /test command.
+        gameTestServer {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            property 'forge.enabledGameTestNamespaces', 'examplemod'
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            property 'forge.logging.console.level', 'debug'
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                examplemod {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+// Include resources generated by data generators.
+sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    mavenCentral()
-    mavenLocal()
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+
     maven {
         name "tterrag maven"
         url "https://maven.tterrag.com/"
     }
     maven {
-        url "https://cursemaven.com"
+        url "https://maven.tterrag.com/"
     }
-    maven { url = "https://hephaestus.dev/release" }
-    maven { url = "https://api.modrinth.com/maven" }
-    maven { url = "https://cursemaven.com" }
-    maven { url = "https://maven.parchmentmc.org" }
-    maven { url = "https://maven.fabricmc.net/" }
-    maven { url = "https://maven.tterrag.com/" }
-    maven { url = "https://storage.googleapis.com/devan-maven/" }
-    maven { url = "https://maven.shedaniel.me/" }
-    maven { url = "https://aperlambda.github.io/maven" }
-    maven { url = "https://ladysnake.jfrog.io/artifactory/mods" }
-    maven { url = "https://maven.kotlindiscord.com/repository/terraformers/" }
-    maven { url = "https://mvn.devos.one/releases/" }
-    maven { url = "https://mvn.devos.one/snapshots/" }
-    maven { url = "https://maven.terraformersmc.com/" }
-    maven { url = "https://maven.cafeteria.dev" }
-    maven { url = "https://jitpack.io/" }
-    maven { url = "https://maven.gegy.dev" }
-    maven { url = "https://dvs1.progwml6.com/files/maven/" }
-    maven { url = "https://modmaven.dev" }
-    maven {
-        url = "https://maven.jamieswhiteshirt.com/libs-release"
-        content {
-            includeGroup("com.jamieswhiteshirt")
-        }
-    }
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
 }
 
 dependencies {
-    // To change the versions see the gradle.properties file
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    //mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    mappings loom.layered() {
-        officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
-    }
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    // Apply Mixin AP
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    //implementation 'io.github.douira:glsl-transformer:1.0.0-pre13'
+    //implementation fg.deobf("maven.modrinth:rubidium:${sodium_version}")
+    //implementation fg.deobf("maven.modrinth:oculus:${iris_version}") //Can't find current 1.2.8 on modrinth
 
-    modCompileOnly "com.jozufozu.flywheel:flywheel-fabric-1.18.2:${flywheel_version}"
-    compileOnly "org.joml:joml:1.10.4"
-    compileOnly 'org.anarres:jcpp:1.4.14'
+    implementation fg.deobf("curse.maven:rubidium-574856:3973894")
+    implementation fg.deobf("curse.maven:oculus-581495:3973908")
 
-    modCompileOnly "maven.modrinth:iris:${iris_version}"
-    modCompileOnly "maven.modrinth:sodium:${sodium_version}"
-
-    localRuntime "org.joml:joml:1.10.4"
-    localRuntime 'org.anarres:jcpp:1.4.14'
-    modLocalRuntime "maven.modrinth:indium:1.0.7+mc1.18.2"
-    modLocalRuntime "maven.modrinth:iris:${iris_version}"
-    modLocalRuntime "maven.modrinth:sodium:${sodium_version}"
-    //modLocalRuntime "maven.modrinth:create-fabric:create-1.18.2-0.5.0c-708"
-    dependencies(dependencies)
-}
-// For Test
-def dependencies(DependencyHandler deps) {
-    deps.modLocalRuntime(deps.include("io.github.fabricators_of_create:Porting-Lib:${project.port_lib_version}+${project.minecraft_version}-dev.${project.port_lib_hash}"))
-    deps.modLocalRuntime(deps.include("me.alphamode:ForgeTags:${project.forge_tags_version}"))
-    deps.modLocalRuntime(deps.include("com.electronwill.night-config:core:${project.night_config_core_version}"))
-    deps.modLocalRuntime(deps.include("com.electronwill.night-config:toml:${project.night_config_toml_version}"))
-    deps.modLocalRuntime(deps.include("curse.maven:forge-config-api-port-fabric-547434:${project.config_api_id}"))
-    deps.modLocalRuntime(deps.include("com.tterrag.registrate_fabric:Registrate:${project.registrate_version}"))
-    deps.modLocalRuntime(deps.include("com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${project.flywheel_version}"))
-    deps.modLocalRuntime(deps.include("com.jamieswhiteshirt:reach-entity-attributes:${project.reach_entity_attributes_version}"))
-    deps.modLocalRuntime(deps.include("dev.cafeteria:fake-player-api:${project.fake_player_api_version}"))
-    deps.modLocalRuntime(deps.include("io.github.tropheusj:milk-lib:${project.milk_lib_version}"))
-    deps.modLocalRuntime(deps.include("me.luligabi:NoIndium:${project.no_indium_version}"))
-    deps.modLocalRuntime(deps.include("com.google.code.findbugs:jsr305:${project.jsr305_version}"))
-
-    deps.modLocalRuntime("maven.modrinth:lazydfu:0.1.2")
-    deps.modLocalRuntime("maven.modrinth:lithium:mc1.18.2-0.7.9")
-    // used to prevent forge config api port from complaining
-    deps.modLocalRuntime("com.github.AlphaMode:fakeconfig:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") }
-    deps.modLocalRuntime("com.github.AlphaMode:fakeconfigtoml:master-SNAPSHOT") { exclude(group: "net.fabricmc.fabric-api") }
-
-    deps.modLocalRuntime("maven.modrinth:create-fabric:create-1.18.2-0.5.0c-708")
+    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-1.19.2:${flywheel_version}")
 }
 
-processResources {
-    inputs.property "version", project.version
-    filteringCharset "UTF-8"
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
-
-//loom {
-//    accessWidenerPath = file("src/main/resources/irisflw.accesswidener")
-//    enableTransitiveAccessWideners = true
-//}
-
-def targetJavaVersion = 17
-tasks.withType(JavaCompile).configureEach {
-    // ensure that the encoding is set to UTF-8, no matter what the system default is
-    // this fixes some edge cases with special characters not displaying correctly
-    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-    // If Javadoc is generated, this must be specified in that task too.
-    it.options.encoding = "UTF-8"
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        it.options.release = targetJavaVersion
-    }
-}
-
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-    archivesBaseName = "${project.archives_base_name}-${minecraft_version}"
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
-}
-
+// Example for how to get properties into the manifest for reading at runtime.
 jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+    manifest {
+        attributes([
+                "Specification-Title"     : "irisflw",
+                "Specification-Vendor"    : "examplemodsareus",
+                "Specification-Version"   : "1", // We are version 1 of ourselves
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : "examplemodsareus",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
 }
 
-// configure the maven publication
+// Example configuration to allow publishing using the maven-publish plugin
+// This is the preferred method to reobfuscate your jar file
+jar.finalizedBy('reobfJar')
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+// publish.dependsOn('reobfJar')
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
+            artifact jar
         }
     }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
     }
+}
+
+mixin {
+    // MixinGradle Settings
+    add sourceSets.main, 'mixins.irisflw.refmap.json'
+    config 'irisflw.mixins.flw.json'
+    config 'irisflw.mixins.iris.json'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
