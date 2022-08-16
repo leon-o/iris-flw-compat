@@ -4,38 +4,19 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.compile.*;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import net.coderbot.iris.Iris;
-import net.coderbot.iris.gl.blending.AlphaTest;
-import net.coderbot.iris.gl.blending.AlphaTestFunction;
-import net.coderbot.iris.gl.blending.BlendModeOverride;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
-import net.coderbot.iris.pipeline.newshader.*;
-import net.coderbot.iris.shaderpack.ProgramSet;
-import net.coderbot.iris.shaderpack.ProgramSource;
-import net.coderbot.iris.shaderpack.ShaderProperties;
+import net.coderbot.iris.pipeline.newshader.ExtendedShader;
+import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
+import net.coderbot.iris.pipeline.newshader.ShaderKey;
 import net.irisshaders.iris.api.v0.IrisApi;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Shader;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.math.MathHelper;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.client.renderer.ShaderInstance;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import top.leonx.irisflw.IrisFlw;
 import top.leonx.irisflw.compiler.AutoInsertProgramCompiler;
 import top.leonx.irisflw.compiler.IrisProgramCompilerBase;
-import top.leonx.irisflw.transformer.TemplatePreprocessor;
-import top.leonx.irisflw.accessors.*;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Mixin(value = ProgramCompiler.class, remap = false)
 public abstract class MixinProgramCompiler<P extends WorldProgram> {
@@ -61,7 +42,7 @@ public abstract class MixinProgramCompiler<P extends WorldProgram> {
             if (program != null) cir.setReturnValue(program);
             else {
                 if (pipeline instanceof NewWorldRenderingPipeline newPipeline) {
-                    Shader shader = newPipeline.getShaderMap().getShader(ShaderKey.TEXTURED_COLOR);
+                    ShaderInstance shader = newPipeline.getShaderMap().getShader(ShaderKey.TEXTURED_COLOR);
                     if (shader instanceof ExtendedShader extendedShader) {
                         ((ExtendedShaderAccessor) extendedShader).getWritingToBeforeTranslucent().bind();
                         //Use the same render target with Gbuffers_textured.

@@ -6,6 +6,9 @@ import com.jozufozu.flywheel.core.compile.Template;
 import com.jozufozu.flywheel.core.compile.VertexData;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
+import com.mojang.authlib.minecraft.client.MinecraftClient;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.gl.blending.AlphaTest;
 import net.coderbot.iris.gl.blending.BlendModeOverride;
@@ -15,11 +18,9 @@ import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shaderpack.ProgramSource;
 import net.coderbot.iris.shaderpack.ShaderProperties;
 import net.irisshaders.iris.api.v0.IrisApi;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Shader;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.NotNull;
 import top.leonx.irisflw.IrisFlw;
 import top.leonx.irisflw.accessors.*;
@@ -34,7 +35,7 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
     Map<WorldRenderingPipeline, HashMap<ProgramContext, P>> shadowProgramCache = new HashMap<>();
 
     protected final GlProgram.Factory<P> factory;
-
+    private static int programCounter = 0;
     public IrisProgramCompilerBase(GlProgram.Factory<P> factory,Template<? extends VertexData> template, FileResolution header) {
         this.factory = factory;
     }
@@ -54,10 +55,10 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
                 P created = createIrisShaderProgram(ctx, isShadow);
                 cache.put(ctx, created);
                 if (created == null) {
-                    if (isShadow) MinecraftClient.getInstance().player.sendMessage(new LiteralText(
+                    if (isShadow) Minecraft.getInstance().player.displayClientMessage(new TextComponent(
                             String.format("Fail to compile %s_%s_%s", "Shadow", ctx.spec.name.getNamespace(),
                                           ctx.spec.name.getPath())), false);
-                    else MinecraftClient.getInstance().player.sendMessage(new LiteralText(
+                    else Minecraft.getInstance().player.displayClientMessage(new TextComponent(
                             String.format("Fail to compile %s_%s_%s", "Gbuffers_flw", ctx.spec.name.getNamespace(),
                                           ctx.spec.name.getPath())), false);
                 }
@@ -70,19 +71,20 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
     abstract P createIrisShaderProgram(ProgramContext ctx, boolean isShadow);
 
     protected P createWorldProgramBySource(ProgramContext ctx, boolean isShadow, NewWorldRenderingPipelineAccessor pipeline, ProgramSource processedSource) {
-        Shader override = null;
+        ShaderInstance override = null;
         try {
-            String randomId = MathHelper.randomUuid().toString();
+            String randomId = String.valueOf(programCounter);
+            programCounter++;
             if (isShadow) {
                 override = pipeline.callCreateShadowShader(
                         String.format("shadow_flw_%s_%s_%s", ctx.spec.name.getNamespace(),
                                       ctx.spec.name.getPath(), randomId), processedSource, AlphaTest.ALWAYS,
-                        VertexFormats.POSITION_TEXTURE, false, false);
+                        DefaultVertexFormat.POSITION_TEX, false);
             } else {
                 override = pipeline.callCreateShader(
                         String.format("gbuffers_flw_%s_%s_%s", ctx.spec.name.getNamespace(),
                                       ctx.spec.name.getPath(), randomId), processedSource, AlphaTest.ALWAYS,
-                        VertexFormats.POSITION_TEXTURE, FogMode.OFF, false, false);
+                        DefaultVertexFormat.POSITION_TEX, FogMode.OFF, false);
             }
 
         } catch (Exception exception) {
@@ -90,7 +92,7 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
         }
 
         if (override != null) {
-            P program = factory.create(ctx.spec.name, override.getProgramRef());
+            P program = factory.create(ctx.spec.name, override.getId());
             ((WorldProgramAccessor) program).setShader(new IrisFlwCompatShaderWarp(override));
             return program;
         }

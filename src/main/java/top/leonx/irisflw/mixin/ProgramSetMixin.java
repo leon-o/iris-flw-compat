@@ -7,7 +7,6 @@ import net.coderbot.iris.shaderpack.ShaderPack;
 import net.coderbot.iris.shaderpack.ShaderProperties;
 import net.coderbot.iris.shaderpack.include.AbsolutePackPath;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,7 +29,7 @@ public abstract class ProgramSetMixin implements ProgramSetAccessor {
     private ProgramSource gbuffersFlw;
     private ProgramSource shadowFlw;
 
-    @Inject(method = "<init>",remap = false,at = @At(value="INVOKE_ASSIGN",target = "Lnet/coderbot/iris/shaderpack/ProgramSet;readProgramSource(Lnet/coderbot/iris/shaderpack/include/AbsolutePackPath;Ljava/util/function/Function;Ljava/lang/String;Lnet/coderbot/iris/shaderpack/ProgramSet;Lnet/coderbot/iris/shaderpack/ShaderProperties;)Lnet/coderbot/iris/shaderpack/ProgramSource;",ordinal = 0))
+    @Inject(method = "<init>",remap = false,at = @At(value="RETURN"))
     private void initGBufferFlw(AbsolutePackPath directory, Function<AbsolutePackPath, String> sourceProvider,
                                 ShaderProperties shaderProperties, ShaderPack pack, CallbackInfo ci){
         gbuffersFlw = callReadProgramSource(directory, sourceProvider, "gbuffers_flw", (ProgramSet) (Object)this, shaderProperties);

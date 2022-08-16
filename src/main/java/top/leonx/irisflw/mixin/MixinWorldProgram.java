@@ -4,7 +4,7 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.coderbot.iris.gl.blending.BlendModeStorage;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +18,7 @@ public abstract class MixinWorldProgram extends GlProgram implements WorldProgra
     @Unique
     private IrisFlwCompatShaderWarp shader;
 
-    protected MixinWorldProgram(Identifier name, int handle) {
+    protected MixinWorldProgram(ResourceLocation name, int handle) {
         super(name, handle);
     }
 
