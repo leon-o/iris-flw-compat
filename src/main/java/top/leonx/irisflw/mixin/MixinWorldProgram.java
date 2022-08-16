@@ -4,7 +4,6 @@ import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.coderbot.iris.gl.blending.BlendModeStorage;
-import net.minecraft.client.render.Shader;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -12,19 +11,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.leonx.irisflw.accessors.WorldProgramAccessor;
+import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
 
 @Mixin(WorldProgram.class)
 public abstract class MixinWorldProgram extends GlProgram implements WorldProgramAccessor {
     @Unique
-    private Shader shader;
+    private IrisFlwCompatShaderWarp shader;
 
     protected MixinWorldProgram(Identifier name, int handle) {
         super(name, handle);
     }
 
-    public void setShader(Shader shader){
+    public void setShader(IrisFlwCompatShaderWarp shader){
         this.shader = shader;
-        setHandle(shader.getProgramRef());
+        setHandle(shader.getProgramHandle());
     }
 
     @Inject(method = "bind",remap = false,at = @At("HEAD"))

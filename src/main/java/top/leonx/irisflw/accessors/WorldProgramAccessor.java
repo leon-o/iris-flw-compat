@@ -1,9 +1,9 @@
 package top.leonx.irisflw.accessors;
 
-import net.minecraft.client.render.Shader;
+import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
 
 public interface WorldProgramAccessor {
-    void setShader(Shader shader);
+    void setShader(IrisFlwCompatShaderWarp shader);
 
     void instanceUnbind();
 }
