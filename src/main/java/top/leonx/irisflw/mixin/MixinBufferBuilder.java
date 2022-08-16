@@ -1,12 +1,11 @@
 package top.leonx.irisflw.mixin;
 
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexFormat;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.leonx.irisflw.accessors.BufferBuilderAccessor;
@@ -20,7 +19,7 @@ public class MixinBufferBuilder implements BufferBuilderAccessor {
     // There will be an error when building, never mind.
     // This shadow field provided by Iris.
     @SuppressWarnings("MixinAnnotationTarget")
-    @Shadow
+
     private boolean extending;
 
     @Override
@@ -28,8 +27,8 @@ public class MixinBufferBuilder implements BufferBuilderAccessor {
         this.isFlyWheelBufferBuilder = isFlyWheel;
     }
 
-    @Inject(method = "begin", at = @At(value = "FIELD",target = "Lnet/minecraft/client/render/BufferBuilder;building:Z"))
-    private void iris$onBegin(VertexFormat.DrawMode drawMode, VertexFormat format, CallbackInfo ci) {
+    @Inject(method = "begin", at = @At(value = "FIELD",target = "com/mojang/blaze3d/vertex/BufferBuilder.building:Z"))
+    private void iris$onBegin(VertexFormat.Mode drawMode, VertexFormat format, CallbackInfo ci) {
         extending = extending && !isFlyWheelBufferBuilder;
     }
 }

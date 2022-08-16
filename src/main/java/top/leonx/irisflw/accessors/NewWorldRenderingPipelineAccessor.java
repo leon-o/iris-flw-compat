@@ -1,22 +1,21 @@
 package top.leonx.irisflw.accessors;
 
+import com.mojang.blaze3d.vertex.VertexFormat;
 import net.coderbot.iris.gl.blending.AlphaTest;
 import net.coderbot.iris.pipeline.newshader.FogMode;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shaderpack.ProgramSource;
-import net.minecraft.client.render.Shader;
-import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.renderer.ShaderInstance;
+
+import java.io.IOException;
 
 public interface NewWorldRenderingPipelineAccessor {
     ProgramSet getProgramSet();
 
-    Shader callCreateShader(String name, ProgramSource source, AlphaTest fallbackAlpha,
-                                   VertexFormat vertexFormat, FogMode fogMode,
-                                   boolean isIntensity, boolean isFullbright);
+    ShaderInstance callCreateShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, FogMode fogMode, boolean isFullbright) throws IOException;
 
 
-    Shader callCreateShadowShader(String name, ProgramSource source, AlphaTest fallbackAlpha,
-                                                  VertexFormat vertexFormat, boolean isIntensity, boolean isFullbright);
+    ShaderInstance callCreateShadowShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isFullbright) throws IOException;
 
     //IrisShaderProgram getFlwShaderProgram(ProgramContext context);
 }
