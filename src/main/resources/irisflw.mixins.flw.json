@@ -8,7 +8,9 @@
     "IrisHandlerMixin",
     "VertexCompilerAccessor",
     "MixinWorldProgram",
-    "MixinModelUtil"
+    "MixinModelUtil",
+    "MixinInstancedRenderDispatcher",
+    "MixinLevelRender"
   ],
   "injectors": {
     "defaultRequire": 1
