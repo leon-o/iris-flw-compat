@@ -71,7 +71,7 @@ dependencies {
     modCompileOnly "maven.modrinth:sodium:${sodium_version}"
     modLocalRuntime "maven.modrinth:indium:1.0.7+mc1.18.2"
     //modLocalRuntime "maven.modrinth:create-fabric:create-1.18.2-0.5.0c-708"
-    dependencies(dependencies)
+    //dependencies(dependencies)
 }
 // For Test
 def dependencies(DependencyHandler deps) {
@@ -106,10 +106,10 @@ processResources {
     }
 }
 
-loom {
-    accessWidenerPath = file("src/main/resources/irisflw.accesswidener")
-    enableTransitiveAccessWideners = true
-}
+//loom {
+//    accessWidenerPath = file("src/main/resources/irisflw.accesswidener")
+//    enableTransitiveAccessWideners = true
+//}
 
 def targetJavaVersion = 17
 tasks.withType(JavaCompile).configureEach {

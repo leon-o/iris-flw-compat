@@ -79,12 +79,12 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
                 override = pipeline.callCreateShadowShader(
                         String.format("shadow_flw_%s_%s_%s", ctx.spec.name.getNamespace(),
                                       ctx.spec.name.getPath(), randomId), processedSource, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX, false);
+                        DefaultVertexFormat.POSITION_TEX, false,false);
             } else {
                 override = pipeline.callCreateShader(
                         String.format("gbuffers_flw_%s_%s_%s", ctx.spec.name.getNamespace(),
                                       ctx.spec.name.getPath(), randomId), processedSource, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX, FogMode.OFF, false);
+                        DefaultVertexFormat.POSITION_TEX, FogMode.OFF, false,false);
             }
 
         } catch (Exception exception) {

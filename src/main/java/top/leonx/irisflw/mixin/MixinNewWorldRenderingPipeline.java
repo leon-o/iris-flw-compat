@@ -39,11 +39,11 @@ public abstract class MixinNewWorldRenderingPipeline implements NewWorldRenderin
 
     @Invoker(remap = false)
     @Override
-    public abstract ShaderInstance callCreateShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, FogMode fogMode, boolean isFullbright) throws IOException;
+    public abstract ShaderInstance callCreateShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, FogMode fogMode, boolean isIntensity, boolean isFullbright) throws IOException;
 
     @Invoker(remap = false)
     @Override
-    public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isFullbright) throws IOException;
+    public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isIntensity, boolean isFullbright) throws IOException;
 
 //    @Override
 //    public IrisShaderProgram getFlwShaderProgram(ProgramContext context) {
