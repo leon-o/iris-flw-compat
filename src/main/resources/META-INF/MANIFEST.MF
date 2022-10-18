@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Specification-Title: irisflw
+Specification-Vendor: examplemodsareus
+Specification-Version: 1
+Implementation-Title: iris-flywheel
+Implementation-Version: 1.18.2-0.1.5-ALPHA
+Implementation-Vendor: examplemodsareus
+Implementation-Timestamp: 2022-08-16T22:04:24+0800
+MixinConfigs: irisflw.mixins.flw.json,irisflw.mixins.iris.json
+
