@@ -44,7 +44,7 @@ public abstract class MixinWorldProgram extends GlProgram implements WorldProgra
         //Currently, this method has never been called.
         //So, the shader never been unbounded.
         //That's why I invoke the BlendModeStorage.restoreBlend in bind method,
-        // otherwise the blend won't be enabled when Render Entity Outline, witch will cause black screen.
+        // otherwise the blend won't be enabled when Render Entity Outline, witch resulting in a completely black screen.
         if(this.shader!=null)
             this.shader.unbind();
     }

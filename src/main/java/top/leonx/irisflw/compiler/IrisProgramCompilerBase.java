@@ -6,9 +6,7 @@ import com.jozufozu.flywheel.core.compile.Template;
 import com.jozufozu.flywheel.core.compile.VertexData;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.mojang.authlib.minecraft.client.MinecraftClient;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.gl.blending.AlphaTest;
 import net.coderbot.iris.gl.blending.BlendModeOverride;
@@ -23,11 +21,14 @@ import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.NotNull;
 import top.leonx.irisflw.IrisFlw;
-import top.leonx.irisflw.accessors.*;
+import top.leonx.irisflw.accessors.NewWorldRenderingPipelineAccessor;
+import top.leonx.irisflw.accessors.ProgramSourceAccessor;
+import top.leonx.irisflw.accessors.WorldProgramAccessor;
 import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
     Map<WorldRenderingPipeline, HashMap<ProgramContext, P>> programCache = new HashMap<>();
@@ -36,7 +37,7 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
 
     protected final GlProgram.Factory<P> factory;
     private static int programCounter = 0;
-    public IrisProgramCompilerBase(GlProgram.Factory<P> factory,Template<? extends VertexData> template, FileResolution header) {
+    public IrisProgramCompilerBase(GlProgram.Factory<P> factory, Template<? extends VertexData> ignoredTemplate, FileResolution ignoredHeader) {
         this.factory = factory;
     }
 
@@ -55,12 +56,17 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
                 P created = createIrisShaderProgram(ctx, isShadow);
                 cache.put(ctx, created);
                 if (created == null) {
-                    if (isShadow) Minecraft.getInstance().player.displayClientMessage(new TextComponent(
-                            String.format("Fail to compile %s_%s_%s", "Shadow", ctx.spec.name.getNamespace(),
-                                          ctx.spec.name.getPath())), false);
-                    else Minecraft.getInstance().player.displayClientMessage(new TextComponent(
+                    if (Minecraft.getInstance().player != null) {
+                    if (isShadow)
+                        Minecraft.getInstance().player.displayClientMessage(new TextComponent(
+                                String.format("Fail to compile %s_%s_%s", "Shadow", ctx.spec.name.getNamespace(),
+                                              ctx.spec.name.getPath())), false);
+
+                    else
+                        Minecraft.getInstance().player.displayClientMessage(new TextComponent(
                             String.format("Fail to compile %s_%s_%s", "Gbuffers_flw", ctx.spec.name.getNamespace(),
                                           ctx.spec.name.getPath())), false);
+                    }
                 }
             }
             return cache.get(ctx);
@@ -104,10 +110,10 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
         ShaderProperties properties = ((ProgramSourceAccessor) source).getShaderProperties();
         BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) source).getBlendModeOverride();
         //Get a copy of program
-        ProgramSource processedSource = new ProgramSource(source.getName() + "_" + ctx.spec.name, vertexSource,
+        return new ProgramSource(source.getName() + "_" + ctx.spec.name.toString().replace(":","_")+
+                UUID.randomUUID(), vertexSource,
                                                           source.getGeometrySource().orElse(null),
                                                           source.getFragmentSource().orElse(null), programSet, properties, blendModeOverride);
-        return processedSource;
     }
 
     public void clear(){

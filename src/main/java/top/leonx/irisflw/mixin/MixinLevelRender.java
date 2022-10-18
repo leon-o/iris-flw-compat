@@ -5,7 +5,6 @@ import com.jozufozu.flywheel.event.RenderLayerEvent;
 import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
-import net.coderbot.iris.mixin.LevelRendererAccessor;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
@@ -20,6 +19,7 @@ import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
 
 @Mixin(value = LevelRenderer.class,priority = 900)
 public class MixinLevelRender {
+
     @Shadow
     @Final
     private RenderBuffers renderBuffers;
@@ -31,17 +31,22 @@ public class MixinLevelRender {
             at = @At(value = "FIELD",target = "Lnet/minecraft/client/renderer/LevelRenderer;renderedEntities:I",ordinal = 0)
     )
     private void irisflw$renderLayerTail(PoseStack poseStack, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo callbackInfo) {
+        // Render flywheel block entities in the last.
+        // Otherwise, it may cause rendering issue with some shaderpacks.
+
         RenderLayerEventStateManager.setSkip(false);
-        RenderBuffers renderBuffers = this.renderBuffers;
-        Vec3 camPos = camera.getPosition();
-        double camX = camPos.x();
-        double camY = camPos.y();
-        double camZ = camPos.z();
-        GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-        FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.solid(), poseStack, renderBuffers, camX, camY, camZ));
-        FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.cutoutMipped(), poseStack, renderBuffers, camX, camY, camZ));
-        FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.cutout(), poseStack, renderBuffers, camX, camY, camZ));
-        restoreState.restore();
+        if (!RenderLayerEventStateManager.isRenderingShadow()){
+            RenderBuffers renderBuffers = this.renderBuffers;
+            Vec3 camPos = camera.getPosition();
+            double camX = camPos.x();
+            double camY = camPos.y();
+            double camZ = camPos.z();
+            GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
+            FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.solid(), poseStack, renderBuffers, camX, camY, camZ));
+            FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.cutoutMipped(), poseStack, renderBuffers, camX, camY, camZ));
+            FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.cutout(), poseStack, renderBuffers, camX, camY, camZ));
+            restoreState.restore();
+        }
     }
 
     @Inject(

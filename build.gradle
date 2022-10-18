@@ -30,7 +30,7 @@ repositories {
     maven { url = "https://mvn.devos.one/releases/" }
     maven { url = "https://mvn.devos.one/snapshots/" }
     maven { url = "https://maven.terraformersmc.com/" }
-    maven { url = "https://maven.cafeteria.dev" }
+    maven { url = "https://maven.cafeteria.dev/releases/" }
     maven { url = "https://jitpack.io/" }
     maven { url = "https://maven.gegy.dev" }
     maven { url = "https://dvs1.progwml6.com/files/maven/" }
@@ -61,7 +61,7 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    //implementation 'io.github.douira:glsl-transformer:1.0.0-pre13'
+    implementation 'io.github.douira:glsl-transformer:1.0.1'
 
     modCompileOnly "com.jozufozu.flywheel:flywheel-fabric-1.18.2:${flywheel_version}"
     compileOnly "org.joml:joml:1.10.4"
@@ -72,11 +72,13 @@ dependencies {
 
     localRuntime "org.joml:joml:1.10.4"
     localRuntime 'org.anarres:jcpp:1.4.14'
-    modLocalRuntime "maven.modrinth:indium:1.0.7+mc1.18.2"
+    //modLocalRuntime "maven.modrinth:indium:1.0.7+mc1.18.2"
     modLocalRuntime "maven.modrinth:iris:${iris_version}"
     modLocalRuntime "maven.modrinth:sodium:${sodium_version}"
+    modLocalRuntime("com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${project.flywheel_version}")
+
     //modLocalRuntime "maven.modrinth:create-fabric:create-1.18.2-0.5.0c-708"
-    dependencies(dependencies)
+    //dependencies(dependencies)
 }
 // For Test
 def dependencies(DependencyHandler deps) {
@@ -111,10 +113,6 @@ processResources {
     }
 }
 
-//loom {
-//    accessWidenerPath = file("src/main/resources/irisflw.accesswidener")
-//    enableTransitiveAccessWideners = true
-//}
 
 def targetJavaVersion = 17
 tasks.withType(JavaCompile).configureEach {

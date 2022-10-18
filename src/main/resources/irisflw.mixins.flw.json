@@ -4,13 +4,13 @@
   "package": "top.leonx.irisflw.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "MixinProgramCompiler",
     "IrisHandlerMixin",
-    "VertexCompilerAccessor",
-    "MixinWorldProgram",
-    "MixinModelUtil",
     "MixinInstancedRenderDispatcher",
-    "MixinLevelRender"
+    "MixinLevelRender",
+    "MixinModelUtil",
+    "MixinProgramCompiler",
+    "MixinWorldProgram",
+    "VertexCompilerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
