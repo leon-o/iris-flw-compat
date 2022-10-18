@@ -5,11 +5,13 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "mixins.irisflw.refmap.json",
   "client": [
-    "MixinProgramCompiler",
     "IrisHandlerMixin",
-    "VertexCompilerAccessor",
+    "MixinInstancedRenderDispatcher",
+    "MixinLevelRender",
+    "MixinModelUtil",
+    "MixinProgramCompiler",
     "MixinWorldProgram",
-    "MixinModelUtilLocalThreadObject"
+    "VertexCompilerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

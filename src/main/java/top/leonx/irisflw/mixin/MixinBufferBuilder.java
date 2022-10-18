@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.leonx.irisflw.accessors.BufferBuilderAccessor;
+import top.leonx.irisflw.iris.BufferBuilderStateManager;
 
 @Mixin(value = BufferBuilder.class,priority = 1010)
 public class MixinBufferBuilder implements BufferBuilderAccessor {
@@ -18,7 +19,6 @@ public class MixinBufferBuilder implements BufferBuilderAccessor {
 
     // There will be an error when building, never mind.
     // This shadow field provided by Iris.
-    @SuppressWarnings("MixinAnnotationTarget")
 
     private boolean extending;
 
@@ -29,6 +29,6 @@ public class MixinBufferBuilder implements BufferBuilderAccessor {
 
     @Inject(method = "begin", at = @At(value = "FIELD",target = "com/mojang/blaze3d/vertex/BufferBuilder.building:Z"))
     private void iris$onBegin(VertexFormat.Mode drawMode, VertexFormat format, CallbackInfo ci) {
-        extending = extending && !isFlyWheelBufferBuilder;
+        extending = extending && BufferBuilderStateManager.isAllowExtend();
     }
 }
