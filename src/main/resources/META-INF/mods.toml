@@ -24,3 +24,10 @@ Enable FlyWheel instancing optimization when use custom shaders.
     ordering="NONE"
     side="CLIENT"
 
+[[dependencies.irisflw]]
+    modId="oculus"
+    mandatory=true
+    versionRange="[1.4,)"
+    ordering="NONE"
+    side="CLIENT"
+

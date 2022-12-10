@@ -1,24 +1,35 @@
 package top.leonx.irisflw.flywheel;
 
+import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import net.coderbot.iris.uniforms.CapturedRenderingState;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.lwjgl.opengl.GL20;
+import top.leonx.irisflw.iris.GlUniformMcMatrix3f;
 import top.leonx.irisflw.iris.GlUniformMcMatrix4f;
 
 public class IrisFlwCompatShaderWarp {
     public ShaderInstance shader;
     protected GlUniformMcMatrix4f uniformIrisProjMat;
     protected GlUniformMcMatrix4f uniformModelViewMat;
-    protected GlUniformMcMatrix4f uniformNormalMatrix;
+    protected GlUniformMcMatrix3f uniformNormalMatrix;
     protected GlUniformMcMatrix4f uniformModelViewProjMat;
 
     public IrisFlwCompatShaderWarp(ShaderInstance shader) {
         this.shader = shader;
         int progId = shader.getId();
+
+        //ModelViewMat may be removed if the shader doesn't use it.
+        //If the MODEL_VIEW_MATRIX is null, the game will crash when we call ExtendedShader::apply().
+        if(shader.MODEL_VIEW_MATRIX == null){
+            shader.MODEL_VIEW_MATRIX = new Uniform("ModelViewMat",10,16,shader);
+            shader.MODEL_VIEW_MATRIX.set(Matrix4f.createScaleMatrix(1,1,1));
+        }
+
         uniformIrisProjMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId,"iris_ProjMat"));
         uniformModelViewMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId,"iris_ModelViewMat"));
-        uniformNormalMatrix = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId,"flw_NormalMat"));
+        uniformNormalMatrix = new GlUniformMcMatrix3f(GL20.glGetUniformLocation(progId,"iris_NormalMat"));
         uniformModelViewProjMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId,"flw_ModelViewProjMat"));
     }
 
@@ -46,7 +57,7 @@ public class IrisFlwCompatShaderWarp {
             Matrix4f normalMatrix = new Matrix4f(modelView);
             normalMatrix.invert();
             normalMatrix.transpose();
-            this.uniformNormalMatrix.set(normalMatrix);
+            this.uniformNormalMatrix.set(new Matrix3f(normalMatrix));
         }
     }
 }

@@ -6,9 +6,6 @@ import com.jozufozu.flywheel.core.compile.Template;
 import com.jozufozu.flywheel.core.compile.VertexData;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import com.mojang.authlib.minecraft.client.MinecraftClient;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.gl.blending.AlphaTest;
@@ -18,6 +15,7 @@ import net.coderbot.iris.pipeline.newshader.FogMode;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shaderpack.ProgramSource;
 import net.coderbot.iris.shaderpack.ShaderProperties;
+import net.coderbot.iris.shaderpack.loading.ProgramId;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -31,6 +29,7 @@ import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
     Map<WorldRenderingPipeline, HashMap<ProgramContext, P>> programCache = new HashMap<>();
@@ -86,13 +85,13 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
             if (isShadow) {
                 override = pipeline.callCreateShadowShader(
                         String.format("shadow_flw_%s_%s_%s", ctx.spec.name.getNamespace(),
-                                      ctx.spec.name.getPath(), randomId), processedSource, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX, false);
+                                      ctx.spec.name.getPath(), randomId), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
+                        DefaultVertexFormat.POSITION_TEX, false,false);
             } else {
                 override = pipeline.callCreateShader(
                         String.format("gbuffers_flw_%s_%s_%s", ctx.spec.name.getNamespace(),
-                                      ctx.spec.name.getPath(), randomId), processedSource, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX, FogMode.OFF, false);
+                                      ctx.spec.name.getPath(), randomId), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
+                        DefaultVertexFormat.POSITION_TEX, FogMode.OFF, false,false);
             }
 
         } catch (Exception exception) {
