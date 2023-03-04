@@ -33,8 +33,6 @@ public abstract class MixinNewWorldRenderingPipeline implements NewWorldRenderin
     @Inject(method = "<init>",at = @At("TAIL"),remap = false)
     public void initSet(ProgramSet set, CallbackInfo callbackInfo){
         programSet = set;
-//        addIrisShaderProgram(ProgramContext.create(((Instanced) Materials.TRANSFORMED).getProgramSpec(),
-//                                                   Formats.POS_TEX_NORMAL, RenderLayer.SOLID));
     }
 
 
@@ -44,10 +42,5 @@ public abstract class MixinNewWorldRenderingPipeline implements NewWorldRenderin
 
     @Invoker(remap = false)
     @Override
-    public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isIntensity,boolean isFullbright) throws IOException;
-
-//    @Override
-//    public IrisShaderProgram getFlwShaderProgram(ProgramContext context) {
-//        return programCache.get(context);
-//    }
+    public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isIntensity, boolean isFullbright) throws IOException;
 }

@@ -15,7 +15,7 @@ import net.coderbot.iris.pipeline.newshader.FogMode;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shaderpack.ProgramSource;
 import net.coderbot.iris.shaderpack.ShaderProperties;
- import net.coderbot.iris.shaderpack.loading.ProgramId;
+import net.coderbot.iris.shaderpack.loading.ProgramId;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -58,12 +58,14 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
                 P created = createIrisShaderProgram(ctx, isShadow);
                 cache.put(ctx, created);
                 if (created == null) {
-                    if (isShadow) Minecraft.getInstance().player.displayClientMessage(Component.literal(
-                            String.format("Fail to compile %s_%s_%s", "Shadow", ctx.spec.name.getNamespace(),
-                                    ctx.spec.name.getPath())), false);
-                    else Minecraft.getInstance().player.displayClientMessage(Component.literal(
-                            String.format("Fail to compile %s_%s_%s", "Gbuffers_flw", ctx.spec.name.getNamespace(),
-                                    ctx.spec.name.getPath())), false);
+                    if (Minecraft.getInstance().player != null) {
+                        if (isShadow) Minecraft.getInstance().player.displayClientMessage(Component.literal(
+                                String.format("Fail to compile %s_%s_%s", "Shadow", ctx.spec.name.getNamespace(),
+                                        ctx.spec.name.getPath())), false);
+                        else Minecraft.getInstance().player.displayClientMessage(Component.literal(
+                                String.format("Fail to compile %s_%s_%s", "Gbuffers_flw", ctx.spec.name.getNamespace(),
+                                        ctx.spec.name.getPath())), false);
+                    }
                 }
             }
             return cache.get(ctx);
