@@ -1,0 +1,2 @@
+accessWidener	v1	named
+mutable field net/minecraft/client/renderer/ShaderInstance MODEL_VIEW_MATRIX Lcom/mojang/blaze3d/shaders/Uniform;

@@ -119,6 +119,9 @@ processResources {
     }
 }
 
+loom {
+    accessWidenerPath = file("src/main/resources/irisflw.accesswidener")
+}
 
 def targetJavaVersion = 17
 tasks.withType(JavaCompile).configureEach {
