@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
 
-@Mixin(ShadowRenderer.class)
+@Mixin(value = ShadowRenderer.class,remap = false)
 public class MixinShadowRenderer {
 
     @Final
