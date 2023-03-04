@@ -7,6 +7,7 @@ import net.coderbot.iris.pipeline.newshader.FogMode;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shaderpack.ProgramSource;
+import net.coderbot.iris.shaderpack.loading.ProgramId;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.apache.http.annotation.Obsolete;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,9 +40,9 @@ public abstract class MixinNewWorldRenderingPipeline implements NewWorldRenderin
 
     @Invoker(remap = false)
     @Override
-    public abstract ShaderInstance callCreateShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, FogMode fogMode, boolean isIntensity, boolean isFullbright) throws IOException;
+    public abstract ShaderInstance callCreateShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha, VertexFormat vertexFormat, FogMode fogMode, boolean isIntensity, boolean isFullbright) throws IOException;
 
     @Invoker(remap = false)
     @Override
-    public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isIntensity, boolean isFullbright) throws IOException;
+    public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isIntensity, boolean isFullbright) throws IOException;
 }
