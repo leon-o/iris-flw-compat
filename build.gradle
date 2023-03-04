@@ -178,13 +178,13 @@ dependencies {
     // Apply Mixin AP
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    //implementation fg.deobf("maven.modrinth:rubidium:${sodium_version}")
-    //implementation fg.deobf("maven.modrinth:oculus:${iris_version}") //Can't find current 1.2.8 on modrinth
+    implementation fg.deobf("maven.modrinth:rubidium:${sodium_version}")
+    implementation fg.deobf("maven.modrinth:oculus:${iris_version}")
 
-    implementation fg.deobf("curse.maven:rubidium-574856:3973894")
-    implementation fg.deobf("curse.maven:oculus-581495:3973908")
+    //implementation fg.deobf("curse.maven:rubidium-574856:3973894")
+    //implementation fg.deobf("curse.maven:oculus-581495:3973908")
 
-    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-1.19.2:${flywheel_version}")
+    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.

@@ -34,6 +34,6 @@ Enable FlyWheel instancing optimization when use custom shaders.
 [[dependencies.irisflw]]
     modId="flywheel"
     mandatory=true
-    versionRange="[0.6.7,0.6.8)"
+    versionRange="[0.6.7,)"
     ordering="AFTER"
     side="CLIENT"
