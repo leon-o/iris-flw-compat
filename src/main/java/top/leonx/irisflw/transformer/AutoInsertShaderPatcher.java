@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AutoInsertShaderPatcher extends ShaderPatcherBase {
-    Pattern versionPattern = Pattern.compile("#version\\s+\\d+");
+    Pattern versionPattern = Pattern.compile("#version\\s+\\d+(\\s+compatibility)?");
     Pattern ftransformAssignPattern = Pattern.compile("ftransform\\(\\)");
     Pattern textureMatrixPattern = Pattern.compile("gl_TextureMatrix\\[\\d\\]");
     Pattern boxCoordDetector = Pattern.compile("BoxCoord");
