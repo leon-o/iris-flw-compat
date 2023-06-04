@@ -61,7 +61,7 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    implementation 'io.github.douira:glsl-transformer:2.0.0-pre9'
+    implementation 'io.github.douira:glsl-transformer:2.0.0-pre14'
 
     modCompileOnly "com.jozufozu.flywheel:flywheel-fabric-1.18.2:${flywheel_version}"
     compileOnly "org.joml:joml:1.10.4"

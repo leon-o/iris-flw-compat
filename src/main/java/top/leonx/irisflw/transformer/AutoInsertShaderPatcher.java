@@ -11,6 +11,7 @@ public class AutoInsertShaderPatcher extends ShaderPatcherBase {
     Pattern versionPattern = Pattern.compile("#version\\s+\\d+(\\s+compatibility)?");
     Pattern ftransformAssignPattern = Pattern.compile("ftransform\\(\\)");
     Pattern textureMatrixPattern = Pattern.compile("gl_TextureMatrix\\[\\d\\]");
+    Pattern atTangentPattern = Pattern.compile("(?<!(in\\svec4\\s|attribute\\svec4\\s))at_tangent"); // usage of at_tangent attribute
     Pattern boxCoordDetector = Pattern.compile("BoxCoord");
     Pattern definePattern = Pattern.compile("(?<=#define\\s)\\w+(?=\\s+)");
 
@@ -34,8 +35,13 @@ public class AutoInsertShaderPatcher extends ShaderPatcherBase {
         createVertexBuilder.append('\n');
         generateCreateVertex(appliedTemplate,createVertexBuilder);
         createVertexBuilder.append("""
-                                           vec4 _flw_patched_vertex_pos = FLWVertex(v);
+                                           _flw_patched_vertex_pos = FLWVertex(v);
                                            """);
+        createVertexBuilder.append("""
+                vec3 skewedNormal = v.normal+vec3(0.5,0.5,0.5);
+                _flw_tangent = vec4(normalize(skewedNormal - v.normal*dot(skewedNormal,v.normal)).xyz,1.0);
+                """);
+        //This tangent is not correct. Just make the tangent not equal to (0,0,0).
         createVertexBuilder.append('\n');
 
         // insert the code after the #version.
@@ -52,25 +58,19 @@ public class AutoInsertShaderPatcher extends ShaderPatcherBase {
             irisSourceBuilder.insert(mainFuncMatcher.end(),createVertexBuilder);
         }
 
-        // replace all ftransform() with _flw_patched_vertex_pos
+        // Replace all ftransform() with _flw_patched_vertex_pos
         Matcher ftransformMatcher = ftransformAssignPattern.matcher(irisSourceBuilder);
-        while (ftransformMatcher.find()){
-            irisSourceBuilder.replace(ftransformMatcher.start(),ftransformMatcher.end(),
-                            "_flw_patched_vertex_pos");
+        var afterReplaced = ftransformMatcher.replaceAll("_flw_patched_vertex_pos");
 
-            ftransformMatcher = ftransformAssignPattern.matcher(irisSourceBuilder);
-        }
+        // Replace all at_tangent with _flw_tangent
+        Matcher atangentMatcher = atTangentPattern.matcher(afterReplaced);
+        afterReplaced = atangentMatcher.replaceAll("_flw_tangent");
 
+        // Replace textureMatrix with "1.0"
+        Matcher textureMatrixMatcher = textureMatrixPattern.matcher(afterReplaced);
+        afterReplaced = textureMatrixMatcher.replaceAll("1.0");
 
-        //replace textureMatrix with "1.0"
-        Matcher textureMatrixMatcher = textureMatrixPattern.matcher(irisSourceBuilder);
-        while (textureMatrixMatcher.find()){
-            irisSourceBuilder.replace(textureMatrixMatcher.start(),textureMatrixMatcher.end(),
-                            "1.0");
-
-            textureMatrixMatcher = textureMatrixPattern.matcher(irisSourceBuilder);
-        }
-        return irisSourceBuilder.toString();
+        return afterReplaced;
     }
 
     private void replaceOriginalDefine(StringBuilder predefinedCodeBuilder) {
