@@ -12,6 +12,7 @@ import top.leonx.irisflw.iris.GlUniformMcMatrix4f;
 public class IrisFlwCompatShaderWarp {
     public ShaderInstance shader;
     protected GlUniformMcMatrix4f uniformIrisProjMat;
+    protected GlUniformMcMatrix4f iris_uniformModelViewMat;
     protected GlUniformMcMatrix4f uniformModelViewMat;
     protected GlUniformMcMatrix3f uniformNormalMatrix;
     protected GlUniformMcMatrix4f uniformModelViewProjMat;
@@ -28,7 +29,7 @@ public class IrisFlwCompatShaderWarp {
         }
 
         uniformIrisProjMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId,"iris_ProjMat"));
-        uniformModelViewMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId,"iris_ModelViewMat"));
+        iris_uniformModelViewMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId,"iris_ModelViewMat"));
         uniformNormalMatrix = new GlUniformMcMatrix3f(GL20.glGetUniformLocation(progId,"iris_NormalMat"));
         uniformModelViewProjMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId,"flw_ModelViewProjMat"));
     }

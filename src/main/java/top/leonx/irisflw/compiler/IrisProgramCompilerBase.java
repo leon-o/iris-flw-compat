@@ -43,7 +43,7 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
         this.factory = factory;
     }
 
-    public P getProgram(ProgramContext ctx, boolean isShadow) {
+    public P getProgram(ProgramContext ctx,boolean isShadow) {
 
         if (IrisApi.getInstance().isShaderPackInUse()) {
             //Optional<ShaderPack> currentPackOptional = Iris.getCurrentPack();
@@ -92,11 +92,11 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
             if (isShadow) {
                 override = pipeline.callCreateShadowShader(
                         getFlwShaderName(ctx.spec.name, true), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX, false, false);
+                        DefaultVertexFormat.POSITION_TEX, false, false, false);
             } else {
                 override = pipeline.callCreateShader(
                         getFlwShaderName(ctx.spec.name, false), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX, FogMode.OFF, false, false);
+                        DefaultVertexFormat.POSITION_TEX, FogMode.OFF, false, false,false,false);
             }
 
         } catch (Exception exception) {

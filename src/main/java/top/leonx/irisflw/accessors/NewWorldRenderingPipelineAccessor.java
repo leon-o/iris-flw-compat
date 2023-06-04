@@ -13,10 +13,13 @@ import java.io.IOException;
 public interface NewWorldRenderingPipelineAccessor {
     ProgramSet getProgramSet();
 
-    ShaderInstance callCreateShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha, VertexFormat vertexFormat, FogMode fogMode, boolean isIntensity, boolean isFullbright) throws IOException;
+    ShaderInstance callCreateShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha,
+                                    VertexFormat vertexFormat, FogMode fogMode,
+                                    boolean isIntensity, boolean isFullbright, boolean isGlint, boolean isText) throws IOException;
 
 
-    ShaderInstance callCreateShadowShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isIntensity, boolean isFullbright) throws IOException;
+    ShaderInstance callCreateShadowShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha,
+                                          VertexFormat vertexFormat, boolean isIntensity, boolean isFullbright, boolean isText) throws IOException;
 
     //IrisShaderProgram getFlwShaderProgram(ProgramContext context);
 }
