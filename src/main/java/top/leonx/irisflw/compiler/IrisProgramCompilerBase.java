@@ -46,7 +46,6 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
     public P getProgram(ProgramContext ctx,boolean isShadow) {
 
         if (IrisApi.getInstance().isShaderPackInUse()) {
-            //Optional<ShaderPack> currentPackOptional = Iris.getCurrentPack();
             WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
             HashMap<ProgramContext, P> cache;
             if (isShadow) {
@@ -96,7 +95,7 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
             } else {
                 override = pipeline.callCreateShader(
                         getFlwShaderName(ctx.spec.name, false), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX, FogMode.OFF, false, false,false,false);
+                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, FogMode.OFF, false, false,false,false);
             }
 
         } catch (Exception exception) {

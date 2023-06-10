@@ -19,19 +19,21 @@ import top.leonx.irisflw.accessors.NewWorldRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
 import top.leonx.irisflw.transformer.ShaderPatcherBase;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public abstract class NewProgramCompiler <P extends WorldProgram> extends IrisProgramCompilerBase<P>{
-
-    public abstract ShaderPatcherBase getShaderPatcher();
+public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldProgram> extends IrisProgramCompilerBase<P>{
     private final Map<ProgramSet,ProgramFallbackResolver> resolvers = new HashMap<>();
     private final Iterable<StringPair> environmentDefines;
-    public NewProgramCompiler(GlProgram.Factory<P> factory, Template<? extends VertexData> template, FileResolution header) {
+    public NewProgramCompiler(GlProgram.Factory<P> factory, Template<? extends VertexData> template, FileResolution header,Class<TP> patcherClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(factory, template, header);
         environmentDefines = StandardMacros.createStandardEnvironmentDefines();
+        patcher = patcherClass.getDeclaredConstructor(Template.class, FileResolution.class).newInstance(template,header);
     }
+
+    private final TP patcher;
 
     @Override
     P createIrisShaderProgram(ProgramContext ctx, boolean isShadow) {
@@ -45,8 +47,6 @@ public abstract class NewProgramCompiler <P extends WorldProgram> extends IrisPr
             ProgramSource sourceRef = sourceReferenceOpt.get();
             if(sourceRef.getVertexSource().isEmpty())
                 return null;
-
-            var patcher = getShaderPatcher();
 
             String vertexSource = sourceRef.getVertexSource().get();
             String newVertexSource = patcher.patch(vertexSource,new ShaderPatcherBase.Context(ctx.spec.getVertexFile(),
