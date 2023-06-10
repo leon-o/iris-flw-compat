@@ -24,7 +24,7 @@
     "irisflw.mixins.iris.json"
   ],
   "depends": {
-    "fabricloader": ">=0.13.3",
+    "fabricloader": ">=0.14.19",
     "fabric": "*",
     "minecraft": "~1.19.2",
     "java": ">=17",
