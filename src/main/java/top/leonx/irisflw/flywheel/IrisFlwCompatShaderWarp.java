@@ -13,7 +13,7 @@ public class IrisFlwCompatShaderWarp {
     public ShaderInstance shader;
     protected GlUniformMcMatrix4f uniformIrisProjMat;
     protected GlUniformMcMatrix4f iris_uniformModelViewMat;
-    protected GlUniformMcMatrix4f uniformModelViewMat;
+    //protected GlUniformMcMatrix4f uniformModelViewMat;
     protected GlUniformMcMatrix3f uniformNormalMatrix;
     protected GlUniformMcMatrix4f uniformModelViewProjMat;
 
@@ -52,7 +52,7 @@ public class IrisFlwCompatShaderWarp {
     }
 
     public void setModelViewMatrix(Matrix4f modelView) {
-        uniformModelViewMat.set(modelView);
+        iris_uniformModelViewMat.set(modelView);
 
         if (this.uniformNormalMatrix != null) {
             Matrix4f normalMatrix = new Matrix4f(modelView);

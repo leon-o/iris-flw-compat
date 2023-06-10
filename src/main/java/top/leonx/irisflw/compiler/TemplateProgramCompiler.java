@@ -8,23 +8,16 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shaderpack.ProgramSource;
 import top.leonx.irisflw.accessors.ProgramSetAccessor;
-import top.leonx.irisflw.transformer.ShaderPatcherBase;
 import top.leonx.irisflw.transformer.TemplateShaderPatcher;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
-public class TemplateProgramCompiler<P extends WorldProgram> extends NewProgramCompiler<P>{
-    TemplateShaderPatcher patcher;
+public class TemplateProgramCompiler<P extends WorldProgram> extends NewProgramCompiler<TemplateShaderPatcher,P>{
 
-    @Override
-    public ShaderPatcherBase getShaderPatcher() {
-        return patcher;
-    }
-
-    public TemplateProgramCompiler(GlProgram.Factory<P> factory, Template<? extends VertexData> template, FileResolution header) {
-        super(factory, template, header);
-        patcher = new TemplateShaderPatcher(template,header);
+    public TemplateProgramCompiler(GlProgram.Factory<P> factory, Template<? extends VertexData> template, FileResolution header) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        super(factory, template, header, TemplateShaderPatcher.class);
     }
 
     @Override
