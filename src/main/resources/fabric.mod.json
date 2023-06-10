@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Iris Flywheel Compat",
-  "description": "Enable FlyWheel instancing optimization when use custom shaders.",
+  "description": "Allow Flywheel instancing optimization to be enabled when using iris.",
   "authors": [
     "Leon"
   ],
@@ -28,7 +28,7 @@
     "fabric": "*",
     "minecraft": "~1.19.2",
     "java": ">=17",
-    "iris": "*",
+    "iris": ">=1.6",
     "flywheel": "*"
   },
   "suggests": {
