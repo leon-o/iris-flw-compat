@@ -19,7 +19,9 @@ import net.coderbot.iris.shaderpack.loading.ProgramId;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import top.leonx.irisflw.IrisFlw;
 import top.leonx.irisflw.accessors.NewWorldRenderingPipelineAccessor;
@@ -29,7 +31,6 @@ import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
     Map<WorldRenderingPipeline, HashMap<ProgramContext, P>> programCache = new HashMap<>();
@@ -38,7 +39,8 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
 
     protected final GlProgram.Factory<P> factory;
     private static int programCounter = 0;
-    public IrisProgramCompilerBase(GlProgram.Factory<P> factory, Template<? extends VertexData> ignoredTemplate, FileResolution ignoredHeader) {
+
+    public IrisProgramCompilerBase(GlProgram.Factory<P> factory, Template<? extends VertexData> template, FileResolution header) {
         this.factory = factory;
     }
 
@@ -57,15 +59,12 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
                 cache.put(ctx, created);
                 if (created == null) {
                     if (Minecraft.getInstance().player != null) {
-                    if (isShadow)
-                        Minecraft.getInstance().player.displayClientMessage(new TextComponent(
+                        if (isShadow) Minecraft.getInstance().player.displayClientMessage(new TextComponent(
                                 String.format("Fail to compile %s_%s_%s", "Shadow", ctx.spec.name.getNamespace(),
-                                              ctx.spec.name.getPath())), false);
-
-                    else
-                        Minecraft.getInstance().player.displayClientMessage(new TextComponent(
-                            String.format("Fail to compile %s_%s_%s", "Gbuffers_flw", ctx.spec.name.getNamespace(),
-                                          ctx.spec.name.getPath())), false);
+                                        ctx.spec.name.getPath())), false);
+                        else Minecraft.getInstance().player.displayClientMessage(new TextComponent(
+                                String.format("Fail to compile %s_%s_%s", "Gbuffers_flw", ctx.spec.name.getNamespace(),
+                                        ctx.spec.name.getPath())), false);
                     }
                 }
             }
@@ -74,23 +73,30 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
         return null;
     }
 
+    private String getFlwShaderName(ResourceLocation location, boolean isShadow) {
+        String randomId = String.valueOf(programCounter);
+        programCounter++;
+        if (isShadow)
+            return String.format("shadow_flw_%s_%s_%s", location.getNamespace(),
+                    location.getPath(), randomId);
+        else
+            return String.format("gbuffers_flw_%s_%s_%s", location.getNamespace(),
+                    location.getPath(), randomId);
+    }
+
     abstract P createIrisShaderProgram(ProgramContext ctx, boolean isShadow);
 
     protected P createWorldProgramBySource(ProgramContext ctx, boolean isShadow, NewWorldRenderingPipelineAccessor pipeline, ProgramSource processedSource) {
         ShaderInstance override = null;
         try {
-            String randomId = String.valueOf(programCounter);
-            programCounter++;
             if (isShadow) {
                 override = pipeline.callCreateShadowShader(
-                        String.format("shadow_flw_%s_%s_%s", ctx.spec.name.getNamespace(),
-                                      ctx.spec.name.getPath(), randomId), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX, false,false,false);
+                        getFlwShaderName(ctx.spec.name, true), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
+                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, false, false, false);
             } else {
                 override = pipeline.callCreateShader(
-                        String.format("gbuffers_flw_%s_%s_%s", ctx.spec.name.getNamespace(),
-                                      ctx.spec.name.getPath(), randomId), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, FogMode.OFF, false,false,false,false);
+                        getFlwShaderName(ctx.spec.name, false), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
+                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, FogMode.OFF, false, false,false,false);
             }
 
         } catch (Exception exception) {
@@ -110,13 +116,14 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
         ShaderProperties properties = ((ProgramSourceAccessor) source).getShaderProperties();
         BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) source).getBlendModeOverride();
         //Get a copy of program
-        return new ProgramSource(source.getName() + "_" + ctx.spec.name.toString().replace(":","_")+
-                UUID.randomUUID(), vertexSource,
-                                                          source.getGeometrySource().orElse(null),
-                                                          source.getFragmentSource().orElse(null), programSet, properties, blendModeOverride);
+        ProgramSource processedSource = new ProgramSource(source.getName() + "_" + ctx.spec.name.getNamespace() + "_" +
+                ctx.spec.name.getPath(), vertexSource,
+                source.getGeometrySource().orElse(null),
+                source.getFragmentSource().orElse(null), programSet, properties, blendModeOverride);
+        return processedSource;
     }
 
-    public void clear(){
+    public void clear() {
         programCache.clear();
         shadowProgramCache.clear();
     }
