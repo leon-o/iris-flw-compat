@@ -9,24 +9,31 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.gl.blending.AlphaTest;
 import net.coderbot.iris.gl.blending.AlphaTestFunction;
+import net.coderbot.iris.gl.shader.StandardMacros;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
-import net.coderbot.iris.shaderpack.ProgramSet;
-import net.coderbot.iris.shaderpack.ProgramSource;
+import net.coderbot.iris.shaderpack.*;
+import net.coderbot.iris.shaderpack.loading.ProgramId;
+import net.coderbot.iris.shaderpack.preprocessor.JcppProcessor;
 import top.leonx.irisflw.accessors.NewWorldRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
-import top.leonx.irisflw.transformer.AutoInsertPreprocessor;
-import top.leonx.irisflw.transformer.PreprocessorBase;
+import top.leonx.irisflw.transformer.ShaderPatcherBase;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-public class AutoInsertProgramCompiler<P extends WorldProgram> extends IrisProgramCompilerBase<P>{
-
-    AutoInsertPreprocessor preprocessor;
-    public AutoInsertProgramCompiler(GlProgram.Factory<P> factory, Template<? extends VertexData> template, FileResolution header) {
+public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldProgram> extends IrisProgramCompilerBase<P>{
+    private final Map<ProgramSet,ProgramFallbackResolver> resolvers = new HashMap<>();
+    private final Iterable<StringPair> environmentDefines;
+    public NewProgramCompiler(GlProgram.Factory<P> factory, Template<? extends VertexData> template, FileResolution header,Class<TP> patcherClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(factory, template, header);
-        preprocessor= new AutoInsertPreprocessor(template,header);
+        environmentDefines = StandardMacros.createStandardEnvironmentDefines();
+        patcher = patcherClass.getDeclaredConstructor(Template.class, FileResolution.class).newInstance(template,header);
     }
+
+    private final TP patcher;
 
     @Override
     P createIrisShaderProgram(ProgramContext ctx, boolean isShadow) {
@@ -42,8 +49,9 @@ public class AutoInsertProgramCompiler<P extends WorldProgram> extends IrisProgr
                 return null;
 
             String vertexSource = sourceRef.getVertexSource().get();
-            String newVertexSource = preprocessor.preprocess(vertexSource,new PreprocessorBase.Context(ctx.spec.getVertexFile(),
-                                                                              ctx.ctx, ctx.vertexType));
+            String newVertexSource = patcher.patch(vertexSource,new ShaderPatcherBase.Context(ctx.spec.getVertexFile(),
+                ctx.ctx, ctx.vertexType));
+            newVertexSource = JcppProcessor.glslPreprocessSource(newVertexSource, environmentDefines);
             ProgramSource newProgramSource = programSourceOverrideVertexSource(ctx, programSet, sourceRef, newVertexSource);
             ((ProgramDirectivesAccessor) newProgramSource.getDirectives()).setFlwAlphaTestOverride(
                     new AlphaTest(AlphaTestFunction.GREATER, ctx.alphaDiscard));
@@ -52,23 +60,20 @@ public class AutoInsertProgramCompiler<P extends WorldProgram> extends IrisProgr
         return null;
     }
 
-    private Optional<ProgramSource> getProgramSourceReference(ProgramSet programSet, boolean isShadow){
-        if(isShadow){
-            return programSet.getShadow();
-        }else{
-            if (programSet.getGbuffersBlock().isPresent()){
-                return programSet.getGbuffersBlock();
-            }else if(programSet.getGbuffersTerrain().isPresent()){
-                return programSet.getGbuffersTerrain();
-            }else if(programSet.getGbuffersTexturedLit().isPresent()){
-                return programSet.getGbuffersTexturedLit();
-            }else if(programSet.getGbuffersTextured().isPresent()){
-                return programSet.getGbuffersTextured();
-            }else if(programSet.getGbuffersBasic().isPresent()){
-                return programSet.getGbuffersBasic();
-            }
-        }
+    protected Optional<ProgramSource> getProgramSourceReference(ProgramSet programSet, boolean isShadow){
 
-        return Optional.empty();
+        var resolver = resolvers.computeIfAbsent(programSet, ProgramFallbackResolver::new);
+
+        if(isShadow){
+            return resolver.resolve(ProgramId.Shadow);
+        }else{
+            return resolver.resolve(ProgramId.Block);
+        }
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        resolvers.clear();
     }
 }

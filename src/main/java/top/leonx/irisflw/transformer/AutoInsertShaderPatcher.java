@@ -3,74 +3,80 @@ package top.leonx.irisflw.transformer;
 import com.jozufozu.flywheel.core.compile.Template;
 import com.jozufozu.flywheel.core.compile.VertexData;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import top.leonx.irisflw.accessors.BufferBuilderAccessor;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AutoInsertPreprocessor extends PreprocessorBase{
-    Pattern versionPattern = Pattern.compile("#version\\s+\\d+");
+public class AutoInsertShaderPatcher extends ShaderPatcherBase {
+    Pattern versionPattern = Pattern.compile("#version\\s+\\d+(\\s+compatibility)?");
     Pattern ftransformAssignPattern = Pattern.compile("ftransform\\(\\)");
     Pattern textureMatrixPattern = Pattern.compile("gl_TextureMatrix\\[\\d\\]");
+    Pattern atTangentPattern = Pattern.compile("(?<!(in\\svec4\\s|attribute\\svec4\\s))at_tangent"); // usage of at_tangent attribute
     Pattern boxCoordDetector = Pattern.compile("BoxCoord");
     Pattern definePattern = Pattern.compile("(?<=#define\\s)\\w+(?=\\s+)");
 
     public String mainFunctionRegex = "void\\s+main\\(\\s*\\)\\s*\\{";
-    private Pattern mainFunctionPattern = Pattern.compile(mainFunctionRegex);
+    private final Pattern mainFunctionPattern = Pattern.compile(mainFunctionRegex);
 
-    public AutoInsertPreprocessor(Template<? extends VertexData> template, FileResolution header) {
+    public AutoInsertShaderPatcher(Template<? extends VertexData> template, FileResolution header) {
         super(template, header);
     }
 
     @Override
-    public String preprocess(String irisSource, TemplatePreprocessor.Context key) {
-        StringBuilder builder = new StringBuilder(irisSource);
+    public String patch(String irisSource, TemplateShaderPatcher.Context key) {
+        StringBuilder irisSourceBuilder = new StringBuilder(irisSource);
         VertexData appliedTemplate = template.apply(key.file);
         StringBuilder predefinedCodeBuilder = new StringBuilder();
-        genPredefine(key, builder, appliedTemplate, predefinedCodeBuilder);
+        genPredefine(key, appliedTemplate, predefinedCodeBuilder);
         renameFlwDefine(predefinedCodeBuilder);
-        replaceOriginalDefine(builder, predefinedCodeBuilder);
+        replaceOriginalDefine(predefinedCodeBuilder);
 
         StringBuilder createVertexBuilder = new StringBuilder();
         createVertexBuilder.append('\n');
         generateCreateVertex(appliedTemplate,createVertexBuilder);
         createVertexBuilder.append("""
-                                           vec4 _flw_patched_vertex_pos = FLWVertex(v);
+                                           _flw_patched_vertex_pos = FLWVertex(v);
                                            """);
+        createVertexBuilder.append("""
+                vec3 skewedNormal = v.normal+vec3(0.5,0.5,0.5);
+                _flw_tangent = vec4(normalize(skewedNormal - v.normal*dot(skewedNormal,v.normal)).xyz,1.0);
+                """);
+        //This tangent is not correct. Just make the tangent not equal to (0,0,0).
         createVertexBuilder.append('\n');
 
-        Matcher versionMatcher = versionPattern.matcher(builder);
+        // insert the code after the #version.
+        Matcher versionMatcher = versionPattern.matcher(irisSourceBuilder);
         if (versionMatcher.find()) {
-            builder.insert(versionMatcher.end(),predefinedCodeBuilder);
+            irisSourceBuilder.insert(versionMatcher.end(),predefinedCodeBuilder);
         }
 
 
-        Matcher mainFuncMatcher = mainFunctionPattern.matcher(builder);
+        // insert the code before the main() function
+        Matcher mainFuncMatcher = mainFunctionPattern.matcher(irisSourceBuilder);
 
         if (mainFuncMatcher.find()) {
-            builder.insert(mainFuncMatcher.end(),createVertexBuilder);
+            irisSourceBuilder.insert(mainFuncMatcher.end(),createVertexBuilder);
         }
 
-        Matcher ftransformMatcher = ftransformAssignPattern.matcher(builder);
-        while (ftransformMatcher.find()){
-            builder.replace(ftransformMatcher.start(),ftransformMatcher.end(),
-                            "_flw_patched_vertex_pos");
+        // Replace all ftransform() with _flw_patched_vertex_pos
+        Matcher ftransformMatcher = ftransformAssignPattern.matcher(irisSourceBuilder);
+        var afterReplaced = ftransformMatcher.replaceAll("_flw_patched_vertex_pos");
 
-            ftransformMatcher = ftransformAssignPattern.matcher(builder);
-        }
+        // Replace all at_tangent with _flw_tangent
+        Matcher atangentMatcher = atTangentPattern.matcher(afterReplaced);
+        afterReplaced = atangentMatcher.replaceAll("_flw_tangent");
 
+        // Replace textureMatrix with "1.0"
+        Matcher textureMatrixMatcher = textureMatrixPattern.matcher(afterReplaced);
+        afterReplaced = textureMatrixMatcher.replaceAll("1.0");
 
-        Matcher textureMatrixMatcher = textureMatrixPattern.matcher(builder);
-        while (textureMatrixMatcher.find()){
-            builder.replace(textureMatrixMatcher.start(),textureMatrixMatcher.end(),
-                            "1.0");
-
-            textureMatrixMatcher = textureMatrixPattern.matcher(builder);
-        }
-        return builder.toString();
+        return afterReplaced;
     }
 
-    private void replaceOriginalDefine(StringBuilder builder, StringBuilder predefinedCodeBuilder) {
+    private void replaceOriginalDefine(StringBuilder predefinedCodeBuilder) {
+
+        // Use #define to replace the original vertex data.
+        // Jcpp will preprocess the code before compiling.
         predefinedCodeBuilder.append("""
                                              #undef gl_Vertex
                                              #undef gl_MultiTexCoord0
@@ -83,7 +89,7 @@ public class AutoInsertPreprocessor extends PreprocessorBase{
                                              """);
 
 
-        if (boxCoordDetector.matcher(builder).find()) {
+        if (boxCoordDetector.matcher(predefinedCodeBuilder).find()) {
             predefinedCodeBuilder.append("""
                                             #undef gl_MultiTexCoord1
                                             #define gl_MultiTexCoord1 (vec4(max(v.light,texture3D(uLightVolume,BoxCoord).rg),0,1))
@@ -97,7 +103,7 @@ public class AutoInsertPreprocessor extends PreprocessorBase{
         predefinedCodeBuilder.append('\n');
     }
 
-    private void genPredefine(Context key, StringBuilder builder, VertexData appliedTemplate, StringBuilder predefinedCodeBuilder) {
+    private void genPredefine(Context key, VertexData appliedTemplate, StringBuilder predefinedCodeBuilder) {
         predefinedCodeBuilder.append('\n');
         genHeadSource(predefinedCodeBuilder, key);
         genCommonSource(predefinedCodeBuilder, key, appliedTemplate);

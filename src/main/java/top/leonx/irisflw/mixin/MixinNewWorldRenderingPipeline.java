@@ -7,6 +7,7 @@ import net.coderbot.iris.pipeline.newshader.FogMode;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shaderpack.ProgramSource;
+import net.coderbot.iris.shaderpack.loading.ProgramId;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -32,21 +33,17 @@ public abstract class MixinNewWorldRenderingPipeline implements NewWorldRenderin
     @Inject(method = "<init>",at = @At("TAIL"),remap = false)
     public void initSet(ProgramSet set, CallbackInfo callbackInfo){
         programSet = set;
-//        addIrisShaderProgram(ProgramContext.create(((Instanced) Materials.TRANSFORMED).getProgramSpec(),
-//                                                   Formats.POS_TEX_NORMAL, RenderLayer.SOLID));
     }
 
 
     @Invoker(remap = false)
     @Override
-    public abstract ShaderInstance callCreateShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, FogMode fogMode, boolean isIntensity, boolean isFullbright) throws IOException;
+    public abstract ShaderInstance callCreateShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha,
+                                                    VertexFormat vertexFormat, FogMode fogMode,
+                                                    boolean isIntensity, boolean isFullbright, boolean isGlint, boolean isText) throws IOException;
 
     @Invoker(remap = false)
     @Override
-    public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, AlphaTest fallbackAlpha, VertexFormat vertexFormat, boolean isIntensity,boolean isFullbright) throws IOException;
-
-//    @Override
-//    public IrisShaderProgram getFlwShaderProgram(ProgramContext context) {
-//        return programCache.get(context);
-//    }
+    public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha,
+                                                          VertexFormat vertexFormat, boolean isIntensity, boolean isFullbright, boolean isText) throws IOException;
 }

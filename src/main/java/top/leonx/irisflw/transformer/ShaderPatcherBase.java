@@ -10,16 +10,16 @@ import com.jozufozu.flywheel.core.source.parse.StructField;
 
 import java.util.Objects;
 
-public abstract class PreprocessorBase {
+public abstract class ShaderPatcherBase {
     protected final FileResolution header;
     protected final Template<? extends VertexData> template;
 
-    public PreprocessorBase(Template<? extends VertexData> template, FileResolution header) {
+    public ShaderPatcherBase(Template<? extends VertexData> template, FileResolution header) {
         this.header = header;
         this.template = template;
     }
 
-    public abstract String preprocess(String irisSource, TemplatePreprocessor.Context key);
+    public abstract String patch(String irisSource, TemplateShaderPatcher.Context key);
 
     public void generateCreateVertex(VertexData template, StringBuilder createVertexBuilder) {
         if (template instanceof InstancingTemplateData instancingTemplate) {
@@ -33,7 +33,7 @@ public abstract class PreprocessorBase {
                                                      InstancingTemplateData.assignFields(instancingTemplate.instance,
                                                                                          "i.", "a_i_")));
 
-        } else if (template instanceof OneShotTemplateData oneShotTemplateData) {
+        } else if (template instanceof OneShotTemplateData) {
             createVertexBuilder.append("""
                                                     v = FLWCreateVertex();
                                                     vertex(v);
@@ -82,6 +82,8 @@ public abstract class PreprocessorBase {
                                      };
                                      
                                      Vertex v; //define outside of main() so all function can use it.
+                                     vec4 _flw_patched_vertex_pos;
+                                     vec4 _flw_tangent;
                                      """);
         headerBuilder.append(key.vertexType.getShaderHeader());
     }

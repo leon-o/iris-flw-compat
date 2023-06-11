@@ -6,9 +6,9 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TemplatePreprocessor extends PreprocessorBase {
+public class TemplateShaderPatcher extends ShaderPatcherBase {
 
-    public TemplatePreprocessor(Template<? extends VertexData> template, FileResolution header) {
+    public TemplateShaderPatcher(Template<? extends VertexData> template, FileResolution header) {
         super(template,header);
     }
 
@@ -27,7 +27,7 @@ public class TemplatePreprocessor extends PreprocessorBase {
     private final Pattern leftValuePattern = Pattern.compile(leftValue);
     private final Pattern rightValuePattern = Pattern.compile(rightValue);
     private final Pattern headerPattern = Pattern.compile(headerPlaceholder);
-    public String preprocess(String irisSource, Context key) {
+    public String patch(String irisSource, Context key) {
         irisSource = patchHead(irisSource, key);
         Matcher matcher;
         VertexData appliedTemplate = template.apply(key.file);
