@@ -5,9 +5,6 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-
         // MixinGradle:
         classpath 'org.spongepowered:mixingradle:0.7.+'
     }
@@ -16,6 +13,8 @@ buildscript {
 plugins {
     id 'eclipse'
     id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 apply plugin: 'net.minecraftforge.gradle'
 // MixinGradle:
