@@ -8,7 +8,7 @@ displayName="Oculus Flywheel Compat"
 logoFile="icon.png"
 authors="Leon"
 description='''
-Enable FlyWheel instancing optimization when use custom shaders.
+Allow Flywheel instancing optimization to be enabled when using iris.
 '''
 [[dependencies.irisflw]]
     modId="forge"
@@ -27,7 +27,7 @@ Enable FlyWheel instancing optimization when use custom shaders.
 [[dependencies.irisflw]]
     modId="oculus"
     mandatory=true
-    versionRange="[1.2.8,)"
+    versionRange="[1.6,)"
     ordering="NONE"
     side="CLIENT"
 

@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "top.leonx.irisflw.mixin",
   "compatibilityLevel": "JAVA_17",
+  "refmap": "mixins.irisflw.refmap.json",
   "client": [
     "ProgramSetMixin",
     "MixinNewWorldRenderingPipeline",

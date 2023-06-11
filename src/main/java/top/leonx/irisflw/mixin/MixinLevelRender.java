@@ -2,13 +2,13 @@ package top.leonx.irisflw.mixin;
 
 import com.jozufozu.flywheel.backend.gl.GlStateTracker;
 import com.jozufozu.flywheel.event.RenderLayerEvent;
-import com.jozufozu.flywheel.fabric.event.FlywheelEvents;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,9 +42,9 @@ public class MixinLevelRender {
             double camY = camPos.y();
             double camZ = camPos.z();
             GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-            FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.solid(), poseStack, renderBuffers, camX, camY, camZ));
-            FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.cutoutMipped(), poseStack, renderBuffers, camX, camY, camZ));
-            FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.cutout(), poseStack, renderBuffers, camX, camY, camZ));
+            MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, RenderType.solid(), poseStack, renderBuffers, camX, camY, camZ));
+            MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, RenderType.cutoutMipped(), poseStack, renderBuffers, camX, camY, camZ));
+            MinecraftForge.EVENT_BUS.post(new RenderLayerEvent(level, RenderType.cutout(), poseStack, renderBuffers, camX, camY, camZ));
             restoreState.restore();
         }
     }
