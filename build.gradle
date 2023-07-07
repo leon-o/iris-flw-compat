@@ -163,7 +163,7 @@ dependencies {
 
     implementation fg.deobf("maven.modrinth:oculus:${iris_version}")
 
-    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${minecraft_version}:${flywheel_version}")
+    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
