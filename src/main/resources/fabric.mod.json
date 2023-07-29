@@ -26,7 +26,7 @@
   "depends": {
     "fabricloader": ">=0.14.19",
     "fabric": "*",
-    "minecraft": "~1.19.2",
+    "minecraft": "~1.20.1",
     "java": ">=17",
     "iris": ">=1.6",
     "flywheel": "*"
