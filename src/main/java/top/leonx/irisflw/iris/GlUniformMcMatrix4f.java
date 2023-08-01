@@ -1,14 +1,13 @@
 package top.leonx.irisflw.iris;
 
-import org.joml.Matrix4f;
 import me.jellysquid.mods.sodium.client.gl.shader.uniform.GlUniform;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
 
 public class GlUniformMcMatrix4f extends GlUniform<Matrix4f>{
-
     public GlUniformMcMatrix4f(int index) {
         super(index);
     }

@@ -1,12 +1,10 @@
 package top.leonx.irisflw.mixin;
 
-import java.util.Collection;
-
 import com.jozufozu.flywheel.core.model.Bufferable;
 import com.jozufozu.flywheel.core.model.ModelUtil;
+import com.jozufozu.flywheel.util.Pair;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -15,9 +13,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import com.jozufozu.flywheel.util.Pair;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import top.leonx.irisflw.iris.BufferBuilderStateManager;
+
+import java.util.Collection;
 
 @Mixin(value = ModelUtil.class, remap = false)
 public class MixinModelUtil {
