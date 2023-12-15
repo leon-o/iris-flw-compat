@@ -9,6 +9,7 @@
     "MixinLevelRender",
     "MixinModelUtil",
     "MixinProgramCompiler",
+    "MixinProgramSamplers",
     "MixinWorldProgram",
     "VertexCompilerAccessor"
   ],
