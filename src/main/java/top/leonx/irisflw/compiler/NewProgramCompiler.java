@@ -1,5 +1,6 @@
 package top.leonx.irisflw.compiler;
 
+import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.compile.ProgramContext;
 import com.jozufozu.flywheel.core.compile.Template;
@@ -26,7 +27,7 @@ import java.util.Optional;
 
 public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldProgram> extends IrisProgramCompilerBase<P>{
     private final Map<ProgramSet,ProgramFallbackResolver> resolvers = new HashMap<>();
-    private final Iterable<StringPair> environmentDefines;
+    private final ImmutableList<StringPair> environmentDefines;
     public NewProgramCompiler(GlProgram.Factory<P> factory, Template<? extends VertexData> template, FileResolution header,Class<TP> patcherClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(factory, template, header);
         environmentDefines = StandardMacros.createStandardEnvironmentDefines();
