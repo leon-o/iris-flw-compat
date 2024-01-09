@@ -9,9 +9,9 @@ name: fabric latest
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "work-flow-test" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "work-flow-test" ]
 
 permissions:
   contents: read
