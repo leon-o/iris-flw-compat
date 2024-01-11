@@ -23,6 +23,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Extract branch name
+      shell: bash
+      run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      id: extract_branch
+  
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
@@ -39,5 +45,5 @@ jobs:
         
     - uses: actions/upload-artifact@v4
       with:
-        name: iris-flw-compat-1.20.1-${{ steps.getversion.outputs.version }}.jar
+        name: iris-flw-compat-${{ steps.extract_branch.outputs.branch }}-${{ steps.getversion.outputs.version }}.jar
         path: build/libs/*.jar
