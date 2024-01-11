@@ -28,11 +28,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Generate build number
-      id: buildnumber
-      uses: onyxmueller/build-tag-number@v1
-      with:
-        token: ${{secrets.github_token}}
     - uses: EmberCM/action-get-gradle-version@master
       id: getversion
     - name: Build with Gradle
@@ -41,5 +36,5 @@ jobs:
         arguments: build
     - uses: actions/upload-artifact@v4
       with:
-        name: iris-flw-compat-1.20.1-${{ steps.getversion.outputs.version }}-BUILD${{ steps.buildnumber.outputs.build_number }}
+        name: iris-flw-compat-1.20.1-${{ steps.getversion.outputs.version }}.jar
         path: build/libs/*.jar
