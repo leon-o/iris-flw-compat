@@ -28,8 +28,16 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    
+        
+    - uses: EmberCM/action-get-gradle-version@master
+      id: getversion
+      
     - name: Build with Gradle
       uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
       with:
         arguments: build
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: iris-flw-compat-1.20.1-${{ steps.getversion.outputs.version }}.jar
+        path: build/libs/*.jar
