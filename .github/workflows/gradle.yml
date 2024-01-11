@@ -41,7 +41,7 @@ jobs:
         
     - name: Retrieve Archive Name
       run: |
-        echo "::set-output name=ARCHIVE_NANE::$(${{github.workspace}}/gradlew -q printArchivesName)"
+        echo "ARCHIVE_NANE=$(${{github.workspace}}/gradlew -q printArchivesName)" >> $GITHUB_OUTPUT
       id: archive_name
       
     - name: Build with Gradle
@@ -52,5 +52,5 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
 #        name: iris-flw-compat-${{ steps.extract_branch.outputs.branch }}-${{ steps.getversion.outputs.version }}.jar
-        name: ${{ steps.archive_name.outputs.ARCHIVE_NANE }}
+        name: ${{ steps.archive_name.outputs.ARCHIVE_NANE }}.jar
         path: build/libs/*.jar
