@@ -44,6 +44,10 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
+            //property 'mixin.env.remapRefMap', 'true'
+            // property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
@@ -144,13 +148,21 @@ repositories {
         }
     }
 
-    maven {
+    /*maven {
         name "tterrag maven"
         url "https://maven.tterrag.com/"
+    }*/
+    maven {
+        name = 'tterrag maven'
+        url = 'https://maven.tterrag.com/'
     }
     maven {
         url "https://maven.tterrag.com/"
     }
+    maven {
+        url "https://maven.blamejared.com"
+    }
+
 }
 
 dependencies {
@@ -159,11 +171,16 @@ dependencies {
     // Apply Mixin AP
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    implementation fg.deobf("maven.modrinth:rubidium:${sodium_version}")
+    //implementation fg.deobf("maven.modrinth:rubidium:${sodium_version}")
+
+    implementation fg.deobf("org.embeddedt:embeddium-${minecraft_version}:${embeddium_version}+mc${minecraft_version}")
 
     implementation fg.deobf("maven.modrinth:oculus:${iris_version}")
 
+    implementation fg.deobf("com.simibubi.create:create-${create_minecraft_version}:${create_version}:slim") { transitive = false }
     implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
+    implementation fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
+    //implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_version}")
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
