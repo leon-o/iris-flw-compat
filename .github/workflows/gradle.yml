@@ -8,14 +8,17 @@
 name: fabric latest
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-      - 'release/**'
+      - 'iris/latest'
+      - 'oculus/latest'
   pull_request:
     branches:
       - main
-      - 'release/**'
+      - 'iris/latest'
+      - 'oculus/latest'
 
 permissions:
   contents: read
