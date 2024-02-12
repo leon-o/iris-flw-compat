@@ -110,7 +110,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 tasks.register('printArchivesName') {
-    println "${archives_base_name}-${minecraft_version}-${mod_version}"
+    println "%${archives_base_name}-${minecraft_version}-${mod_version}%"
 }
 
 java {
