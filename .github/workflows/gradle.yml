@@ -44,7 +44,7 @@ jobs:
         
     - name: Retrieve Archive Name
       run: |
-        echo "ARCHIVE_NANE=$(${{github.workspace}}/gradlew -q printArchivesName)" >> $GITHUB_OUTPUT
+        echo "ARCHIVE_NANE=$(${{github.workspace}}/gradlew -q printArchivesName | grep '%.*%' | tr -d '%')" >> $GITHUB_OUTPUT
       id: archive_name
       
     - name: Build with Gradle
