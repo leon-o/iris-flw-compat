@@ -13,7 +13,7 @@ buildscript {
 plugins {
     id 'eclipse'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'net.minecraftforge.gradle' version '6.0.20'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -222,4 +222,7 @@ mixin {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+tasks.register('printArchivesName') {
+    println "${archives_base_name}-${minecraft_version}-${mod_version}"
 }
