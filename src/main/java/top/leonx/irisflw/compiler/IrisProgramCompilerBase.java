@@ -95,7 +95,7 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
             } else {
                 override = pipeline.callCreateShader(
                         getFlwShaderName(ctx.spec.name, false), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, FogMode.OFF, true, false,false,false);
+                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, FogMode.OFF, false, false,false,false);
             }
 
         } catch (Exception exception) {
