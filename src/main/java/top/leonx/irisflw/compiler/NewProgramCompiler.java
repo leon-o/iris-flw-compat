@@ -1,5 +1,6 @@
 package top.leonx.irisflw.compiler;
 
+import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.compile.ProgramContext;
 import com.jozufozu.flywheel.core.compile.Template;
@@ -20,6 +21,7 @@ import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
 import top.leonx.irisflw.transformer.ShaderPatcherBase;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +31,9 @@ public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldPro
     private final Iterable<StringPair> environmentDefines;
     public NewProgramCompiler(GlProgram.Factory<P> factory, Template<? extends VertexData> template, FileResolution header,Class<TP> patcherClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(factory, template, header);
-        environmentDefines = StandardMacros.createStandardEnvironmentDefines();
+        //environmentDefines = StandardMacros.createStandardEnvironmentDefines();
+        Method method = StandardMacros.class.getMethod("createStandardEnvironmentDefines");
+        environmentDefines =(Iterable<StringPair>) method.invoke(null);
         patcher = patcherClass.getDeclaredConstructor(Template.class, FileResolution.class).newInstance(template,header);
     }
 

@@ -27,7 +27,7 @@ Allow Flywheel instancing optimization to be enabled when using iris.
 [[dependencies.irisflw]]
     modId="oculus"
     mandatory=true
-    versionRange="[1.6.13,)"
+    versionRange="[1.6.15,)"
     ordering="NONE"
     side="CLIENT"
 
