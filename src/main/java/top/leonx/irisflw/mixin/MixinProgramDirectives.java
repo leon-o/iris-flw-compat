@@ -1,7 +1,7 @@
 package top.leonx.irisflw.mixin;
 
-import net.coderbot.iris.gl.blending.AlphaTest;
-import net.coderbot.iris.shaderpack.ProgramDirectives;
+import net.irisshaders.iris.gl.blending.AlphaTest;
+import net.irisshaders.iris.shaderpack.properties.ProgramDirectives;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
