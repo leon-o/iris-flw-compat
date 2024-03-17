@@ -1,6 +1,6 @@
 package top.leonx.irisflw.mixin;
 
-import net.coderbot.iris.gl.program.ProgramSamplers;
+import net.irisshaders.iris.gl.program.ProgramSamplers;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.At;

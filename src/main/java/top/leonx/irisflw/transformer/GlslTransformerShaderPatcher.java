@@ -25,9 +25,9 @@ import io.github.douira.glsl_transformer.ast.transform.ASTInjectionPoint;
 import io.github.douira.glsl_transformer.ast.transform.JobParameters;
 import io.github.douira.glsl_transformer.ast.transform.SingleASTTransformer;
 import io.github.douira.glsl_transformer.parser.ParseShape;
-import net.coderbot.iris.pipeline.transform.transformer.CommonTransformer;
-import net.coderbot.iris.shaderpack.StringPair;
-import net.coderbot.iris.shaderpack.preprocessor.JcppProcessor;
+import net.irisshaders.iris.pipeline.transform.transformer.CommonTransformer;
+import net.irisshaders.iris.helpers.StringPair;
+import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
 
 import java.util.List;
 import java.util.regex.Matcher;

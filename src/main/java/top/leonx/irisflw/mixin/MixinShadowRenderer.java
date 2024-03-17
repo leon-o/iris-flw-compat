@@ -1,7 +1,7 @@
 package top.leonx.irisflw.mixin;
 
-import net.coderbot.iris.mixin.LevelRendererAccessor;
-import net.coderbot.iris.pipeline.ShadowRenderer;
+import net.irisshaders.iris.mixin.LevelRendererAccessor;
+import net.irisshaders.iris.shadows.ShadowRenderer;
 import net.minecraft.client.Camera;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

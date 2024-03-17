@@ -3,7 +3,7 @@ package top.leonx.irisflw.mixin;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.coderbot.iris.gl.blending.BlendModeStorage;
+import net.irisshaders.iris.gl.blending.BlendModeStorage;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

@@ -3,7 +3,7 @@ package top.leonx.irisflw.flywheel;
 import com.mojang.blaze3d.shaders.Uniform;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
-import net.coderbot.iris.uniforms.CapturedRenderingState;
+import net.irisshaders.iris.uniforms.CapturedRenderingState;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.lwjgl.opengl.GL20;
 import top.leonx.irisflw.iris.GlUniformMcMatrix3f;

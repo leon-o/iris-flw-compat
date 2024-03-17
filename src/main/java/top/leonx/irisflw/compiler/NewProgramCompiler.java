@@ -7,16 +7,20 @@ import com.jozufozu.flywheel.core.compile.Template;
 import com.jozufozu.flywheel.core.compile.VertexData;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import net.coderbot.iris.Iris;
-import net.coderbot.iris.gl.blending.AlphaTest;
-import net.coderbot.iris.gl.blending.AlphaTestFunction;
-import net.coderbot.iris.gl.shader.StandardMacros;
-import net.coderbot.iris.pipeline.WorldRenderingPipeline;
-import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
-import net.coderbot.iris.shaderpack.*;
-import net.coderbot.iris.shaderpack.loading.ProgramId;
-import net.coderbot.iris.shaderpack.preprocessor.JcppProcessor;
-import top.leonx.irisflw.accessors.NewWorldRenderingPipelineAccessor;
+import net.irisshaders.iris.Iris;
+import net.irisshaders.iris.gl.blending.AlphaTest;
+import net.irisshaders.iris.gl.blending.AlphaTestFunction;
+import net.irisshaders.iris.gl.shader.StandardMacros;
+import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
+import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
+import net.irisshaders.iris.shaderpack.*;
+import net.irisshaders.iris.shaderpack.loading.ProgramId;
+import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
+import net.irisshaders.iris.shaderpack.programs.ProgramSet;
+import net.irisshaders.iris.shaderpack.programs.ProgramSource;
+import net.irisshaders.iris.shaderpack.programs.ProgramFallbackResolver;
+import net.irisshaders.iris.helpers.StringPair;
+import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
 import top.leonx.irisflw.transformer.ShaderPatcherBase;
 
@@ -42,8 +46,8 @@ public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldPro
     @Override
     P createIrisShaderProgram(ProgramContext ctx, boolean isShadow) {
         WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
-        if (pipeline instanceof NewWorldRenderingPipeline newPipeline) {
-            ProgramSet programSet = ((NewWorldRenderingPipelineAccessor) newPipeline).getProgramSet();
+        if (pipeline instanceof IrisRenderingPipeline newPipeline) {
+            ProgramSet programSet = ((IrisRenderingPipelineAccessor) newPipeline).getProgramSet();
             Optional<ProgramSource> sourceReferenceOpt = getProgramSourceReference(programSet, isShadow);
             if(sourceReferenceOpt.isEmpty())
                 return null;
@@ -59,7 +63,7 @@ public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldPro
             ProgramSource newProgramSource = programSourceOverrideVertexSource(ctx, programSet, sourceRef, newVertexSource);
             ((ProgramDirectivesAccessor) newProgramSource.getDirectives()).setFlwAlphaTestOverride(
                     new AlphaTest(AlphaTestFunction.GREATER, ctx.alphaDiscard));
-            return createWorldProgramBySource(ctx, isShadow, (NewWorldRenderingPipelineAccessor) newPipeline, newProgramSource);
+            return createWorldProgramBySource(ctx, isShadow, (IrisRenderingPipelineAccessor) newPipeline, newProgramSource);
         }
         return null;
     }
