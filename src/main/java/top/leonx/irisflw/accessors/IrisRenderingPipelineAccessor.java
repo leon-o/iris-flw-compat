@@ -1,8 +1,8 @@
 package top.leonx.irisflw.accessors;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.coderbot.iris.gl.blending.AlphaTest;
-import net.coderbot.iris.pipeline.newshader.FogMode;
+import net.irisshaders.iris.gl.blending.AlphaTest;
+import net.irisshaders.iris.pipeline.newshader.FogMode;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shaderpack.ProgramSource;
 import net.coderbot.iris.shaderpack.loading.ProgramId;

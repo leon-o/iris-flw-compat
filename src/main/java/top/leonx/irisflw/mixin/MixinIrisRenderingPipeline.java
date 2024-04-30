@@ -15,12 +15,12 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import top.leonx.irisflw.accessors.NewWorldRenderingPipelineAccessor;
+import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 
 import java.io.IOException;
 
 @Mixin(NewWorldRenderingPipeline.class)
-public abstract class MixinNewWorldRenderingPipeline implements NewWorldRenderingPipelineAccessor {
+public abstract class MixinNewWorldRenderingPipeline implements IrisRenderingPipelineAccessor {
 
     @Unique
     private ProgramSet programSet;
