@@ -2,12 +2,12 @@ package top.leonx.irisflw.mixin;
 
 
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.coderbot.iris.gl.blending.AlphaTest;
-import net.coderbot.iris.pipeline.newshader.FogMode;
-import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
-import net.coderbot.iris.shaderpack.ProgramSet;
-import net.coderbot.iris.shaderpack.ProgramSource;
-import net.coderbot.iris.shaderpack.loading.ProgramId;
+import net.irisshaders.iris.gl.blending.AlphaTest;
+import net.irisshaders.iris.gl.state.FogMode;
+import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
+import net.irisshaders.iris.shaderpack.programs.ProgramSet;
+import net.irisshaders.iris.shaderpack.programs.ProgramSource;
+import net.irisshaders.iris.shaderpack.loading.ProgramId;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,8 +19,8 @@ import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 
 import java.io.IOException;
 
-@Mixin(NewWorldRenderingPipeline.class)
-public abstract class MixinNewWorldRenderingPipeline implements IrisRenderingPipelineAccessor {
+@Mixin(IrisRenderingPipeline.class)
+public abstract class MixinIrisRenderingPipeline implements IrisRenderingPipelineAccessor {
 
     @Unique
     private ProgramSet programSet;

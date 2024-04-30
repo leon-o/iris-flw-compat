@@ -7,15 +7,15 @@ import com.jozufozu.flywheel.core.compile.VertexData;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.coderbot.iris.Iris;
-import net.coderbot.iris.gl.blending.AlphaTest;
-import net.coderbot.iris.gl.blending.BlendModeOverride;
-import net.coderbot.iris.pipeline.WorldRenderingPipeline;
-import net.coderbot.iris.pipeline.newshader.FogMode;
-import net.coderbot.iris.shaderpack.ProgramSet;
-import net.coderbot.iris.shaderpack.ProgramSource;
-import net.coderbot.iris.shaderpack.ShaderProperties;
-import net.coderbot.iris.shaderpack.loading.ProgramId;
+import net.irisshaders.iris.Iris;
+import net.irisshaders.iris.gl.blending.AlphaTest;
+import net.irisshaders.iris.gl.blending.BlendModeOverride;
+import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
+import net.irisshaders.iris.gl.state.FogMode;
+import net.irisshaders.iris.shaderpack.programs.ProgramSet;
+import net.irisshaders.iris.shaderpack.programs.ProgramSource;
+import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
+import net.irisshaders.iris.shaderpack.loading.ProgramId;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -23,7 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import top.leonx.irisflw.IrisFlw;
-import top.leonx.irisflw.accessors.NewWorldRenderingPipelineAccessor;
+import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramSourceAccessor;
 import top.leonx.irisflw.accessors.WorldProgramAccessor;
 import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
@@ -85,7 +85,7 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
 
     abstract P createIrisShaderProgram(ProgramContext ctx, boolean isShadow);
 
-    protected P createWorldProgramBySource(ProgramContext ctx, boolean isShadow, NewWorldRenderingPipelineAccessor pipeline, ProgramSource processedSource) {
+    protected P createWorldProgramBySource(ProgramContext ctx, boolean isShadow, IrisRenderingPipelineAccessor pipeline, ProgramSource processedSource) {
         ShaderInstance override = null;
         try {
             if (isShadow) {
