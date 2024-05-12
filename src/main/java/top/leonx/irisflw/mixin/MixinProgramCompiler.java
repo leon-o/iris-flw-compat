@@ -3,11 +3,11 @@ package top.leonx.irisflw.mixin;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.compile.*;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
-import net.coderbot.iris.Iris;
-import net.coderbot.iris.pipeline.WorldRenderingPipeline;
-import net.coderbot.iris.pipeline.newshader.ExtendedShader;
-import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
-import net.coderbot.iris.pipeline.newshader.ShaderKey;
+import net.irisshaders.iris.Iris;
+import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
+import net.irisshaders.iris.pipeline.programs.ExtendedShader;
+import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
+import net.irisshaders.iris.pipeline.programs.ShaderKey;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,7 +50,7 @@ public abstract class MixinProgramCompiler<P extends WorldProgram> {
                 P program = irisProgramCompiler.getProgram(ctx,isShadow);
                 if (program != null) cir.setReturnValue(program);
                 else {
-                    if (pipeline instanceof NewWorldRenderingPipeline newPipeline) {
+                    if (pipeline instanceof IrisRenderingPipeline newPipeline) {
                         ShaderInstance shader = newPipeline.getShaderMap().getShader(ShaderKey.TEXTURED_COLOR);
                         if (shader instanceof ExtendedShader extendedShader) {
                             ((ExtendedShaderAccessor) extendedShader).getWritingToBeforeTranslucent().bind();
