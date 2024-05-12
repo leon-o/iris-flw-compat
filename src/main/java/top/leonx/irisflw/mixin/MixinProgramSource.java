@@ -1,9 +1,9 @@
 package top.leonx.irisflw.mixin;
 
-import net.coderbot.iris.gl.blending.BlendModeOverride;
-import net.coderbot.iris.shaderpack.ProgramSet;
-import net.coderbot.iris.shaderpack.ProgramSource;
-import net.coderbot.iris.shaderpack.ShaderProperties;
+import net.irisshaders.iris.gl.blending.BlendModeOverride;
+import net.irisshaders.iris.shaderpack.programs.ProgramSet;
+import net.irisshaders.iris.shaderpack.programs.ProgramSource;
+import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,7 +28,7 @@ public class MixinProgramSource implements ProgramSourceAccessor {
         return blendMode;
     }
 
-    @Inject(remap = false, method = "<init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lnet/coderbot/iris/shaderpack/ProgramSet;Lnet/coderbot/iris/shaderpack/ShaderProperties;Lnet/coderbot/iris/gl/blending/BlendModeOverride;)V",at = @At("TAIL"))
+    @Inject(remap = false, method = "<init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lnet/irisshaders/iris/shaderpack/programs/ProgramSet;Lnet/irisshaders/iris/shaderpack/properties/ShaderProperties;Lnet/irisshaders/iris/gl/blending/BlendModeOverride;)V",at = @At("TAIL"))
     private void injectInit(String name, String vertexSource, String geometrySource, String tessControlSource, String tessEvalSource, String fragmentSource, ProgramSet parent, ShaderProperties properties, BlendModeOverride blendModeOverride, CallbackInfo ci){
         shaderProperties = properties;
 

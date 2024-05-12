@@ -6,7 +6,7 @@
   "refmap": "mixins.irisflw.refmap.json",
   "client": [
     "ProgramSetMixin",
-    "MixinNewWorldRenderingPipeline",
+    "MixinIrisRenderingPipeline",
     "MixinShaderPackSourceNames",
     "MixinProgramSource",
     "MixinBufferBuilder",

@@ -5,8 +5,8 @@ import com.jozufozu.flywheel.core.compile.Template;
 import com.jozufozu.flywheel.core.compile.VertexData;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
-import net.coderbot.iris.shaderpack.ProgramSet;
-import net.coderbot.iris.shaderpack.ProgramSource;
+import net.irisshaders.iris.shaderpack.programs.ProgramSet;
+import net.irisshaders.iris.shaderpack.programs.ProgramSource;
 import top.leonx.irisflw.accessors.ProgramSetAccessor;
 import top.leonx.irisflw.transformer.TemplateShaderPatcher;
 
