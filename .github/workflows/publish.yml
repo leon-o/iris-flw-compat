@@ -10,8 +10,11 @@ name: Publish Jar
 on:
   workflow_dispatch:
 
+env:
+  JAVA_VERSION: 17
+
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -39,7 +42,7 @@ jobs:
       - name: Build
         run: ./gradlew clean build
 
-      - name: Publish fabric (CurseForge/Modrinth/GitHub)
+      - name: Publish Fabric
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
@@ -49,19 +52,15 @@ jobs:
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
           github-tag: "forge-v${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
-          github-token: "${{secrets.GITHUB_TOKEN}}"
+          github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: "Iris Flywheel Compat ${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
-          version: "${{env.VERSION}}"
-          version-type: release
           changelog-file: CHANGELOG.md
 
           loaders: fabric
-          game-versions: "${{env.MINECRAFT_VERSION}}"
           java: "${{env.JAVA_VERSION}}"
           files: fabric/build/libs/!(*-@(dev|sources|javadoc)).jar
 
-      - name: Publish forge (CurseForge/Modrinth/GitHub)
+      - name: Publish Forge
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
@@ -71,14 +70,10 @@ jobs:
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
           github-tag: "fabric-v${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
-          github-token: "${{secrets.GITHUB_TOKEN}}"
+          github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: "Oculus Flywheel Compat ${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
-          version: "${{env.VERSION}}"
-          version-type: release
           changelog-file: CHANGELOG.md
 
           loaders: forge
-          game-versions: "${{env.MINECRAFT_VERSION}}"
           java: "${{env.JAVA_VERSION}}"
           files: forge/build/libs/!(*-@(dev|sources|javadoc)).jar
