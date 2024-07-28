@@ -1,0 +1,84 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Publish Jar
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Environment Variables
+        run: env
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: "temurin"
+          java-version: 17
+
+      - name: Make Gradle Wrapper Executable
+        if: ${{ runner.os != 'Windows' }}
+        run: chmod +x ./gradlew
+
+      - name: Build
+        run: ./gradlew clean build
+
+      - name: Publish fabric (CurseForge/Modrinth/GitHub)
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-id: 659897
+          curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
+
+          modrinth-id: iris-flw-compat
+          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
+
+          github-tag: "forge-v${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
+          github-token: "${{secrets.GITHUB_TOKEN}}"
+
+          name: "Iris Flywheel Compat ${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
+          version: "${{env.VERSION}}"
+          version-type: release
+          changelog-file: CHANGELOG.md
+
+          loaders: fabric
+          game-versions: "${{env.MINECRAFT_VERSION}}"
+          java: "${{env.JAVA_VERSION}}"
+          files: fabric/build/libs/!(*-@(dev|sources|javadoc)).jar
+
+      - name: Publish forge (CurseForge/Modrinth/GitHub)
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          curseforge-id: 659897
+          curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
+
+          modrinth-id: iris-flw-compat
+          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
+
+          github-tag: "fabric-v${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
+          github-token: "${{secrets.GITHUB_TOKEN}}"
+
+          name: "Oculus Flywheel Compat ${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
+          version: "${{env.VERSION}}"
+          version-type: release
+          changelog-file: CHANGELOG.md
+
+          loaders: forge
+          game-versions: "${{env.MINECRAFT_VERSION}}"
+          java: "${{env.JAVA_VERSION}}"
+          files: forge/build/libs/!(*-@(dev|sources|javadoc)).jar
