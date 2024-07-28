@@ -37,7 +37,6 @@ public abstract class ShaderPatcherBase {
             createVertexBuilder.append("""
                                                     v = FLWCreateVertex();
                                                     vertex(v);
-                                                    v.light = vec2(0,0.85);
                                                """);
         }
     }

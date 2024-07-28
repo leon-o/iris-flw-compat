@@ -136,9 +136,9 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         //root.replaceExpressionMatches(transformer, glTextureMatrix0, "mat4(1.0)");
 
         if (boxCoordDetector.matcher(predefineContent).find()) {
-            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(max(v.light,texture3D(uLightVolume,BoxCoord).rg)*255.0,0,1))");
+            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(max(v.light,texture3D(uLightVolume,BoxCoord).rg)*240.0,0,1))");
         } else {
-            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(v.light*255.0,0,1))");
+            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(v.light*240.0,0,1))");
         }
 
         //root.replaceExpressionMatches(transformer, CommonTransformer.glTextureMatrix1, "1.0");
