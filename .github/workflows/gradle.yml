@@ -48,6 +48,6 @@ jobs:
       with:
         arguments: build
         
-    - uses: kittaakos/upload-artifact-as-is@v1
+    - uses: kittaakos/upload-artifact-as-is@v0
       with:
         path: forge/build/libs/*.jar, fabric/build/libs/*.jar
