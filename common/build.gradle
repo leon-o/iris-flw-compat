@@ -1,0 +1,20 @@
+architectury {
+    common rootProject.enabled_platforms.split(',')
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/irisflw.accesswidener")
+}
+
+dependencies {
+    // We depend on Fabric Loader here to use the Fabric @Environment annotations,
+    // which get remapped to the correct annotations on each platform.
+    // Do NOT use other classes from Fabric Loader.
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+    modCompileOnly ("maven.modrinth:iris:$iris_version")
+    modCompileOnly ("maven.modrinth:sodium:${sodium_version}")
+    modCompileOnly ("com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}")
+
+    implementation 'io.github.douira:glsl-transformer:2.0.0-pre14'
+}

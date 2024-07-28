@@ -1,21 +1,14 @@
 pluginManagement {
     repositories {
-        // 存放 fabricloomCN 的主仓库
-        maven {
-            name = 'Iced\'s loom maven'
-            url = 'https://maven.icedlab.tech/loom/'
-        }
-
-        // 存放 fabricloomCN 的代理仓库
-        maven {
-            name = 'Hanbing\'s proxy maven'
-            url = 'https://repository.hanbings.io/proxy/'
-        }
-
-        maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
-        }
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://files.minecraftforge.net/maven/" }
         gradlePluginPortal()
     }
 }
+
+rootProject.name = 'irisflw'
+
+include 'common'
+include 'fabric'
+include 'forge'

@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import top.leonx.irisflw.FlywheelEventsInvoker;
 import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
 
 @Mixin(value = LevelRenderer.class,priority = 900)
@@ -42,9 +43,9 @@ public class MixinLevelRender {
             double camY = camPos.y();
             double camZ = camPos.z();
             GlStateTracker.State restoreState = GlStateTracker.getRestoreState();
-            FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.solid(), poseStack, renderBuffers, camX, camY, camZ));
-            FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.cutoutMipped(), poseStack, renderBuffers, camX, camY, camZ));
-            FlywheelEvents.RENDER_LAYER.invoker().handleEvent(new RenderLayerEvent(level, RenderType.cutout(), poseStack, renderBuffers, camX, camY, camZ));
+            FlywheelEventsInvoker.InvokeRenderLayer(new RenderLayerEvent(level, RenderType.solid(), poseStack, renderBuffers, camX, camY, camZ));
+            FlywheelEventsInvoker.InvokeRenderLayer(new RenderLayerEvent(level, RenderType.cutoutMipped(), poseStack, renderBuffers, camX, camY, camZ));
+            FlywheelEventsInvoker.InvokeRenderLayer(new RenderLayerEvent(level, RenderType.cutout(), poseStack, renderBuffers, camX, camY, camZ));
             restoreState.restore();
         }
     }

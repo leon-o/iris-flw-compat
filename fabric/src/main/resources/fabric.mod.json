@@ -12,11 +12,10 @@
   },
   "license": "CC0-1.0",
   "icon": "assets/irisflw/icon.png",
-  "accessWidener" : "irisflw.accesswidener",
   "environment": "client",
   "entrypoints": {
     "client": [
-      "top.leonx.irisflw.IrisFlw"
+      "top.leonx.irisflw.fabric.IrisFlwFabricClient"
     ]
   },
   "mixins": [
@@ -28,7 +27,7 @@
     "fabric": "*",
     "minecraft": "~1.20.1",
     "java": ">=17",
-    "iris": ">=1.6.5",
+    "iris": ">=1.7.0",
     "flywheel": "*"
   },
   "suggests": {
