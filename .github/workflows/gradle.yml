@@ -12,13 +12,9 @@ on:
   push:
     branches:
       - main
-      - 'iris/latest'
-      - 'oculus/latest'
   pull_request:
     branches:
       - main
-      - 'iris/latest'
-      - 'oculus/latest'
 
 permissions:
   contents: read
@@ -52,8 +48,6 @@ jobs:
       with:
         arguments: build
         
-    - uses: actions/upload-artifact@v4
+    - uses: kittaakos/upload-artifact-as-is@v1
       with:
-#        name: iris-flw-compat-${{ steps.extract_branch.outputs.branch }}-${{ steps.getversion.outputs.version }}.jar
-        name: ${{ steps.archive_name.outputs.ARCHIVE_NANE }}.jar
-        path: build/libs/*.jar
+        path: forge/build/libs/*.jar, fabric/build/libs/*.jar
