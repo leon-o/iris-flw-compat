@@ -54,6 +54,7 @@ jobs:
           github-tag: "forge-v${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
+          name: Fabric 1.20.1-1.1.0 for Iris 1.7.0+
           changelog-file: CHANGELOG.md
 
           loaders: fabric
@@ -72,6 +73,7 @@ jobs:
           github-tag: "fabric-v${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
+          name: Forge 1.20.1-1.1.0 for Oculus 1.7.0+
           changelog-file: CHANGELOG.md
 
           loaders: forge
