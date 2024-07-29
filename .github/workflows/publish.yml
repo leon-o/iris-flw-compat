@@ -51,15 +51,15 @@ jobs:
           modrinth-id: iris-flw-compat
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-          github-tag: "forge-v${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: "Forge 1.19.2-1.0.0 for Iris 1.6.9+"
+          name: "Fabric 1.19.2-1.0.0 for Iris 1.6.9+"
           changelog-file: CHANGELOG.md
 
-          loaders: fabric
           java: "${{env.JAVA_VERSION}}"
           files: fabric/build/libs/!(*-@(dev|sources|javadoc)).jar
+
+          fail-mode: warn
 
       - name: Publish Forge
         uses: Kir-Antipov/mc-publish@v3.3
@@ -70,12 +70,12 @@ jobs:
           modrinth-id: iris-flw-compat
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-          github-tag: "fabric-v${{env.MINECRAFT_VERSION}}-${{env.VERSION}}"
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: "Fabric 1.19.2-1.0.0 for Iris 1.6.9+"
+          name: "Forge 1.19.2-1.0.0 for Iris 1.6.9+"
           changelog-file: CHANGELOG.md
 
-          loaders: forge
           java: "${{env.JAVA_VERSION}}"
           files: forge/build/libs/!(*-@(dev|sources|javadoc)).jar
+
+          fail-mode: warn
