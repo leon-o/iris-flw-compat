@@ -27,8 +27,8 @@
     "fabric": "*",
     "minecraft": "~1.19.2",
     "java": ">=17",
-    "iris": ">=1.6",
-    "flywheel": "*"
+    "iris": ">=1.6.9",
+    "flywheel": ">=0.6.10"
   },
   "suggests": {
     "another-mod": "*"

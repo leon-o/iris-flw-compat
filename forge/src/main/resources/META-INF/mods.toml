@@ -27,13 +27,13 @@ side="CLIENT"
 [[dependencies.irisflw]]
 modId="oculus"
 mandatory=true
-versionRange="[1.6,)"
+versionRange="[1.6.9,)"
 ordering="NONE"
 side="CLIENT"
 
 [[dependencies.irisflw]]
 modId="flywheel"
 mandatory=true
-versionRange="[0.6.7,)"
+versionRange="[0.6.10,)"
 ordering="AFTER"
 side="CLIENT"
