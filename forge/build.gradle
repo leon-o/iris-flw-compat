@@ -38,13 +38,6 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
 
     modCompileOnly "com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}"
-
-
-    modLocalRuntime ("org.embeddedt:embeddium-${minecraft_version}:${embeddium_version}+mc${minecraft_version}")
-    modLocalRuntime ("maven.modrinth:oculus:${oculus_version}")
-    modLocalRuntime ("com.simibubi.create:create-${minecraft_version}:0.5.1.e-22") { transitive = false }
-    modLocalRuntime ("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}")
-    modLocalRuntime ("com.tterrag.registrate:Registrate:${registrate_version}")
 }
 
 processResources {

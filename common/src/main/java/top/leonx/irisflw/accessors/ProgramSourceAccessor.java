@@ -1,7 +1,7 @@
 package top.leonx.irisflw.accessors;
 
-import net.irisshaders.iris.gl.blending.BlendModeOverride;
-import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
+import net.coderbot.iris.gl.blending.BlendModeOverride;
+import net.coderbot.iris.shaderpack.ShaderProperties;
 
 public interface ProgramSourceAccessor {
     ShaderProperties getShaderProperties();

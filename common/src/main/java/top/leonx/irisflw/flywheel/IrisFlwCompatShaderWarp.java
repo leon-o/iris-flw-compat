@@ -1,9 +1,9 @@
 package top.leonx.irisflw.flywheel;
 
 import com.mojang.blaze3d.shaders.Uniform;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import net.irisshaders.iris.uniforms.CapturedRenderingState;
+import com.mojang.math.Matrix3f;
+import com.mojang.math.Matrix4f;
+import net.coderbot.iris.uniforms.CapturedRenderingState;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.lwjgl.opengl.GL20;
 import top.leonx.irisflw.iris.GlUniformMcMatrix3f;
@@ -25,7 +25,7 @@ public class IrisFlwCompatShaderWarp {
         //If the MODEL_VIEW_MATRIX is null, the game will crash when we call ExtendedShader::apply().
         if(shader.MODEL_VIEW_MATRIX == null){
             shader.MODEL_VIEW_MATRIX = new Uniform("ModelViewMat",10,16,shader);
-            shader.MODEL_VIEW_MATRIX.set(new Matrix4f());
+            shader.MODEL_VIEW_MATRIX.set(Matrix4f.createScaleMatrix(1,1,1));
         }
 
         uniformIrisProjMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId,"iris_ProjMat"));

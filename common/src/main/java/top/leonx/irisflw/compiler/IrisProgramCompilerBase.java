@@ -7,15 +7,15 @@ import com.jozufozu.flywheel.core.compile.VertexData;
 import com.jozufozu.flywheel.core.shader.WorldProgram;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import net.irisshaders.iris.Iris;
-import net.irisshaders.iris.gl.blending.AlphaTest;
-import net.irisshaders.iris.gl.blending.BlendModeOverride;
-import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
-import net.irisshaders.iris.gl.state.FogMode;
-import net.irisshaders.iris.shaderpack.programs.ProgramSet;
-import net.irisshaders.iris.shaderpack.programs.ProgramSource;
-import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
-import net.irisshaders.iris.shaderpack.loading.ProgramId;
+import net.coderbot.iris.Iris;
+import net.coderbot.iris.gl.blending.AlphaTest;
+import net.coderbot.iris.gl.blending.BlendModeOverride;
+import net.coderbot.iris.pipeline.WorldRenderingPipeline;
+import net.coderbot.iris.pipeline.newshader.FogMode;
+import net.coderbot.iris.shaderpack.ProgramSet;
+import net.coderbot.iris.shaderpack.ProgramSource;
+import net.coderbot.iris.shaderpack.ShaderProperties;
+import net.coderbot.iris.shaderpack.loading.ProgramId;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -118,8 +118,6 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
         ProgramSource processedSource = new ProgramSource(source.getName() + "_" + ctx.spec.name.getNamespace() + "_" +
                 ctx.spec.name.getPath(), vertexSource,
                 source.getGeometrySource().orElse(null),
-		source.getTessControlSource().orElse(null),
-		source.getTessEvalSource().orElse(null),
                 source.getFragmentSource().orElse(null), programSet, properties, blendModeOverride);
         return processedSource;
     }

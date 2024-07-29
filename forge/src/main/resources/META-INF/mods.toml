@@ -13,27 +13,27 @@ Allow Flywheel instancing optimization to be enabled when using iris.
 [[dependencies.irisflw]]
 modId="forge"
 mandatory=true
-versionRange="[47,)"
+versionRange="[40,)"
 ordering="NONE"
 side="CLIENT"
 
 [[dependencies.irisflw]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.20,1.21)"
+versionRange="[1.19,1.20)"
 ordering="NONE"
 side="CLIENT"
 
 [[dependencies.irisflw]]
 modId="oculus"
 mandatory=true
-versionRange="[1.6.15,)"
+versionRange="[1.6,)"
 ordering="NONE"
 side="CLIENT"
 
 [[dependencies.irisflw]]
 modId="flywheel"
 mandatory=true
-versionRange="[0.6.9,)"
+versionRange="[0.6.7,)"
 ordering="AFTER"
 side="CLIENT"

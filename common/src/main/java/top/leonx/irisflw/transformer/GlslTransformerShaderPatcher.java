@@ -6,14 +6,8 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import io.github.douira.glsl_transformer.GLSLParser;
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
 import io.github.douira.glsl_transformer.ast.node.Version;
-import io.github.douira.glsl_transformer.ast.node.declaration.DeclarationMember;
-import io.github.douira.glsl_transformer.ast.node.declaration.FunctionDeclaration;
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
-import io.github.douira.glsl_transformer.ast.node.external_declaration.DeclarationExternalDeclaration;
-import io.github.douira.glsl_transformer.ast.node.external_declaration.ExternalDeclaration;
-import io.github.douira.glsl_transformer.ast.node.external_declaration.FunctionDefinition;
 import io.github.douira.glsl_transformer.ast.node.statement.CompoundStatement;
-import io.github.douira.glsl_transformer.ast.node.statement.Statement;
 import io.github.douira.glsl_transformer.ast.query.Root;
 import io.github.douira.glsl_transformer.ast.query.RootSupplier;
 import io.github.douira.glsl_transformer.ast.query.index.ExternalDeclarationIndex;
@@ -25,14 +19,12 @@ import io.github.douira.glsl_transformer.ast.transform.ASTInjectionPoint;
 import io.github.douira.glsl_transformer.ast.transform.JobParameters;
 import io.github.douira.glsl_transformer.ast.transform.SingleASTTransformer;
 import io.github.douira.glsl_transformer.parser.ParseShape;
-import net.irisshaders.iris.pipeline.transform.transformer.CommonTransformer;
-import net.irisshaders.iris.helpers.StringPair;
-import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
+import net.coderbot.iris.shaderpack.StringPair;
+import net.coderbot.iris.shaderpack.preprocessor.JcppProcessor;
 
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
