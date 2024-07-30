@@ -57,7 +57,7 @@ jobs:
           changelog-file: CHANGELOG.md
 
           java: "${{env.JAVA_VERSION}}"
-          files: fabric/build/libs/!(*-@(dev|sources|javadoc)).jar
+          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
           fail-mode: warn
 
@@ -76,6 +76,6 @@ jobs:
           changelog-file: CHANGELOG.md
 
           java: "${{env.JAVA_VERSION}}"
-          files: forge/build/libs/!(*-@(dev|sources|javadoc)).jar
+          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
           fail-mode: warn
