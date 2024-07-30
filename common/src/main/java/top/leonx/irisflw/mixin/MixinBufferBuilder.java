@@ -1,8 +1,10 @@
 package top.leonx.irisflw.mixin;
 
+import com.jozufozu.flywheel.backend.ShadersModHandler;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.irisshaders.iris.api.v0.IrisApi;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -10,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import top.leonx.irisflw.accessors.BufferBuilderAccessor;
 import top.leonx.irisflw.iris.BufferBuilderStateManager;
 
-@Mixin(value = BufferBuilder.class,priority = 1010)
+@Mixin(value = BufferBuilder.class, priority = 1010)
 public class MixinBufferBuilder implements BufferBuilderAccessor {
 
     @Unique
@@ -33,11 +35,11 @@ public class MixinBufferBuilder implements BufferBuilderAccessor {
 
     @ModifyVariable(method = "begin", at = @At("HEAD"), argsOnly = true)
     private VertexFormat iris$extendFormat(VertexFormat format) {
-        if(!BufferBuilderStateManager.isAllowExtend()){
+        if (!BufferBuilderStateManager.isAllowExtend()) {
             extending = false;
-            return DefaultVertexFormat.BLOCK;
+            if (IrisApi.getInstance().isShaderPackInUse())
+                return DefaultVertexFormat.BLOCK;
         }
-
         return format;
     }
 }
