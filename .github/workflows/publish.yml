@@ -57,7 +57,11 @@ jobs:
           changelog-file: CHANGELOG.md
 
           java: "${{env.JAVA_VERSION}}"
-          files: fabric/build/libs/!(*-@(dev|sources|javadoc)).jar
+          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+
+          dependencies: |
+            IrisShader@1.7.0(required){modrinth:iris}{curseforge:455508}
+            CreateFabric(optional){modrithn:create-fabric}{curseforge:624165}
           
           fail-mode: warn
 
@@ -77,6 +81,10 @@ jobs:
           changelog-file: CHANGELOG.md
 
           java: "${{env.JAVA_VERSION}}"
-          files: forge/build/libs/!(*-@(dev|sources|javadoc)).jar
+          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+
+          dependencies: |
+            Oculus@1.7.0(required){modrinth:oculus}{curseforge:581495}
+            Create(optional){modrithn:create}{curseforge:328085}
 
           fail-mode: warn
