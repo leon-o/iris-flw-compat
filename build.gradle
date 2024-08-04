@@ -10,7 +10,7 @@ architectury {
 
 allprojects {
     group = rootProject.maven_group
-    version = rootProject.mod_version
+    version = "${project.name}${minecraft_version}+${mod_version}"
 }
 
 subprojects {
@@ -20,9 +20,9 @@ subprojects {
 
     base {
         if (project.name == "forge"){
-            archivesName = "$rootProject.forge_archives_name-$project.name-$rootProject.minecraft_version"
+            archivesName = "$rootProject.forge_archives_name"
         }else if(project.name == "fabric"){
-            archivesName = "$rootProject.fabric_archives_name-$project.name-$rootProject.minecraft_version"
+            archivesName = "$rootProject.fabric_archives_name"
         }else{
             archivesName = "irisflw-$project.name"
         }
