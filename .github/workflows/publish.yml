@@ -14,12 +14,12 @@ on:
         description: 'Fabric Title'
         required: true
         type: 'string'
-        default: 'Fabric 1.20.1 1.1.1 for Iris 1.7.0+'
+        default: 'Fabric 1.20.1-1.1.1 for Iris 1.7.0+'
       forge_title:
         description: 'Forge Title'
         required: true
         type: 'string'
-        default: 'Forge 1.20.1 1.1.1 for Iris 1.7.0+'
+        default: 'Forge 1.20.1-1.1.1 for Oculus 1.7.0+'
       publish_forge:
         description: 'Publish Forge'
         required: true
@@ -76,13 +76,13 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build
         run: ./gradlew clean build
 
-      - name: Publish Fabric Github Release
-        if: ${{ inputs.publish_fabric == 'true' && inputs.publish_github_release == 'true' }}
+      - name: Publish Fabric GitHub Release
+        if: ${{ inputs.publish_fabric == true && inputs.publish_github_release == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
@@ -94,13 +94,13 @@ jobs:
           fail-mode: warn
 
       - name: Publish Fabric CurseForge
-        if: ${{ inputs.publish_fabric == 'true' && inputs.publish_to_curseforge == 'true' }}
+        if: ${{ inputs.publish_fabric == true && inputs.publish_to_curseforge == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          name: "${{inputs.fabric_title}}"
+          name: ""
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -111,7 +111,7 @@ jobs:
           fail-mode: warn
 
       - name: Publish Fabric Modrinth
-        if: ${{ inputs.publish_fabric == 'true' && inputs.publish_to_modrinth == 'true' }}
+        if: ${{ inputs.publish_fabric == true && inputs.publish_to_modrinth == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: iris-flw-compat
@@ -127,8 +127,8 @@ jobs:
 
           fail-mode: warn
 
-      - name: Publish Forge Github Release
-        if: ${{ inputs.publish_forge == 'true' && inputs.publish_to_modrinth == 'true' }}
+      - name: Publish Forge GitHub Release
+        if: ${{ inputs.publish_forge == true && inputs.publish_github_release == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
@@ -140,13 +140,13 @@ jobs:
           fail-mode: warn
 
       - name: Publish Forge CurseForge
-        if: ${{ inputs.publish_forge == 'true' && inputs.publish_to_curseforge == 'true' }}
+        if: ${{ inputs.publish_forge == true && inputs.publish_to_curseforge == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          name: "${{inputs.forge_title}}"
+          name: ""
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -158,7 +158,7 @@ jobs:
 
 
       - name: Publish Forge Modrinth
-        if: ${{ inputs.publish_forge == 'true' && inputs.publish_to_modrinth == 'true' }}
+        if: ${{ inputs.publish_forge == true && inputs.publish_to_modrinth == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: iris-flw-compat
