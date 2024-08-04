@@ -9,6 +9,42 @@ name: Publish Jar
 
 on:
   workflow_dispatch:
+    inputs:
+      fabric_title:
+        description: 'Fabric Title'
+        required: true
+        type: 'string'
+        default: 'Fabric 1.20.1 1.1.1 for Iris 1.7.0+'
+      forge_title:
+        description: 'Forge Title'
+        required: true
+        type: 'string'
+        default: 'Forge 1.20.1 1.1.1 for Iris 1.7.0+'
+      publish_forge:
+        description: 'Publish Forge'
+        required: true
+        type: 'boolean'
+        default: true
+      publish_fabric:
+        description: 'Publish Fabric'
+        required: true
+        type: 'boolean'
+        default: true
+      publish_to_curseforge:
+        description: 'Publish to CurseForge'
+        required: true
+        type: 'boolean'
+        default: false
+      publish_to_modrinth:
+        description: 'Publish to Modrinth'
+        required: true
+        type: 'boolean'
+        default: false
+      publish_github_release:
+        description: 'Publish GitHub Release'
+        required: true
+        type: 'boolean'
+        default: true
 
 env:
   JAVA_VERSION: 17
@@ -39,52 +75,101 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
 
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+
       - name: Build
         run: ./gradlew clean build
 
-      - name: Publish Fabric
+      - name: Publish Fabric Github Release
+        if: ${{ inputs.publish_fabric == 'true' && inputs.publish_github_release == 'true' }}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          github-token: "${{secrets.PUBLISH_TOKEN}}"
+
+          name: "${{inputs.fabric_title}}"
+          changelog-file: CHANGELOG.md
+          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+
+          fail-mode: warn
+
+      - name: Publish Fabric CurseForge
+        if: ${{ inputs.publish_fabric == 'true' && inputs.publish_to_curseforge == 'true' }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          modrinth-id: iris-flw-compat
-          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
-
-          github-token: "${{secrets.PUBLISH_TOKEN}}"
-
-          name: Fabric 1.20.1-1.1.0 for Iris 1.7.0+
+          name: "${{inputs.fabric_title}}"
           changelog-file: CHANGELOG.md
-
-          java: "${{env.JAVA_VERSION}}"
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
           dependencies: |
-            IrisShader@1.7.0(required){modrinth:iris}{curseforge:455508}
+            IrisShader(required){modrinth:iris}{curseforge:455508}
             CreateFabric(optional){modrithn:create-fabric}{curseforge:624165}
-          
+
           fail-mode: warn
 
+      - name: Publish Fabric Modrinth
+        if: ${{ inputs.publish_fabric == 'true' && inputs.publish_to_modrinth == 'true' }}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: iris-flw-compat
+          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-      - name: Publish Forge
+          name: "${{inputs.fabric_title}}"
+          changelog-file: CHANGELOG.md
+          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+
+          dependencies: |
+            IrisShader(required){modrinth:iris}{curseforge:455508}
+            CreateFabric(optional){modrithn:create-fabric}{curseforge:624165}
+
+          fail-mode: warn
+
+      - name: Publish Forge Github Release
+        if: ${{ inputs.publish_forge == 'true' && inputs.publish_to_modrinth == 'true' }}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          github-token: "${{secrets.PUBLISH_TOKEN}}"
+
+          name: "${{inputs.forge_title}}"
+          changelog-file: CHANGELOG.md
+          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+
+          fail-mode: warn
+
+      - name: Publish Forge CurseForge
+        if: ${{ inputs.publish_forge == 'true' && inputs.publish_to_curseforge == 'true' }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          modrinth-id: iris-flw-compat
-          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
-
-          github-token: "${{secrets.PUBLISH_TOKEN}}"
-
-          name: Forge 1.20.1-1.1.0 for Oculus 1.7.0+
+          name: "${{inputs.forge_title}}"
           changelog-file: CHANGELOG.md
-
-          java: "${{env.JAVA_VERSION}}"
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
           dependencies: |
-            Oculus@1.7.0(required){modrinth:oculus}{curseforge:581495}
+            Oculus(required){modrinth:oculus}{curseforge:581495}
+            Create(optional){modrithn:create}{curseforge:328085}
+
+          fail-mode: warn
+
+
+      - name: Publish Forge Modrinth
+        if: ${{ inputs.publish_forge == 'true' && inputs.publish_to_modrinth == 'true' }}
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: iris-flw-compat
+          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
+
+          name: "${{inputs.forge_title}}"
+          changelog-file: CHANGELOG.md
+          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+
+          dependencies: |
+            Oculus(required){modrinth:oculus}{curseforge:581495}
             Create(optional){modrithn:create}{curseforge:328085}
 
           fail-mode: warn
