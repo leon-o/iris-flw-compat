@@ -10,6 +10,16 @@ name: Publish Jar
 on:
   workflow_dispatch:
     inputs:
+      fabric_title:
+        description: 'Fabric Title'
+        required: true
+        type: 'string'
+        default: 'Fabric 1.19.2 1.0.1 for Iris 1.6.9+'
+      forge_title:
+        description: 'Forge Title'
+        required: true
+        type: 'string'
+        default: 'Forge 1.19.2 1.0.1 for Iris 1.6.9+'
       publish_forge:
         description: 'Publish Forge'
         required: true
@@ -38,8 +48,6 @@ on:
 
 env:
   JAVA_VERSION: 17
-  FABRIC_NAME: "Fabric 1.19.2-1.0.0 for Iris 1.6.9+"
-  FORGE_NAME: "Forge 1.19.2-1.0.0 for Iris 1.6.9+"
 
 permissions:
   contents: write
@@ -76,7 +84,7 @@ jobs:
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: "${{env.FABRIC_NAME}}"
+          name: "${{inputs.fabric_title}}"
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -89,12 +97,12 @@ jobs:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          name: "${{env.FABRIC_NAME}}"
+          name: "${{inputs.fabric_title}}"
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
           dependencies: |
-            IrisShader@1.6.9(required){modrinth:iris}{curseforge:455508}
+            IrisShader(required){modrinth:iris}{curseforge:455508}
             CreateFabric(optional){modrithn:create-fabric}{curseforge:624165}
 
           fail-mode: warn
@@ -106,12 +114,12 @@ jobs:
           modrinth-id: iris-flw-compat
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-          name: "${{env.FABRIC_NAME}}"
+          name: "${{inputs.fabric_title}}"
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
           dependencies: |
-            IrisShader@1.6.9(required){modrinth:iris}{curseforge:455508}
+            IrisShader(required){modrinth:iris}{curseforge:455508}
             CreateFabric(optional){modrithn:create-fabric}{curseforge:624165}
 
           fail-mode: warn
@@ -122,7 +130,7 @@ jobs:
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: "${{env.FORGE_NAME}}"
+          name: "${{inputs.forge_title}}"
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -135,12 +143,12 @@ jobs:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          name: "${{env.FORGE_NAME}}"
+          name: "${{inputs.forge_title}}"
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
           dependencies: |
-            Oculus@1.6.9(required){modrinth:oculus}{curseforge:581495}
+            Oculus(required){modrinth:oculus}{curseforge:581495}
             Create(optional){modrithn:create}{curseforge:328085}
 
           fail-mode: warn
@@ -153,12 +161,12 @@ jobs:
           modrinth-id: iris-flw-compat
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-          name: "${{env.FORGE_NAME}}"
+          name: "${{inputs.forge_title}}"
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
           dependencies: |
-            Oculus@1.6.9(required){modrinth:oculus}{curseforge:581495}
+            Oculus(required){modrinth:oculus}{curseforge:581495}
             Create(optional){modrithn:create}{curseforge:328085}
 
           fail-mode: warn
