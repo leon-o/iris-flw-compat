@@ -82,7 +82,7 @@ jobs:
         run: ./gradlew clean build
 
       - name: Publish Fabric Github Release
-        if: ${{ inputs.publish_fabric == 'true' && inputs.publish_github_release == 'true' }}
+        if: ${{ inputs.publish_fabric == true && inputs.publish_github_release == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
@@ -94,7 +94,7 @@ jobs:
           fail-mode: warn
 
       - name: Publish Fabric CurseForge
-        if: ${{ inputs.publish_fabric == 'true' && inputs.publish_to_curseforge == 'true' }}
+        if: ${{ inputs.publish_fabric == true && inputs.publish_to_curseforge == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
@@ -111,7 +111,7 @@ jobs:
           fail-mode: warn
 
       - name: Publish Fabric Modrinth
-        if: ${{ inputs.publish_fabric == 'true' && inputs.publish_to_modrinth == 'true' }}
+        if: ${{ inputs.publish_fabric == true && inputs.publish_to_modrinth == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: iris-flw-compat
@@ -128,7 +128,7 @@ jobs:
           fail-mode: warn
 
       - name: Publish Forge Github Release
-        if: ${{ inputs.publish_forge == 'true' && inputs.publish_to_modrinth == 'true' }}
+        if: ${{ inputs.publish_forge == true && inputs.publish_to_modrinth == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
@@ -140,7 +140,7 @@ jobs:
           fail-mode: warn
 
       - name: Publish Forge CurseForge
-        if: ${{ inputs.publish_forge == 'true' && inputs.publish_to_curseforge == 'true' }}
+        if: ${{ inputs.publish_forge == true && inputs.publish_to_curseforge == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
@@ -158,7 +158,7 @@ jobs:
 
 
       - name: Publish Forge Modrinth
-        if: ${{ inputs.publish_forge == 'true' && inputs.publish_to_modrinth == 'true' }}
+        if: ${{ inputs.publish_forge == true && inputs.publish_to_modrinth == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: iris-flw-compat
