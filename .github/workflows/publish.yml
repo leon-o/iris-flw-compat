@@ -76,18 +76,18 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build
         run: ./gradlew clean build
 
-      - name: Publish Fabric Github Release
+      - name: Publish Fabric GitHub Release
         if: ${{ inputs.publish_fabric == true && inputs.publish_github_release == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: "${{inputs.fabric_title}}"
+          name: ""
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -100,7 +100,7 @@ jobs:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          name: "${{inputs.fabric_title}}"
+          name: ""
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -117,7 +117,7 @@ jobs:
           modrinth-id: iris-flw-compat
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-          name: "${{inputs.fabric_title}}"
+          name: ""
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -127,13 +127,13 @@ jobs:
 
           fail-mode: warn
 
-      - name: Publish Forge Github Release
-        if: ${{ inputs.publish_forge == true && inputs.publish_to_modrinth == true }}
+      - name: Publish Forge GitHub Release
+        if: ${{ inputs.publish_forge == true && inputs.publish_github_release == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: "${{inputs.forge_title}}"
+          name: ""
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -146,7 +146,7 @@ jobs:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          name: "${{inputs.forge_title}}"
+          name: ""
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -164,7 +164,7 @@ jobs:
           modrinth-id: iris-flw-compat
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-          name: "${{inputs.forge_title}}"
+          name: ""
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
