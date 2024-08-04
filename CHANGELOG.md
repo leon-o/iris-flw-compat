@@ -1,3 +1,7 @@
+## 1.1.1
+1. Fix issue [#125](https://github.com/leon-o/iris-flw-compat/issues/125): occasional crashes when shaders are not enabled. Thanks [MoePus](https://github.com/leon-o/iris-flw-compat/pull/141) for the contribution.
+
+## 1.1.0
 1. Fix lighting issues of the moving contraption.
    - The vertex light strength was incorrectly set to a fixed value, causing the moving contraption won't be affected by the light source.
 2. Use architecture to reorganize the project.
