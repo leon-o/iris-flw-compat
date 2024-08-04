@@ -75,6 +75,9 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
 
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+
       - name: Build
         run: ./gradlew clean build
 
