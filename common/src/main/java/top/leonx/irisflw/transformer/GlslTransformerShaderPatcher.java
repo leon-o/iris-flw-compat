@@ -6,14 +6,10 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import io.github.douira.glsl_transformer.GLSLParser;
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
 import io.github.douira.glsl_transformer.ast.node.Version;
-import io.github.douira.glsl_transformer.ast.node.declaration.DeclarationMember;
-import io.github.douira.glsl_transformer.ast.node.declaration.FunctionDeclaration;
+import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
-import io.github.douira.glsl_transformer.ast.node.external_declaration.DeclarationExternalDeclaration;
 import io.github.douira.glsl_transformer.ast.node.external_declaration.ExternalDeclaration;
-import io.github.douira.glsl_transformer.ast.node.external_declaration.FunctionDefinition;
 import io.github.douira.glsl_transformer.ast.node.statement.CompoundStatement;
-import io.github.douira.glsl_transformer.ast.node.statement.Statement;
 import io.github.douira.glsl_transformer.ast.query.Root;
 import io.github.douira.glsl_transformer.ast.query.RootSupplier;
 import io.github.douira.glsl_transformer.ast.query.index.ExternalDeclarationIndex;
@@ -25,14 +21,12 @@ import io.github.douira.glsl_transformer.ast.transform.ASTInjectionPoint;
 import io.github.douira.glsl_transformer.ast.transform.JobParameters;
 import io.github.douira.glsl_transformer.ast.transform.SingleASTTransformer;
 import io.github.douira.glsl_transformer.parser.ParseShape;
-import net.irisshaders.iris.pipeline.transform.transformer.CommonTransformer;
 import net.irisshaders.iris.helpers.StringPair;
 import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
 
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
@@ -44,6 +38,12 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
             "gl_TextureMatrix[1]", ParseShape.EXPRESSION);
     public static final AutoHintedMatcher<Expression> glTextureMatrix2 = new AutoHintedMatcher<>(
             "gl_TextureMatrix[2]", ParseShape.EXPRESSION);
+
+    public static final AutoHintedMatcher<ExternalDeclaration> atTangentAttribute = new AutoHintedMatcher<>(
+            "attribute vec4 at_tangent;", ParseShape.EXTERNAL_DECLARATION);
+
+    public static final AutoHintedMatcher<ExternalDeclaration> mcEntityAttribute = new AutoHintedMatcher<>(
+            "attribute vec4 mc_Entity;", ParseShape.EXTERNAL_DECLARATION);
 
     private static final ParseShape<GLSLParser.CompoundStatementContext, CompoundStatement> CompoundStatementShape = new ParseShape<>(
             GLSLParser.CompoundStatementContext.class,
@@ -131,7 +131,11 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
 
         root.replaceExpressionMatches(transformer, new AutoHintedMatcher<>("ftransform()", ParseShape.EXPRESSION), "_flw_patched_vertex_pos");
 
+        root.processMatches(transformer, atTangentAttribute, ASTNode::detachAndDelete);
         root.replaceReferenceExpressions(transformer, "at_tangent", "_flw_tangent");
+
+        root.processMatches(transformer, mcEntityAttribute, ASTNode::detachAndDelete);
+        root.replaceReferenceExpressions(transformer, "mc_Entity", "vec4(0)");
 
         //root.replaceExpressionMatches(transformer, glTextureMatrix0, "mat4(1.0)");
 
