@@ -14,12 +14,12 @@ on:
         description: 'Fabric Title'
         required: true
         type: 'string'
-        default: 'Fabric 1.19.2 1.0.1 for Iris 1.6.9+'
+        default: 'Fabric 1.18.2 1.0.1 for Iris 1.6.9+'
       forge_title:
         description: 'Forge Title'
         required: true
         type: 'string'
-        default: 'Forge 1.19.2 1.0.1 for Iris 1.6.9+'
+        default: 'Forge 1.18.2 1.0.1 for Iris 1.6.9+'
       publish_forge:
         description: 'Publish Forge'
         required: true
