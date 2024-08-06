@@ -2,6 +2,7 @@
 1. Fix issue [#125](https://github.com/leon-o/iris-flw-compat/issues/125): occasional crashes when shaders are not enabled. Thanks [MoePus](https://github.com/leon-o/iris-flw-compat/pull/141) for the contribution.
 
 ## 1.0.0
+
 This version only support Iris 1.6.9+.
 
 1. Fix lighting issues of the moving contraption.

@@ -38,6 +38,9 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
 
     modCompileOnly "com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}"
+
+    localRuntime include('io.github.douira:glsl-transformer:2.0.0-pre14')
+    localRuntime include('org.anarres:jcpp:1.4.14')
 }
 
 processResources {

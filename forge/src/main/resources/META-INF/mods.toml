@@ -20,7 +20,7 @@ side="CLIENT"
 [[dependencies.irisflw]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.19,1.20)"
+versionRange="[1.18.2,1.19)"
 ordering="NONE"
 side="CLIENT"
 
@@ -34,6 +34,6 @@ side="CLIENT"
 [[dependencies.irisflw]]
 modId="flywheel"
 mandatory=true
-versionRange="[0.6.10,)"
+versionRange="[0.6.9,)"
 ordering="AFTER"
 side="CLIENT"
