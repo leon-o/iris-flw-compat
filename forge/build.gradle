@@ -7,6 +7,12 @@ loom {
         mixinConfig "irisflw.mixins.flw.json"
         mixinConfig "irisflw.mixins.iris.json"
     }
+    runs {
+        client {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+        }
+    }
 }
 
 architectury {
@@ -39,8 +45,10 @@ dependencies {
 
     modCompileOnly "com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}"
 
-    localRuntime include('io.github.douira:glsl-transformer:2.0.0-pre14')
-    localRuntime include('org.anarres:jcpp:1.4.14')
+    modLocalRuntime ("maven.modrinth:rubidium:${rubidium_version}")
+    modLocalRuntime ("maven.modrinth:oculus:${oculus_version}")
+    forgeRuntimeLibrary ('io.github.douira:glsl-transformer:2.0.0-pre14')
+    forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
 }
 
 processResources {

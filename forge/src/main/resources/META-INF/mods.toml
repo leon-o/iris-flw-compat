@@ -27,7 +27,7 @@ side="CLIENT"
 [[dependencies.irisflw]]
 modId="oculus"
 mandatory=true
-versionRange="[1.6.9,)"
+versionRange="[1.6.4,)"
 ordering="NONE"
 side="CLIENT"
 
