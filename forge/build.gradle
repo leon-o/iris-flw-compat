@@ -46,8 +46,8 @@ dependencies {
     modCompileOnly "com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}"
 
     forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
-    modLocalRuntime ("org.embeddedt:embeddium-${minecraft_version}:${embeddium_version}+mc${minecraft_version}")
-    modLocalRuntime ("maven.modrinth:oculus:${oculus_version}")
+    modCompileOnly (files("../libs/iris-forge-1.20.1-1.8.0-snapshot+mc1.20.1-local.jar"))
+    modCompileOnly (files("../libs/sodium-forge-0.6.0-alpha.3+mc1.20.1.jar"))
     modLocalRuntime ("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
     modLocalRuntime ("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}")
     modLocalRuntime ("com.tterrag.registrate:Registrate:${registrate_version}")

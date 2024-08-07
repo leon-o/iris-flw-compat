@@ -34,6 +34,14 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
     modCompileOnly "com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}"
+
+    modLocalRuntime (files("../libs/iris-fabric-1.20.1-1.8.0-snapshot+mc1.20.1-local.jar"))
+    modLocalRuntime (files("../libs/sodium-fabric-0.6.0-alpha.3+mc1.20.1.jar"))
+    modLocalRuntime "com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}"
+
+    localRuntime ("org.joml:joml:1.10.4")
+    localRuntime ('org.anarres:jcpp:1.4.14')
+    localRuntime ('io.github.douira:glsl-transformer:2.0.0-pre14')
 }
 
 processResources {

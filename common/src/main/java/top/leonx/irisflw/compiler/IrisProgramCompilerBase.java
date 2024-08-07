@@ -91,11 +91,11 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
             if (isShadow) {
                 override = pipeline.callCreateShadowShader(
                         getFlwShaderName(ctx.spec.name, true), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, false, false, false);
+                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, false, false, false, false);
             } else {
                 override = pipeline.callCreateShader(
                         getFlwShaderName(ctx.spec.name, false), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, FogMode.OFF, false, false,false,false);
+                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, FogMode.OFF, false, false, false, false, false);
             }
 
         } catch (Exception exception) {
