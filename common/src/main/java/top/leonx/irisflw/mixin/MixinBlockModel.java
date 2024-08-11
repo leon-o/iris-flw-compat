@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import top.leonx.irisflw.IrisFlw;
 
-@Mixin(value = BlockModel.class, remap = false)
+@Mixin(value = BlockModel.class)
 public class MixinBlockModel {
     @Redirect(method = "<init>*", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferBuilder$DrawState;format()Lcom/mojang/blaze3d/vertex/VertexFormat;"))
     private VertexFormat irisFlw$ReturnIrisFormat(BufferBuilder.DrawState drawState) {

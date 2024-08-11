@@ -14,7 +14,8 @@
     "VertexCompilerAccessor",
     "MixinFormats",
     "MixinBlockModel",
-    "MixinShadeSeparatingVertexConsumer"
+    "MixinShadeSeparatingVertexConsumer",
+    "MixinCubiodBuilder"
   ],
   "injectors": {
     "defaultRequire": 1

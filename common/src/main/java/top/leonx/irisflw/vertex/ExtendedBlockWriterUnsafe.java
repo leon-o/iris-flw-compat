@@ -73,7 +73,7 @@ public class ExtendedBlockWriterUnsafe extends BlockWriterUnsafe {
             MemoryUtil.memPutInt(ptr + 48, 0);
         }
 
-        ptr += IrisFlwBlockVertex.EXTEND_FORMAT.getStride();
+        ptr += ExtendedBlockVertex.EXTEND_FORMAT.getStride();
         advance();
     }
 
