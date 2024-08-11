@@ -6,13 +6,17 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import io.github.douira.glsl_transformer.GLSLParser;
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
 import io.github.douira.glsl_transformer.ast.node.Version;
+import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
 import io.github.douira.glsl_transformer.ast.node.declaration.TypeAndInitDeclaration;
 import io.github.douira.glsl_transformer.ast.node.expression.Expression;
 import io.github.douira.glsl_transformer.ast.node.expression.ReferenceExpression;
+import io.github.douira.glsl_transformer.ast.node.expression.binary.AssignmentExpression;
 import io.github.douira.glsl_transformer.ast.node.expression.unary.MemberAccessExpression;
 import io.github.douira.glsl_transformer.ast.node.external_declaration.DeclarationExternalDeclaration;
 import io.github.douira.glsl_transformer.ast.node.statement.CompoundStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.terminal.ExpressionStatement;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.BuiltinNumericTypeSpecifier;
+import io.github.douira.glsl_transformer.ast.print.ASTPrinter;
 import io.github.douira.glsl_transformer.ast.query.Root;
 import io.github.douira.glsl_transformer.ast.query.RootSupplier;
 import io.github.douira.glsl_transformer.ast.query.index.ExternalDeclarationIndex;
@@ -23,6 +27,8 @@ import io.github.douira.glsl_transformer.ast.transform.ASTBuilder;
 import io.github.douira.glsl_transformer.ast.transform.ASTInjectionPoint;
 import io.github.douira.glsl_transformer.ast.transform.JobParameters;
 import io.github.douira.glsl_transformer.ast.transform.SingleASTTransformer;
+import io.github.douira.glsl_transformer.ast.traversal.ASTBaseVisitor;
+import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 import io.github.douira.glsl_transformer.parser.ParseShape;
 import net.irisshaders.iris.helpers.StringPair;
 import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
@@ -56,6 +62,58 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
 
     public static final AutoHintedMatcher<Expression> ftransformExpr = new AutoHintedMatcher<>("ftransform()", ParseShape.EXPRESSION);
 
+    public static final ASTVisitor<Boolean> vNormalMemberReAssignMatchVisitor = new ASTBaseVisitor<Boolean>() {
+        private boolean inVNormalAssignment = false;
+
+        private boolean isVNormalMemberAccess(ASTNode node) {
+            if (node instanceof MemberAccessExpression memberAccessExpression) {
+                return memberAccessExpression.getMember().getName().equals("normal")
+                        && memberAccessExpression.getOperand() instanceof ReferenceExpression referenceExpression
+                        && referenceExpression.getIdentifier().getName().equals("v");
+            }
+            return false;
+        }
+
+        @Override
+        public Boolean startVisit(ASTNode node) {
+            inVNormalAssignment = false;
+            return super.startVisit(node);
+        }
+
+        @Override
+        public Boolean visitRaw(ASTNode node) {
+
+            if (node instanceof AssignmentExpression assignmentExpression) {
+                // If contains v.normal, return true
+                var left = assignmentExpression.getLeft();
+                if(left instanceof MemberAccessExpression memberAccessExpression)
+                {
+                    var leftIsVNormal = isVNormalMemberAccess(memberAccessExpression);
+
+                    if(leftIsVNormal){
+                        Expression right = assignmentExpression.getRight();
+                        inVNormalAssignment = true;
+                        return right.accept(this);
+                    }
+                }
+            }else if (inVNormalAssignment && node instanceof MemberAccessExpression memberAccessExpression
+                && isVNormalMemberAccess(memberAccessExpression)) {
+                return true;
+            }
+            return node.accept(this);
+        }
+
+        @Override
+        public Boolean defaultResult() {
+            return false;
+        }
+
+        @Override
+        public Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
+            return aggregate || nextResult;
+        }
+    };
+
     private static final ParseShape<GLSLParser.CompoundStatementContext, CompoundStatement> CompoundStatementShape = new ParseShape<>(
             GLSLParser.CompoundStatementContext.class,
             GLSLParser::compoundStatement,
@@ -81,7 +139,14 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
                     throw new IllegalArgumentException(
                             "No #version directive found in source code! See debugging.md for more information.");
                 }
-                transformer.getLexer().version = Version.fromNumber(Integer.parseInt(matcher.group(1)));
+                var versionNum = Integer.parseInt(matcher.group(1));
+                if(versionNum < 330)
+                {
+                    versionNum = 330;
+                    var ignored = matcher.replaceAll("#version 330");
+                    IrisFlw.LOGGER.warn("GLSL version is lower than 330, set to 330");
+                }
+                transformer.getLexer().version = Version.fromNumber(versionNum);
 
                 return super.parseTranslationUnit(rootInstance, input);
             }
@@ -137,14 +202,25 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
 
         var predefineContent = JcppProcessor.glslPreprocessSource(beforeDeclarationContent.toString(), List.of(new StringPair("VERTEX_SHADER", "1")));
 
-        var declarationMembers = flwTransformer.parseSeparateTranslationUnit(predefineContent).getChildren();
+        var flwTree = flwTransformer.parseSeparateTranslationUnit(predefineContent);
+        flwTree.getRoot().process(flwTree.getRoot().nodeIndex.getStream(ExpressionStatement.class),
+                statement -> {
+                    if(vNormalMemberReAssignMatchVisitor.startVisit(statement)){
+                        var assignStatStr = ASTPrinter.printSimple(statement);
+                        assignStatStr = assignStatStr.replace("v.normal", "_flw_at_tangent.xyz");
+                        var statements = statement.getAncestor(CompoundStatement.class);
+                        var index = statements.getStatements().indexOf(statement);
+                        statements.getStatements().add(index + 1, flwTransformer.parseStatement(flwTree.getRoot(), assignStatStr));
+                    }
+                }
+        );
+        var declarationMembers = flwTree.getChildren();
 
         tree.injectNodes(ASTInjectionPoint.BEFORE_DECLARATIONS, declarationMembers);
 
 
         StringBuilder createVertexBuilder = new StringBuilder();
         createVertexBuilder.append("{\n");
-        generateCreateVertex(vertexTemplate, createVertexBuilder);
 
         if (IrisFlw.isUsingExtendedVertexFormat()) {
 
@@ -163,6 +239,7 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
                     """);
         }
 
+        generateCreateVertex(vertexTemplate, createVertexBuilder);
         createVertexBuilder.append("""
                 _flw_patched_vertex_pos = FLWVertex(v);
                 """);
