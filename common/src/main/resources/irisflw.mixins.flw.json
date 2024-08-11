@@ -13,7 +13,8 @@
     "MixinWorldProgram",
     "VertexCompilerAccessor",
     "MixinFormats",
-    "MixinBlockModel"
+    "MixinBlockModel",
+    "MixinShadeSeparatingVertexConsumer"
   ],
   "injectors": {
     "defaultRequire": 1

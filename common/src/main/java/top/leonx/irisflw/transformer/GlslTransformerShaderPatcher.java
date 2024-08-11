@@ -282,11 +282,12 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         var atTangentDim = attrVectorDims.getOrDefault("at_tangent", 4);
         var atMidBlockDim = attrVectorDims.getOrDefault("at_midBlock", 4);
         var mcMidTexCoordDim = attrVectorDims.getOrDefault("mc_midTexCoord", 4);
-        var mcEntityDim = attrVectorDims.getOrDefault("mc_Entity", 4);
+        var mcEntityDim = attrVectorDims.getOrDefault("mc_Entity", 2);
 
         if (IrisFlw.isUsingExtendedVertexFormat()) {
             replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "at_tangent", "_flw_at_tangent", atTangentDim);
-            root.replaceReferenceExpressions(transformer, "mc_Entity", getZeroFromDimension(mcEntityDim));
+            replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "mc_Entity", "_flw_v_mc_Entity", atTangentDim);
+//            root.replaceReferenceExpressions(transformer, "mc_Entity", getZeroFromDimension(mcEntityDim));
             replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "mc_midTexCoord", "_flw_mc_midTexCoord", mcMidTexCoordDim);
             replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "at_midBlock", "_flw_at_midBlock", atMidBlockDim);
         } else {

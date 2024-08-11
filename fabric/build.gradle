@@ -34,6 +34,7 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
     modCompileOnly "com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}"
+    modCompileOnly "maven.modrinth:iris:$iris_version"
 }
 
 processResources {

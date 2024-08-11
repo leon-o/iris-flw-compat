@@ -40,8 +40,7 @@ public class IrisFlwBlockVertex extends BlockVertex {
             )
             .build();
 
-    public static final PrimitiveItem UINT4 = new PrimitiveItem(GlNumericType.UINT, 4);
-    public static final PrimitiveItem INT4 = new PrimitiveItem(GlNumericType.INT, 4);
+    public static final PrimitiveItem SHORT2 = new PrimitiveItem(GlNumericType.SHORT, 2);
 
     public static final BufferLayout EXTEND_FORMAT = BufferLayout.builder()
             .addItems(CommonItems.VEC3,         //POSITION  3xFLOAT = 12
@@ -50,8 +49,9 @@ public class IrisFlwBlockVertex extends BlockVertex {
                     CommonItems.LIGHT_SHORT,    //UV2 - LIGHT_SHORT 2xSHORT = 4
                     CommonItems.NORMAL,         //NORMAL    3xBYTE  = 3
                     CommonItems.PADDING_BYTE,   //PADDING   1xBYTE  = 1     ^^^DEFAULT-VERTEX-FORMAT 32 BYTES
-                    CommonItems.VEC4            //EXTEND_DATA 4xFLOAT = 16  xyz:midTexCoord, z:tangent w:midBlock
-                    // Total: 48
+                    CommonItems.VEC4,           //EXTEND_DATA 4xFLOAT = 16  xy:midTexCoord, z:tangent w:midBlock
+                    SHORT2                      //MC_ENTITY 2xSHORT = 4
+                    // Total: 52
             )
             .build();
 
@@ -97,6 +97,7 @@ public class IrisFlwBlockVertex extends BlockVertex {
                     layout (location = 3) in vec2 _flw_v_light;
                     layout (location = 4) in vec3 _flw_v_normal;
                     layout (location = 5) in vec4 _flw_v_packed_extended;  // x:midTexCoord, z:tangent, w:midBlock
+                    layout (location = 6) in vec2 _flw_v_mc_Entity;        // x:midTexCoord, z:tangent, w:midBlock
 
                     Vertex FLWCreateVertex() {
                     	Vertex v;

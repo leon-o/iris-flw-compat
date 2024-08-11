@@ -50,17 +50,27 @@ public class ExtendedBlockWriterUnsafe extends BlockWriterUnsafe {
         if (list instanceof IrisBlockVertexReader irisVertexList) {
             float midU = irisVertexList.getMidTexU(i);
             float midV = irisVertexList.getMidTexV(i);
+
             int tangent = irisVertexList.getTangent(i);
             tangent = repackTangent(tangent);
+
             int midBlock = irisVertexList.getMidBlock(i);
             midBlock = repackMidBlock(midBlock);
+
+            short entityX = irisVertexList.getEntityX(i);
+            short entityY = irisVertexList.getEntityY(i);
+
             MemoryUtil.memPutFloat(ptr + 32, midU);
             MemoryUtil.memPutFloat(ptr + 36, midV);
             MemoryUtil.memPutFloat(ptr + 40, Float.intBitsToFloat(tangent));
             MemoryUtil.memPutFloat(ptr + 44, Float.intBitsToFloat(midBlock));
+
+            MemoryUtil.memPutShort(ptr + 48, entityX);
+            MemoryUtil.memPutShort(ptr + 50, entityY);
         }else{
             MemoryUtil.memPutLong(ptr + 32, 0);
             MemoryUtil.memPutLong(ptr + 40, 0);
+            MemoryUtil.memPutInt(ptr + 48, 0);
         }
 
         ptr += IrisFlwBlockVertex.EXTEND_FORMAT.getStride();

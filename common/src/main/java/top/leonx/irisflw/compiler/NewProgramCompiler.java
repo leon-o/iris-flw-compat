@@ -10,6 +10,7 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gl.blending.AlphaTest;
 import net.irisshaders.iris.gl.blending.AlphaTestFunction;
+import net.irisshaders.iris.gl.blending.BlendModeOverride;
 import net.irisshaders.iris.gl.shader.StandardMacros;
 import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
@@ -20,8 +21,10 @@ import net.irisshaders.iris.shaderpack.programs.ProgramSet;
 import net.irisshaders.iris.shaderpack.programs.ProgramSource;
 import net.irisshaders.iris.shaderpack.programs.ProgramFallbackResolver;
 import net.irisshaders.iris.helpers.StringPair;
+import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
 import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
+import top.leonx.irisflw.accessors.ProgramSourceAccessor;
 import top.leonx.irisflw.transformer.ShaderPatcherBase;
 
 import java.lang.reflect.InvocationTargetException;
@@ -73,9 +76,33 @@ public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldPro
         var resolver = resolvers.computeIfAbsent(programSet, ProgramFallbackResolver::new);
 
         if(isShadow){
-            return resolver.resolve(ProgramId.Shadow);
+            var shadow = resolver.resolve(ProgramId.Shadow).orElse(null);
+            if(shadow==null)
+                return Optional.empty();
+            ShaderProperties properties = ((ProgramSourceAccessor) shadow).getShaderProperties();
+            BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) shadow).getBlendModeOverride();
+            return Optional.of(new ProgramSource("flywheel",
+                    shadow.getVertexSource().orElseThrow(),
+                    shadow.getGeometrySource().orElse(null),
+                    shadow.getTessControlSource().orElse(null),
+                    shadow.getTessEvalSource().orElse(null),
+                    shadow.getFragmentSource().orElseThrow(),
+                    programSet, properties, blendModeOverride));
         }else{
-            return resolver.resolve(ProgramId.Block);
+            var block = resolver.resolve(ProgramId.Block).orElse(null);
+            var terrain = resolver.resolve(ProgramId.Terrain).orElse(block);
+            if(terrain==null || block==null)
+                return Optional.empty();
+            ShaderProperties properties = ((ProgramSourceAccessor) block).getShaderProperties();
+            BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) block).getBlendModeOverride();
+            // We use the terrain's vertex and fragment source, and the block's geometry, tessellation control, and tessellation evaluation sources.
+            return Optional.of(new ProgramSource("flywheel",
+                    terrain.getVertexSource().orElseThrow(),
+                    block.getGeometrySource().orElse(null),
+                    block.getTessControlSource().orElse(null),
+                    block.getTessEvalSource().orElse(null),
+                    terrain.getFragmentSource().orElseThrow(),
+                    programSet, properties, blendModeOverride));
         }
     }
 

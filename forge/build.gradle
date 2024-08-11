@@ -6,6 +6,7 @@ loom {
     forge {
         mixinConfig "irisflw.mixins.flw.json"
         mixinConfig "irisflw.mixins.iris.json"
+        mixinConfig "irisflw.mixins.forge.json"
     }
     runs {
         client {
@@ -44,6 +45,7 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
 
     modCompileOnly "com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}"
+    modCompileOnly ("maven.modrinth:oculus:${oculus_version}")
 
     forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
     modLocalRuntime ("org.embeddedt:embeddium-${minecraft_version}:${embeddium_version}+mc${minecraft_version}")
