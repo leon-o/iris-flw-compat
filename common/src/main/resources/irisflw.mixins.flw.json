@@ -11,7 +11,9 @@
     "MixinProgramCompiler",
     "MixinProgramSamplers",
     "MixinWorldProgram",
-    "VertexCompilerAccessor"
+    "VertexCompilerAccessor",
+    "MixinFormats",
+    "MixinBlockModel"
   ],
   "injectors": {
     "defaultRequire": 1
