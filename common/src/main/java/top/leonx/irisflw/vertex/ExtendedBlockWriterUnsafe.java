@@ -4,6 +4,7 @@ import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.core.vertex.BlockVertex;
 import com.jozufozu.flywheel.core.vertex.BlockWriterUnsafe;
 import com.jozufozu.flywheel.util.RenderMath;
+import net.irisshaders.iris.vertices.NormI8;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
@@ -50,7 +51,9 @@ public class ExtendedBlockWriterUnsafe extends BlockWriterUnsafe {
             float midU = irisVertexList.getMidTexU(i);
             float midV = irisVertexList.getMidTexV(i);
             int tangent = irisVertexList.getTangent(i);
+            tangent = repackTangent(tangent);
             int midBlock = irisVertexList.getMidBlock(i);
+            midBlock = repackMidBlock(midBlock);
             MemoryUtil.memPutFloat(ptr + 32, midU);
             MemoryUtil.memPutFloat(ptr + 36, midV);
             MemoryUtil.memPutFloat(ptr + 40, Float.intBitsToFloat(tangent));
@@ -62,5 +65,24 @@ public class ExtendedBlockWriterUnsafe extends BlockWriterUnsafe {
 
         ptr += IrisFlwBlockVertex.EXTEND_FORMAT.getStride();
         advance();
+    }
+
+    private int repackTangent(int packedTangent) {
+        // Add 1.0f to each component to avoid negative values
+        var x = NormI8.unpackX(packedTangent) + 1.0f;
+        var y = NormI8.unpackY(packedTangent) + 1.0f;
+        var z = NormI8.unpackZ(packedTangent) + 1.0f;
+        var w = NormI8.unpackW(packedTangent) + 1.0f;
+        return NormI8.pack(x, y, z, w);
+    }
+
+    private int repackMidBlock(int midBlock) {
+        // Add 2.0f to each component to avoid negative values
+        float x = (midBlock & 0xFF) * 0.015625F + 2.0f;
+        float y = ((midBlock >> 8) & 0xFF) * 0.015625F + 2.0f;
+        float z = ((midBlock >> 16) & 0xFF) * 0.015625F + 2.0f;
+        int emission = (midBlock >> 24) & 0xFF;
+
+        return (int)(x * 64.0F) & 255 | ((int)(y * 64.0F) & 255) << 8 | ((int)(z * 64.0F) & 255) << 16 | emission << 24;
     }
 }

@@ -169,25 +169,25 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
             beforeDeclarationContent.append("vec4 _flw_mc_midTexCoord;");
             beforeDeclarationContent.append("""
                     float unpackTangentX(int val) {
-                        return float(val & 255) * 0.007874016;
+                        return float(val & 255) * 0.007874016 - 1.0;
                     }
                     float unpackTangentY(int val) {
-                        return float((val >> 8) & 255) * 0.007874016;
+                        return float((val >> 8) & 255) * 0.007874016 - 1.0;
                     }
                     float unpackTangentZ(int val) {
-                        return float((val >> 16) & 255) * 0.007874016;
+                        return float((val >> 16) & 255) * 0.007874016 - 1.0;
                     }
                     float unpackTangentW(int val) {
-                        return float((val >> 24) & 255) * 0.007874016;
+                        return float((val >> 24) & 255) * 0.007874016 - 1.0;
                     }
                     float unpackMidBlockX(int val) {
-                        return float(val & 255) * 0.015625;
+                        return float(val & 255) * 0.015625 - 2.0;
                     }
                     float unpackMidBlockY(int val) {
-                        return float((val >> 8) & 255) * 0.015625;
+                        return float((val >> 8) & 255) * 0.015625 - 2.0;
                     }
                     float unpackMidBlockZ(int val) {
-                        return float((val >> 16) & 255) * 0.015625;
+                        return float((val >> 16) & 255) * 0.015625 - 2.0;
                     }
                     // In Iris 1.7 and newer, the last component stores the light level of the current block
                     float unpackMidBlockW(int val) {
