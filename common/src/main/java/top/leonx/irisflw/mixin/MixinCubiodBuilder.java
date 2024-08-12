@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.leonx.irisflw.vertex.CubiodBuilderTriView;
 import top.leonx.irisflw.vertex.ExtendedPosTexNormalWriterUnsafe;
 
-@Mixin(PartBuilder.CuboidBuilder.class)
+@Mixin(value = PartBuilder.CuboidBuilder.class, remap = false)
 public class MixinCubiodBuilder {
 
     @Unique

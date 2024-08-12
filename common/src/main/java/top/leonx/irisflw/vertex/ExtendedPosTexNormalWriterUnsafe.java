@@ -87,6 +87,7 @@ public class ExtendedPosTexNormalWriterUnsafe extends PosTexNormalWriterUnsafe i
     public static class Reader extends PosTexNormalVertexListUnsafe implements IrisBlockVertexReader {
         private final IntList offsets = new IntArrayList();
         private final int vertexSize;
+
         public Reader(ByteBuffer copyFrom, int vertexCount) {
             super(copyFrom, vertexCount);
             var elements = ExtendedPosTexNormalVertex.EXTEND_FORMAT.getLayoutItems();
@@ -105,6 +106,66 @@ public class ExtendedPosTexNormalWriterUnsafe extends PosTexNormalWriterUnsafe i
         }
 
         @Override
+        public float getX(int index) {
+            return MemoryUtil.memGetFloat(ptr(index));
+        }
+
+        @Override
+        public float getY(int index) {
+            return MemoryUtil.memGetFloat(ptr(index) + 4);
+        }
+
+        @Override
+        public float getZ(int index) {
+            return MemoryUtil.memGetFloat(ptr(index) + 8);
+        }
+
+        @Override
+        public float getU(int index) {
+            return MemoryUtil.memGetFloat(ptr(index) + offsets.getInt(1));
+        }
+
+        @Override
+        public float getV(int index) {
+            return MemoryUtil.memGetFloat(ptr(index) + offsets.getInt(1) + 4);
+        }
+
+        @Override
+        public float getNX(int index) {
+            return RenderMath.f(MemoryUtil.memGetByte(ptr(index) + offsets.getInt(2)));
+        }
+
+        @Override
+        public float getNY(int index) {
+            return RenderMath.f(MemoryUtil.memGetByte(ptr(index) + offsets.getInt(2) + 1));
+        }
+
+        @Override
+        public float getNZ(int index) {
+            return RenderMath.f(MemoryUtil.memGetByte(ptr(index) + offsets.getInt(2) + 2));
+        }
+
+        @Override
+        public float getMidTexU(int index) {
+            return MemoryUtil.memGetFloat(ptr(index) + offsets.getInt(3));
+        }
+
+        @Override
+        public float getMidTexV(int index) {
+            return MemoryUtil.memGetFloat(ptr(index) + offsets.getInt(3) + 4);
+        }
+
+        @Override
+        public int getTangent(int index) {
+            return MemoryUtil.memGetInt(ptr(index) + offsets.getInt(3) + 8);
+        }
+
+        @Override
+        public int getMidBlock(int index) {
+            return MemoryUtil.memGetInt(ptr(index) + offsets.getInt(3) + 12);
+        }
+
+        @Override
         public short getEntityX(int index) {
             return MemoryUtil.memGetShort(ptr(index) + offsets.getInt(4));
         }
@@ -112,26 +173,6 @@ public class ExtendedPosTexNormalWriterUnsafe extends PosTexNormalWriterUnsafe i
         @Override
         public short getEntityY(int index) {
             return MemoryUtil.memGetShort(ptr(index) + offsets.getInt(4) + 2);
-        }
-
-        @Override
-        public float getMidTexU(int index) {
-            return 0;
-        }
-
-        @Override
-        public float getMidTexV(int index) {
-            return 0;
-        }
-
-        @Override
-        public int getTangent(int index) {
-            return 0;
-        }
-
-        @Override
-        public int getMidBlock(int index) {
-            return 0;
         }
 
         @Override
