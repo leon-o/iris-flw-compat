@@ -33,7 +33,7 @@ public class ExtendedPosTexNormalVertex extends PosTexNormalVertex {
     }
 
     @Override
-    public @NotNull PosTexNormalWriterUnsafe createWriter(ByteBuffer buffer) {
+    public @NotNull PosTexNormalWriterUnsafe createWriter(@NotNull ByteBuffer buffer) {
         if (IrisFlw.isUsingExtendedVertexFormat()) {
             return new ExtendedPosTexNormalWriterUnsafe(this, buffer);
         }
@@ -56,7 +56,7 @@ public class ExtendedPosTexNormalVertex extends PosTexNormalVertex {
                     layout (location = 1) in vec2 _flw_v_texCoords;
                     layout (location = 2) in vec3 _flw_v_normal;
                     layout (location = 3) in vec4 _flw_v_packed_extended;  // x:midTexCoord, z:tangent, w:midBlock
-                    layout (location = 4) in vec2 _flw_v_mc_Entity;        // x:entityId or blockId, y:render type
+                    layout (location = 4) in vec4 _flw_v_mc_Entity;        // x:entityId or blockId, y:render type
 
                     Vertex FLWCreateVertex() {
                         Vertex v;

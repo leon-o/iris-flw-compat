@@ -33,8 +33,15 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
-    modCompileOnly "com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}"
+    modCompileOnly ("com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}")
     modCompileOnly "maven.modrinth:iris:$iris_version"
+
+    localRuntime ("org.joml:joml:1.10.4")
+    localRuntime ('org.anarres:jcpp:1.4.14')
+    localRuntime ('io.github.douira:glsl-transformer:2.0.0-pre14')
+    modLocalRuntime ("maven.modrinth:sodium:${sodium_version}")
+    modLocalRuntime ("maven.modrinth:iris:${iris_version}")
+    modLocalRuntime "com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}"
 }
 
 processResources {

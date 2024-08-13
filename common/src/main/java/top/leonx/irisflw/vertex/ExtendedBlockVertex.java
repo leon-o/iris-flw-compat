@@ -1,9 +1,7 @@
 package top.leonx.irisflw.vertex;
 
-import com.jozufozu.flywheel.backend.gl.GlNumericType;
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
-import com.jozufozu.flywheel.core.layout.PrimitiveItem;
 import com.jozufozu.flywheel.core.vertex.BlockVertex;
 import com.jozufozu.flywheel.core.vertex.BlockVertexListUnsafe;
 import com.jozufozu.flywheel.core.vertex.BlockWriterUnsafe;
@@ -95,7 +93,7 @@ public class ExtendedBlockVertex extends BlockVertex {
                     layout (location = 3) in vec2 _flw_v_light;
                     layout (location = 4) in vec3 _flw_v_normal;
                     layout (location = 5) in vec4 _flw_v_packed_extended;  // x:midTexCoord, z:tangent, w:midBlock
-                    layout (location = 6) in vec2 _flw_v_mc_Entity;        // x:entityId or blockId, y:render type
+                    layout (location = 6) in vec4 _flw_v_mc_Entity;        // x:entityId or blockId, y:render type
 
                     Vertex FLWCreateVertex() {
                     	Vertex v;

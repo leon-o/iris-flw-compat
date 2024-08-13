@@ -114,13 +114,12 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
         ShaderProperties properties = ((ProgramSourceAccessor) source).getShaderProperties();
         BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) source).getBlendModeOverride();
         //Get a copy of program
-        ProgramSource processedSource = new ProgramSource(source.getName() + "_" + ctx.spec.name.getNamespace() + "_" +
+        return new ProgramSource(source.getName() + "_" + ctx.spec.name.getNamespace() + "_" +
                 ctx.spec.name.getPath(), vertexSource,
                 source.getGeometrySource().orElse(null),
                 source.getTessControlSource().orElse(null),
                 source.getTessEvalSource().orElse(null),
                 source.getFragmentSource().orElse(null), programSet, properties, blendModeOverride);
-        return processedSource;
     }
 
     public void clear() {

@@ -42,8 +42,8 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
-    private SingleASTTransformer<ContextParameter> transformer;
-    private SingleASTTransformer<ContextParameter> flwTransformer;
+    private final SingleASTTransformer<ContextParameter> transformer;
+    private final SingleASTTransformer<ContextParameter> flwTransformer;
     public static final AutoHintedMatcher<Expression> glTextureMatrix0 = new AutoHintedMatcher<>(
             "gl_TextureMatrix[0]", ParseShape.EXPRESSION);
     public static final AutoHintedMatcher<Expression> glTextureMatrix1 = new AutoHintedMatcher<>(
@@ -62,57 +62,10 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
 
     public static final AutoHintedMatcher<Expression> ftransformExpr = new AutoHintedMatcher<>("ftransform()", ParseShape.EXPRESSION);
 
-    public static final ASTVisitor<Boolean> vNormalMemberReAssignMatchVisitor = new ASTBaseVisitor<Boolean>() {
-        private boolean inVNormalAssignment = false;
+    public static final ASTVisitor<Boolean> vNormalMemberReassignMatchVisitor = new ReassignMatcherVisitor("v", "normal");
 
-        private boolean isVNormalMemberAccess(ASTNode node) {
-            if (node instanceof MemberAccessExpression memberAccessExpression) {
-                return memberAccessExpression.getMember().getName().equals("normal")
-                        && memberAccessExpression.getOperand() instanceof ReferenceExpression referenceExpression
-                        && referenceExpression.getIdentifier().getName().equals("v");
-            }
-            return false;
-        }
+    public static final ASTVisitor<Boolean> vTexCoordsMemberReassignMatchVisitor = new ReassignMatcherVisitor("v", "texCoords");
 
-        @Override
-        public Boolean startVisit(ASTNode node) {
-            inVNormalAssignment = false;
-            return super.startVisit(node);
-        }
-
-        @Override
-        public Boolean visitRaw(ASTNode node) {
-
-            if (node instanceof AssignmentExpression assignmentExpression) {
-                // If contains v.normal, return true
-                var left = assignmentExpression.getLeft();
-                if(left instanceof MemberAccessExpression memberAccessExpression)
-                {
-                    var leftIsVNormal = isVNormalMemberAccess(memberAccessExpression);
-
-                    if(leftIsVNormal){
-                        Expression right = assignmentExpression.getRight();
-                        inVNormalAssignment = true;
-                        return right.accept(this);
-                    }
-                }
-            }else if (inVNormalAssignment && node instanceof MemberAccessExpression memberAccessExpression
-                && isVNormalMemberAccess(memberAccessExpression)) {
-                return true;
-            }
-            return node.accept(this);
-        }
-
-        @Override
-        public Boolean defaultResult() {
-            return false;
-        }
-
-        @Override
-        public Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
-            return aggregate || nextResult;
-        }
-    };
 
     private static final ParseShape<GLSLParser.CompoundStatementContext, CompoundStatement> CompoundStatementShape = new ParseShape<>(
             GLSLParser.CompoundStatementContext.class,
@@ -140,8 +93,7 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
                             "No #version directive found in source code! See debugging.md for more information.");
                 }
                 var versionNum = Integer.parseInt(matcher.group(1));
-                if(versionNum < 330)
-                {
+                if (versionNum < 330) {
                     versionNum = 330;
                     var ignored = matcher.replaceAll("#version 330");
                     IrisFlw.LOGGER.warn("GLSL version is lower than 330, set to 330");
@@ -203,9 +155,10 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         var predefineContent = JcppProcessor.glslPreprocessSource(beforeDeclarationContent.toString(), List.of(new StringPair("VERTEX_SHADER", "1")));
 
         var flwTree = flwTransformer.parseSeparateTranslationUnit(predefineContent);
-        flwTree.getRoot().process(flwTree.getRoot().nodeIndex.getStream(ExpressionStatement.class),
+        var flwPredefineRoot = flwTree.getRoot();
+        flwPredefineRoot.process(flwTree.getRoot().nodeIndex.getStream(ExpressionStatement.class),
                 statement -> {
-                    if(vNormalMemberReAssignMatchVisitor.startVisit(statement)){
+                    if (vNormalMemberReassignMatchVisitor.startVisit(statement)) {
                         var assignStatStr = ASTPrinter.printSimple(statement);
                         assignStatStr = assignStatStr.replace("v.normal", "_flw_at_tangent.xyz");
                         var statements = statement.getAncestor(CompoundStatement.class);
@@ -214,6 +167,20 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
                     }
                 }
         );
+        flwPredefineRoot.process(flwTree.getRoot().nodeIndex.getStream(ExpressionStatement.class),
+                statement -> {
+                    if (vTexCoordsMemberReassignMatchVisitor.startVisit(statement)) {
+                        var assignStatStr = ASTPrinter.printSimple(statement);
+                        assignStatStr = assignStatStr.replace("v.texCoords", "_flw_mc_midTexCoord.xy");
+                        var statements = statement.getAncestor(CompoundStatement.class);
+                        var index = statements.getStatements().indexOf(statement);
+                        statements.getStatements().add(index + 1, flwTransformer.parseStatement(flwTree.getRoot(), assignStatStr));
+                    }
+                }
+        );
+        // Rename v to _flw_v to avoid conflict
+        flwPredefineRoot.rename("v", "_flw_v");
+
         var declarationMembers = flwTree.getChildren();
 
         tree.injectNodes(ASTInjectionPoint.BEFORE_DECLARATIONS, declarationMembers);
@@ -234,8 +201,8 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         } else {
             //fake tangent
             createVertexBuilder.append("""
-                    vec3 skewedNormal = v.normal+vec3(0.5,0.5,0.5);
-                    _flw_fake_tangent = vec4(normalize(skewedNormal - v.normal*dot(skewedNormal,v.normal)).xyz,1.0);
+                    vec3 skewedNormal = _flw_v.normal+vec3(0.5,0.5,0.5);
+                    _flw_fake_tangent = vec4(normalize(skewedNormal - _flw_v.normal*dot(skewedNormal, _flw_v.normal)).xyz,1.0);
                     """);
         }
 
@@ -250,14 +217,15 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
 
         var compoundStatement = flwTransformer.parseNodeSeparate(flwTransformer.getRootSupplier(), CompoundStatementShape, prependMainFuncContent);
         compoundStatement.getRoot().rename("i", "_flw_instance");
+        compoundStatement.getRoot().rename("v", "_flw_v");
 
         var prependMainFuncStatements = compoundStatement.getStatements();
         tree.prependMainFunctionBody(prependMainFuncStatements);
 
         root.replaceReferenceExpressions(transformer, "gl_Vertex", "inverse(gl_ProjectionMatrix*gl_ModelViewMatrix)*_flw_patched_vertex_pos");
-        root.replaceReferenceExpressions(transformer, "gl_MultiTexCoord0", "vec4(v.texCoords,0,1)");
-        root.replaceReferenceExpressions(transformer, "gl_Normal", "v.normal");
-        root.replaceReferenceExpressions(transformer, "gl_Color", "v.color");
+        root.replaceReferenceExpressions(transformer, "gl_MultiTexCoord0", "vec4(_flw_v.texCoords,0,1)");
+        root.replaceReferenceExpressions(transformer, "gl_Normal", "_flw_v.normal");
+        root.replaceReferenceExpressions(transformer, "gl_Color", "_flw_v.color");
 
         root.replaceExpressionMatches(transformer, ftransformExpr, "_flw_patched_vertex_pos");
 
@@ -301,9 +269,9 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         //root.replaceExpressionMatches(transformer, glTextureMatrix0, "mat4(1.0)");
 
         if (boxCoordDetector.matcher(predefineContent).find()) {
-            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(max(v.light,texture3D(uLightVolume,BoxCoord).rg)*240.0,0,1))");
+            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(max(_flw_v.light,texture3D(uLightVolume,BoxCoord).rg)*240.0,0,1))");
         } else {
-            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(v.light*240.0,0,1))");
+            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(_flw_v.light*240.0,0,1))");
         }
 
         //root.replaceExpressionMatches(transformer, CommonTransformer.glTextureMatrix1, "1.0");
@@ -317,11 +285,11 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
                 return;
             }
 
-            if(referenceExpression.getParent() instanceof MemberAccessExpression){
+            if (referenceExpression.getParent() instanceof MemberAccessExpression) {
                 // if the parent is a member access expression, means it's already a swizzle
                 parent.replaceByAndDelete(
                         transformer.parseExpression(identifier.getRoot(), expression));
-            }else{
+            } else {
                 parent.replaceByAndDelete(
                         transformer.parseExpression(identifier.getRoot(), getSwizzleFromDimension(expression, dimension)));
             }
@@ -359,6 +327,65 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
 
         public ContextParameter(Context ctx) {
             this.ctx = ctx;
+        }
+    }
+
+    private static class ReassignMatcherVisitor extends ASTBaseVisitor<Boolean> {
+        private final String targetName;
+        private final String targetMember;
+
+        private boolean isTargetMemberAccess = false;
+
+        public ReassignMatcherVisitor(String targetName, String targetMember) {
+            this.targetName = targetName;
+            this.targetMember = targetMember;
+        }
+
+        private boolean isVNormalMemberAccess(ASTNode node) {
+            if (node instanceof MemberAccessExpression memberAccessExpression) {
+                return memberAccessExpression.getMember().getName().equals(targetMember)
+                        && memberAccessExpression.getOperand() instanceof ReferenceExpression referenceExpression
+                        && referenceExpression.getIdentifier().getName().equals(targetName);
+            }
+            return false;
+        }
+
+        @Override
+        public Boolean startVisit(ASTNode node) {
+            isTargetMemberAccess = false;
+            return super.startVisit(node);
+        }
+
+        @Override
+        public Boolean visitRaw(ASTNode node) {
+
+            if (node instanceof AssignmentExpression assignmentExpression) {
+                // If contains v.normal, return true
+                var left = assignmentExpression.getLeft();
+                if (left instanceof MemberAccessExpression memberAccessExpression) {
+                    var leftIsVNormal = isVNormalMemberAccess(memberAccessExpression);
+
+                    if (leftIsVNormal) {
+                        Expression right = assignmentExpression.getRight();
+                        isTargetMemberAccess = true;
+                        return right.accept(this);
+                    }
+                }
+            } else if (isTargetMemberAccess && node instanceof MemberAccessExpression memberAccessExpression
+                    && isVNormalMemberAccess(memberAccessExpression)) {
+                return true;
+            }
+            return node.accept(this);
+        }
+
+        @Override
+        public Boolean defaultResult() {
+            return false;
+        }
+
+        @Override
+        public Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
+            return aggregate || nextResult;
         }
     }
 }
