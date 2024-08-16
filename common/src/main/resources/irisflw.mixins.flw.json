@@ -11,7 +11,11 @@
     "MixinProgramCompiler",
     "MixinProgramSamplers",
     "MixinWorldProgram",
-    "VertexCompilerAccessor"
+    "VertexCompilerAccessor",
+    "MixinFormats",
+    "MixinBlockModel",
+    "MixinShadeSeparatingVertexConsumer",
+    "MixinCubiodBuilder"
   ],
   "injectors": {
     "defaultRequire": 1

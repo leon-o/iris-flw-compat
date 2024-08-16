@@ -82,7 +82,6 @@ public abstract class ShaderPatcherBase {
                                      
                                      Vertex v; //define outside of main() so all function can use it.
                                      vec4 _flw_patched_vertex_pos;
-                                     vec4 _flw_tangent;
                                      """);
         headerBuilder.append(key.vertexType.getShaderHeader());
     }

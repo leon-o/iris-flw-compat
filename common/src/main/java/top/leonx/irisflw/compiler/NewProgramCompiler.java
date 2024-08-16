@@ -1,6 +1,5 @@
 package top.leonx.irisflw.compiler;
 
-import com.google.common.collect.ImmutableList;
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.compile.ProgramContext;
 import com.jozufozu.flywheel.core.compile.Template;
@@ -10,24 +9,28 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gl.blending.AlphaTest;
 import net.irisshaders.iris.gl.blending.AlphaTestFunction;
+import net.irisshaders.iris.gl.blending.BlendModeOverride;
 import net.irisshaders.iris.gl.shader.StandardMacros;
+import net.irisshaders.iris.helpers.StringPair;
 import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
-import net.irisshaders.iris.shaderpack.*;
 import net.irisshaders.iris.shaderpack.loading.ProgramId;
 import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
+import net.irisshaders.iris.shaderpack.programs.ProgramFallbackResolver;
 import net.irisshaders.iris.shaderpack.programs.ProgramSet;
 import net.irisshaders.iris.shaderpack.programs.ProgramSource;
-import net.irisshaders.iris.shaderpack.programs.ProgramFallbackResolver;
-import net.irisshaders.iris.helpers.StringPair;
+import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
+import net.minecraft.resources.ResourceLocation;
 import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
+import top.leonx.irisflw.accessors.ProgramSourceAccessor;
 import top.leonx.irisflw.transformer.ShaderPatcherBase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldProgram> extends IrisProgramCompilerBase<P>{
@@ -48,7 +51,7 @@ public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldPro
         WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
         if (pipeline instanceof IrisRenderingPipeline newPipeline) {
             ProgramSet programSet = ((IrisRenderingPipelineAccessor) newPipeline).getProgramSet();
-            Optional<ProgramSource> sourceReferenceOpt = getProgramSourceReference(programSet, isShadow);
+            Optional<ProgramSource> sourceReferenceOpt = getProgramSourceReference(programSet, ctx.spec.name, isShadow);
             if(sourceReferenceOpt.isEmpty())
                 return null;
 
@@ -68,14 +71,45 @@ public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldPro
         return null;
     }
 
-    protected Optional<ProgramSource> getProgramSourceReference(ProgramSet programSet, boolean isShadow){
+    protected Optional<ProgramSource> getProgramSourceReference(ProgramSet programSet, ResourceLocation flwShaderName, boolean isShadow){
 
+        // Tessellation is currently not supported
         var resolver = resolvers.computeIfAbsent(programSet, ProgramFallbackResolver::new);
 
         if(isShadow){
-            return resolver.resolve(ProgramId.Shadow);
+            var shadow = resolver.resolve(ProgramId.Shadow).orElse(null);
+            if(shadow==null)
+                return Optional.empty();
+            ShaderProperties properties = ((ProgramSourceAccessor) shadow).getShaderProperties();
+            BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) shadow).getBlendModeOverride();
+            return Optional.of(new ProgramSource("shadow_flw",
+                    shadow.getVertexSource().orElseThrow(),
+                    shadow.getGeometrySource().orElse(null),
+                    null,
+                    null,
+                    shadow.getFragmentSource().orElseThrow(),
+                    programSet, properties, blendModeOverride));
         }else{
-            return resolver.resolve(ProgramId.Block);
+            var refProgramId = ProgramId.Block;
+            if(Objects.equals(flwShaderName.getNamespace(), "flywheel")
+                && Objects.equals(flwShaderName.getPath(), "passthru")){
+                // Temporarily hardcoded, maybe configurable in the future
+                refProgramId = ProgramId.Terrain;
+            }
+            var refProgram = resolver.resolve(refProgramId).orElse(null);
+            if(refProgram==null)
+                return Optional.empty();
+
+            ShaderProperties properties = ((ProgramSourceAccessor) refProgram).getShaderProperties();
+            BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) refProgram).getBlendModeOverride();
+
+            return Optional.of(new ProgramSource("gbuffer_flw",
+                    refProgram.getVertexSource().orElseThrow(),
+                    refProgram.getGeometrySource().orElse(null),
+                    null,
+                    null,
+                    refProgram.getFragmentSource().orElseThrow(),
+                    programSet, properties, blendModeOverride));
         }
     }
 
