@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Random;
 
-@Mixin(value = WorldModelBuilder.class, remap = false)
+@Mixin(value = WorldModelBuilder.class)
 public class MixinWorldModelBuilder {
 
     @Unique
@@ -41,7 +41,10 @@ public class MixinWorldModelBuilder {
     @Redirect(method = "bufferInto(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/renderer/block/ModelBlockRenderer;Ljava/util/Random;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/ModelBlockRenderer;" +
                     "tesselateBlock(Lnet/minecraft/world/level/BlockAndTintGetter;" +
-                    "Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLjava/util/Random;JI)Z"), remap = false, require = 0)
+                    "Lnet/minecraft/client/resources/model/BakedModel;" +
+                    "Lnet/minecraft/world/level/block/state/BlockState;" +
+                    "Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;" +
+                    "Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLjava/util/Random;JI)Z"), require = 0)
     public boolean irisflw$bufferInto(ModelBlockRenderer instance, BlockAndTintGetter level, BakedModel model, BlockState state, BlockPos pos, PoseStack poseStack, VertexConsumer consumer, boolean checkSides, Random random, long seed, int packedOverlay) {
 
         // The WorldModelBuilder is used to buffer the Contraption's block models vertex data.

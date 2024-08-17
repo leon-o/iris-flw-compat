@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.Random;
 
-@Mixin(value = WorldModelBuilder.class, remap = false)
+@Mixin(value = WorldModelBuilder.class)
 public class MixinWorldModelBuilder {
 
     @Unique
@@ -48,7 +48,7 @@ public class MixinWorldModelBuilder {
                     "Lcom/mojang/blaze3d/vertex/PoseStack;" +
                     "Lcom/mojang/blaze3d/vertex/VertexConsumer;" +
                     "ZLjava/util/Random;" +
-                    "JILnet/minecraftforge/client/model/data/IModelData;)Z"))
+                    "JILnet/minecraftforge/client/model/data/IModelData;)Z"), require = 0, remap = false)
     public boolean irisflw$bufferInto(ModelBlockRenderer instance, BlockAndTintGetter tintGetter, BakedModel model, BlockState state, BlockPos pos, PoseStack poseStack, VertexConsumer consumer, boolean checkSides, Random random, long seed, int packedOverlay, IModelData modelData) {
 
         // The WorldModelBuilder is used to buffer the Contraption's block models vertex data.
