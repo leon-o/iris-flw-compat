@@ -113,6 +113,10 @@ jobs:
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
+          java: |
+            Java 17
+          game-versions: |
+            1.20.1
 
           dependencies: |
             IrisShader(required){modrinth:iris}{curseforge:455508}
@@ -131,6 +135,10 @@ jobs:
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
+          java: |
+            Java 17
+          game-versions: |
+            1.20.1
 
           dependencies: |
             IrisShader(required){modrinth:iris}{curseforge:455508}
@@ -162,6 +170,10 @@ jobs:
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
+          java: |
+            Java 17
+          game-versions: |
+            1.20.1
 
           dependencies: |
             Oculus(required){modrinth:oculus}{curseforge:581495}
@@ -181,6 +193,10 @@ jobs:
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
+          java: |
+            Java 17
+          game-versions: |
+            1.20.1
 
           dependencies: |
             Oculus(required){modrinth:oculus}{curseforge:581495}
