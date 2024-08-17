@@ -5,7 +5,7 @@ import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.irisshaders.iris.vertices.IrisVertexFormats;
+import net.coderbot.iris.vertices.IrisVertexFormats;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;

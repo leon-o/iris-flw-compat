@@ -1,13 +1,13 @@
 package top.leonx.irisflw.vertex.postexnormal;
 
-import net.irisshaders.iris.vertices.views.TriView;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
+import com.mojang.math.Vector3f;
+import net.coderbot.iris.vendored.joml.Vector2f;
+import net.coderbot.iris.vertices.TriView;
 
 public class CubiodBuilderTriView implements TriView {
     Vector3f[] pos;
     Vector2f[] uvs = new Vector2f[4];
-    public void setup(Vector3f[] pos,float minU, float maxU, float minV, float maxV){
+    public void setup(Vector3f[] pos, float minU, float maxU, float minV, float maxV){
         this.pos = pos;
         uvs[0] = new Vector2f(maxU, minV);
         uvs[1] = new Vector2f(minU, minV);

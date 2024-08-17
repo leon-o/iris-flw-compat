@@ -9,12 +9,14 @@ import com.jozufozu.flywheel.core.source.FileResolution;
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.gl.blending.AlphaTest;
 import net.coderbot.iris.gl.blending.AlphaTestFunction;
+import net.coderbot.iris.gl.blending.BlendModeOverride;
 import net.coderbot.iris.gl.shader.StandardMacros;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.coderbot.iris.pipeline.newshader.NewWorldRenderingPipeline;
 import net.coderbot.iris.shaderpack.*;
 import net.coderbot.iris.shaderpack.loading.ProgramId;
 import net.coderbot.iris.shaderpack.preprocessor.JcppProcessor;
+import net.minecraft.resources.ResourceLocation;
 import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
 import top.leonx.irisflw.accessors.ProgramSourceAccessor;
@@ -79,8 +81,6 @@ public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldPro
             return Optional.of(new ProgramSource("shadow_flw",
                     shadow.getVertexSource().orElseThrow(),
                     shadow.getGeometrySource().orElse(null),
-                    null,
-                    null,
                     shadow.getFragmentSource().orElseThrow(),
                     programSet, properties, blendModeOverride));
         }else{
@@ -100,8 +100,6 @@ public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldPro
             return Optional.of(new ProgramSource("gbuffer_flw",
                     refProgram.getVertexSource().orElseThrow(),
                     refProgram.getGeometrySource().orElse(null),
-                    null,
-                    null,
                     refProgram.getFragmentSource().orElseThrow(),
                     programSet, properties, blendModeOverride));
         }

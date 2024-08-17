@@ -2,8 +2,8 @@ package top.leonx.irisflw.mixin.flw.vertex;
 
 import com.jozufozu.flywheel.core.hardcoded.PartBuilder;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
-import net.irisshaders.iris.vertices.NormalHelper;
-import org.joml.Vector3f;
+import com.mojang.math.Vector3f;
+import net.coderbot.iris.vertices.NormalHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,7 +19,7 @@ public class MixinCubiodBuilder {
     public CubiodBuilderTriView irisFlw$polygonView = new CubiodBuilderTriView();
 
     @Inject(method = "quad", at = @At("HEAD"), cancellable = true)
-    public void irisFlw$quad(PosTexNormalWriterUnsafe buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, Vector3f normal, CallbackInfo ci){
+    public void irisFlw$quad(PosTexNormalWriterUnsafe buffer, Vector3f[] vertices, float minU, float minV, float maxU, float maxV, com.mojang.math.Vector3f normal, CallbackInfo ci){
         if(buffer instanceof ExtendedPosTexNormalWriterUnsafe extended){
             this.irisFlw$polygonView.setup(vertices, minU, maxU, minV, maxV);
             float midU = minU + (maxU - minU) / 2.0F;

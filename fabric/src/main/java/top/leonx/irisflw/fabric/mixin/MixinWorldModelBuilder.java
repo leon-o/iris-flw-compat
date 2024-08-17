@@ -4,9 +4,9 @@ import com.jozufozu.flywheel.core.model.WorldModelBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.irisshaders.iris.shaderpack.materialmap.WorldRenderingSettings;
-import net.irisshaders.iris.vertices.BlockSensitiveBufferBuilder;
-import net.irisshaders.iris.vertices.ExtendedDataHelper;
+import net.coderbot.iris.block_rendering.BlockRenderingSettings;
+import net.coderbot.iris.vertices.BlockSensitiveBufferBuilder;
+import net.coderbot.iris.vertices.ExtendedDataHelper;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -26,7 +26,7 @@ public class MixinWorldModelBuilder {
 
     @Unique
     private Object2IntMap<BlockState> irisflw$getBlockStateIds() {
-        return WorldRenderingSettings.INSTANCE.getBlockStateIds();
+        return BlockRenderingSettings.INSTANCE.getBlockStateIds();
     }
 
     @Unique

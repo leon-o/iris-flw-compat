@@ -8,7 +8,7 @@ import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
 import com.jozufozu.flywheel.util.RenderMath;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.irisshaders.iris.vertices.BlockSensitiveBufferBuilder;
+import net.coderbot.iris.vertices.BlockSensitiveBufferBuilder;
 import org.lwjgl.system.MemoryUtil;
 import top.leonx.irisflw.vertex.IrisBlockVertexReader;
 

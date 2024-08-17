@@ -33,8 +33,8 @@ import io.github.douira.glsl_transformer.ast.transform.SingleASTTransformer;
 import io.github.douira.glsl_transformer.ast.traversal.ASTBaseVisitor;
 import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 import io.github.douira.glsl_transformer.parser.ParseShape;
-import net.irisshaders.iris.helpers.StringPair;
-import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
+import net.coderbot.iris.shaderpack.StringPair;
+import net.coderbot.iris.shaderpack.preprocessor.JcppProcessor;
 import org.jetbrains.annotations.NotNull;
 import top.leonx.irisflw.IrisFlw;
 
