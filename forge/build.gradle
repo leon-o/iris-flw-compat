@@ -45,11 +45,14 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
 
     modCompileOnly (include("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}"))
+    modCompileOnly ("maven.modrinth:oculus:${oculus_version}")
 
+    forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
     modLocalRuntime ("maven.modrinth:rubidium:${rubidium_version}")
     modLocalRuntime ("maven.modrinth:oculus:${oculus_version}")
-    forgeRuntimeLibrary ('io.github.douira:glsl-transformer:2.0.0-pre14')
-    forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
+    modLocalRuntime ("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    modLocalRuntime ("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}")
+    modLocalRuntime ("com.tterrag.registrate:Registrate:${registrate_version}")
 }
 
 processResources {

@@ -14,12 +14,12 @@ on:
         description: 'Fabric Title'
         required: true
         type: 'string'
-        default: 'Fabric 1.19.2 1.0.1 for Iris 1.6.9+'
+        default: 'Fabric 1.18.2 1.0.3 for Iris 1.6.9+'
       forge_title:
         description: 'Forge Title'
         required: true
         type: 'string'
-        default: 'Forge 1.19.2 1.0.1 for Iris 1.6.9+'
+        default: 'Forge 1.18.2 1.0.3 for Iris 1.6.9+'
       version_type:
         description: 'Version Type'
         required: true
@@ -116,7 +116,7 @@ jobs:
           java: |
             Java 17
           game-versions: |
-            1.19.2
+            1.18.2
 
           dependencies: |
             IrisShader(required){modrinth:iris}{curseforge:455508}
@@ -138,7 +138,7 @@ jobs:
           java: |
             Java 17
           game-versions: |
-            1.19.2
+            1.18.2
 
           dependencies: |
             IrisShader(required){modrinth:iris}{curseforge:455508}
@@ -173,7 +173,7 @@ jobs:
           java: |
             Java 17
           game-versions: |
-            1.19.2
+            1.18.2
 
           dependencies: |
             Oculus(required){modrinth:oculus}{curseforge:581495}
@@ -196,7 +196,7 @@ jobs:
           java: |
             Java 17
           game-versions: |
-            1.19.2
+            1.18.2
 
           dependencies: |
             Oculus(required){modrinth:oculus}{curseforge:581495}

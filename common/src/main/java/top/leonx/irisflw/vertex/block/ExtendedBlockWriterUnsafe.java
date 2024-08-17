@@ -4,7 +4,6 @@ import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.core.vertex.BlockVertex;
 import com.jozufozu.flywheel.core.vertex.BlockWriterUnsafe;
 import com.jozufozu.flywheel.util.RenderMath;
-import net.coderbot.iris.vertices.NormI8;
 import org.lwjgl.system.MemoryUtil;
 import top.leonx.irisflw.vertex.IrisBlockVertexReader;
 
