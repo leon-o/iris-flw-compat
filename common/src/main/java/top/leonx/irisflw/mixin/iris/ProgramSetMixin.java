@@ -1,4 +1,4 @@
-package top.leonx.irisflw.mixin;
+package top.leonx.irisflw.mixin.iris;
 
 import net.irisshaders.iris.gl.blending.BlendModeOverride;
 import net.irisshaders.iris.shaderpack.programs.ProgramSet;

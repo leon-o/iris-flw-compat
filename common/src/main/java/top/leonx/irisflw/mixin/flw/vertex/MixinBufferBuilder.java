@@ -1,4 +1,4 @@
-package top.leonx.irisflw.mixin;
+package top.leonx.irisflw.mixin.flw.vertex;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -9,38 +9,34 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import top.leonx.irisflw.IrisFlw;
 import top.leonx.irisflw.accessors.BufferBuilderAccessor;
-import top.leonx.irisflw.iris.BufferBuilderStateManager;
 
 @Mixin(value = BufferBuilder.class, priority = 1010)
 public class MixinBufferBuilder implements BufferBuilderAccessor {
 
     @SuppressWarnings("unused")
     @Unique
-    private boolean irisFlw$isFlywheelBufferBuilder;
+    private boolean irisFlw$forceBlockFormat;
 
     // This field is from Iris's mixin.
     private boolean extending;
 
     @Override
-    public void irisflw$setIsFlyWheelBufferBuilder(boolean isFlyWheel) {
-        this.irisFlw$isFlywheelBufferBuilder = isFlyWheel;
+    public void irisflw$setForceBlockFormat(boolean isFlyWheel) {
+        this.irisFlw$forceBlockFormat = isFlyWheel;
     }
 
     @ModifyVariable(method = "begin", at = @At("HEAD"), argsOnly = true)
     private VertexFormat irisflw$begin(VertexFormat format) {
-        // IrisFlw.isUsingExtendedVertexFormat() equals true means that we are using the extended vertex format.
-        // BufferBuilderStateManager.isAllowExtend() equals true means that this BufferBuilder is not a Flywheel BufferBuilder, we don't need to handle it.
-        // In these two cases, we should return the original format.
-        // The Iris will then handle it and set to the correct format.
-        if (IrisFlw.isUsingExtendedVertexFormat() || BufferBuilderStateManager.isAllowExtend()) {
-            return format;
+        // If forceBlockFormat is true, we set the format to BLOCK.
+        // Notice that we only handle the format when shader pack is in use.
+        if (irisFlw$forceBlockFormat && IrisFlw.isShaderPackInUse())
+        {
+            extending = false;
+            return DefaultVertexFormat.BLOCK;
         }
 
-        // Otherwise, we are using DefaultVertexFormat.BLOCK.
-        // Notice that we only handle the format when shader pack is in use.
-        extending = false;
-        if (IrisFlw.isShaderPackInUse())
-            return DefaultVertexFormat.BLOCK;
+        // If we are using extended vertex format, we should leave the format as it is.
+        // Since the Iris's mixin will handle the format.
         return format;
     }
 }

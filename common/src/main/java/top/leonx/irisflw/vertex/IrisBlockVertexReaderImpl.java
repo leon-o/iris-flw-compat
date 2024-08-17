@@ -10,6 +10,9 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 
+/**
+ * A vertex list reader for the Iris extended vertex format.
+ */
 public class IrisBlockVertexReaderImpl extends AbstractVertexList implements IrisBlockVertexReader {
     private final IntList offsets = new IntArrayList();
     private final int vertexSize;

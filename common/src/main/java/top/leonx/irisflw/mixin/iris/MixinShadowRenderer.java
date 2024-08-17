@@ -1,4 +1,4 @@
-package top.leonx.irisflw.mixin;
+package top.leonx.irisflw.mixin.iris;
 
 import net.irisshaders.iris.mixin.LevelRendererAccessor;
 import net.irisshaders.iris.shadows.ShadowRenderer;

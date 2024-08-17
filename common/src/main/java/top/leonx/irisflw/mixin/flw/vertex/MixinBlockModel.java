@@ -1,4 +1,4 @@
-package top.leonx.irisflw.mixin;
+package top.leonx.irisflw.mixin.flw.vertex;
 
 import com.jozufozu.flywheel.core.model.BlockModel;
 import com.mojang.blaze3d.vertex.BufferBuilder;

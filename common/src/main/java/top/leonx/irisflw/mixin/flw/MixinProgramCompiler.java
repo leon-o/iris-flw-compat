@@ -1,4 +1,4 @@
-package top.leonx.irisflw.mixin;
+package top.leonx.irisflw.mixin.flw;
 
 import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
 import com.jozufozu.flywheel.core.compile.*;
@@ -18,6 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import top.leonx.irisflw.IrisFlw;
 import top.leonx.irisflw.compiler.IrisProgramCompilerBase;
 import top.leonx.irisflw.compiler.NewProgramCompiler;
+import top.leonx.irisflw.mixin.flw.AccessorVertexCompiler;
+import top.leonx.irisflw.mixin.iris.AccessorExtendedShader;
 import top.leonx.irisflw.transformer.GlslTransformerShaderPatcher;
 
 import java.lang.reflect.InvocationTargetException;
@@ -29,7 +31,7 @@ public abstract class MixinProgramCompiler<P extends WorldProgram> {
 
     @Inject(method = "<init>", at = @At("TAIL"), remap = false)
     public void injectInit(GlProgram.Factory<P> factory, VertexCompiler vertexCompiler, FragmentCompiler fragmentCompiler, CallbackInfo ci) {
-        VertexCompilerAccessor vertexCompilerAccessor = (VertexCompilerAccessor) vertexCompiler;
+        AccessorVertexCompiler vertexCompilerAccessor = (AccessorVertexCompiler) vertexCompiler;
         Template<? extends VertexData> template = vertexCompilerAccessor.getTemplate();
         try {
             irisProgramCompiler = new NewProgramCompiler<>(factory, template, vertexCompilerAccessor.getHeader(), GlslTransformerShaderPatcher.class);
@@ -53,7 +55,7 @@ public abstract class MixinProgramCompiler<P extends WorldProgram> {
                     if (pipeline instanceof IrisRenderingPipeline newPipeline) {
                         ShaderInstance shader = newPipeline.getShaderMap().getShader(ShaderKey.TEXTURED_COLOR);
                         if (shader instanceof ExtendedShader extendedShader) {
-                            ((ExtendedShaderAccessor) extendedShader).getWritingToBeforeTranslucent().bind();
+                            ((AccessorExtendedShader) extendedShader).getWritingToBeforeTranslucent().bind();
                             //Use the same render target with Gbuffers_textured.
                         }
                     }

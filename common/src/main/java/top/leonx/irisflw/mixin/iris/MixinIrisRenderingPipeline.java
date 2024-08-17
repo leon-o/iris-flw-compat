@@ -1,4 +1,4 @@
-package top.leonx.irisflw.mixin;
+package top.leonx.irisflw.mixin.iris;
 
 
 import com.mojang.blaze3d.vertex.VertexFormat;

@@ -1,4 +1,4 @@
-package top.leonx.irisflw.vertex;
+package top.leonx.irisflw.vertex.postexnormal;
 
 import net.irisshaders.iris.vertices.views.TriView;
 import org.joml.Vector2f;

@@ -20,6 +20,15 @@ on:
         required: true
         type: 'string'
         default: 'Forge 1.20.1-1.1.1 for Oculus 1.7.0+'
+      version_type:
+        description: 'Version Type'
+        required: true
+        type: 'choice'
+        options:
+          - 'alpha'
+          - 'beta'
+          - 'release'
+        default: 'beta'
       publish_forge:
         description: 'Publish Forge'
         required: true
@@ -103,6 +112,7 @@ jobs:
           name: ""
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          version-type: ${{inputs.version_type}}
 
           dependencies: |
             IrisShader(required){modrinth:iris}{curseforge:455508}
@@ -120,6 +130,7 @@ jobs:
           name: "${{inputs.fabric_title}}"
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          version-type: ${{inputs.version_type}}
 
           dependencies: |
             IrisShader(required){modrinth:iris}{curseforge:455508}
@@ -136,6 +147,7 @@ jobs:
           name: "${{inputs.forge_title}}"
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          version-type: ${{inputs.version_type}}
 
           fail-mode: warn
 
@@ -149,6 +161,7 @@ jobs:
           name: ""
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          version-type: ${{inputs.version_type}}
 
           dependencies: |
             Oculus(required){modrinth:oculus}{curseforge:581495}
@@ -167,6 +180,7 @@ jobs:
           name: "${{inputs.forge_title}}"
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          version-type: ${{inputs.version_type}}
 
           dependencies: |
             Oculus(required){modrinth:oculus}{curseforge:581495}

@@ -1,4 +1,4 @@
-package top.leonx.irisflw.vertex;
+package top.leonx.irisflw.vertex.postexnormal;
 
 import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.core.layout.CommonItems;
@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.irisshaders.iris.vertices.BlockSensitiveBufferBuilder;
 import org.lwjgl.system.MemoryUtil;
+import top.leonx.irisflw.vertex.IrisBlockVertexReader;
 
 import java.nio.ByteBuffer;
 

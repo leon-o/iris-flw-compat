@@ -5,6 +5,10 @@ import com.jozufozu.flywheel.core.vertex.BlockVertexListUnsafe;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Our replacement for BlockVertexListUnsafe that implements IrisBlockVertexReader.
+ * This is used to read the extended vertex format used by Iris.
+ */
 public class IrisBlockVertexListUnsafe extends BlockVertexListUnsafe implements IrisBlockVertexReader {
 
     private IrisBlockVertexReaderImpl impl;

@@ -1,4 +1,4 @@
-package top.leonx.irisflw.vertex;
+package top.leonx.irisflw.vertex.postexnormal;
 
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
@@ -7,6 +7,7 @@ import com.jozufozu.flywheel.core.vertex.PosTexNormalVertexListUnsafe;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
 import org.jetbrains.annotations.NotNull;
 import top.leonx.irisflw.IrisFlw;
+import top.leonx.irisflw.vertex.ExtendedLayoutItems;
 
 import java.nio.ByteBuffer;
 

@@ -1,4 +1,4 @@
-package top.leonx.irisflw.mixin;
+package top.leonx.irisflw.mixin.flw.vertex;
 
 import com.jozufozu.flywheel.core.hardcoded.PartBuilder;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import top.leonx.irisflw.vertex.CubiodBuilderTriView;
-import top.leonx.irisflw.vertex.ExtendedPosTexNormalWriterUnsafe;
+import top.leonx.irisflw.vertex.postexnormal.CubiodBuilderTriView;
+import top.leonx.irisflw.vertex.postexnormal.ExtendedPosTexNormalWriterUnsafe;
 
 @Mixin(value = PartBuilder.CuboidBuilder.class, remap = false)
 public class MixinCubiodBuilder {

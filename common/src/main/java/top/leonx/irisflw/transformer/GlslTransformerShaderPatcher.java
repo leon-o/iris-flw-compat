@@ -4,6 +4,7 @@ import com.jozufozu.flywheel.core.compile.Template;
 import com.jozufozu.flywheel.core.compile.VertexData;
 import com.jozufozu.flywheel.core.source.FileResolution;
 import io.github.douira.glsl_transformer.GLSLParser;
+import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
 import io.github.douira.glsl_transformer.ast.node.Version;
 import io.github.douira.glsl_transformer.ast.node.abstract_node.ASTNode;
@@ -13,7 +14,9 @@ import io.github.douira.glsl_transformer.ast.node.expression.ReferenceExpression
 import io.github.douira.glsl_transformer.ast.node.expression.binary.AssignmentExpression;
 import io.github.douira.glsl_transformer.ast.node.expression.unary.MemberAccessExpression;
 import io.github.douira.glsl_transformer.ast.node.external_declaration.DeclarationExternalDeclaration;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.ExternalDeclaration;
 import io.github.douira.glsl_transformer.ast.node.statement.CompoundStatement;
+import io.github.douira.glsl_transformer.ast.node.statement.Statement;
 import io.github.douira.glsl_transformer.ast.node.statement.terminal.ExpressionStatement;
 import io.github.douira.glsl_transformer.ast.node.type.specifier.BuiltinNumericTypeSpecifier;
 import io.github.douira.glsl_transformer.ast.print.ASTPrinter;
@@ -32,6 +35,7 @@ import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 import io.github.douira.glsl_transformer.parser.ParseShape;
 import net.irisshaders.iris.helpers.StringPair;
 import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
+import org.jetbrains.annotations.NotNull;
 import top.leonx.irisflw.IrisFlw;
 
 import java.util.HashMap;
@@ -112,40 +116,75 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
     }
 
     private void transform(TranslationUnit tree, Root root, ContextParameter parameter) {
+        var vertexTemplate = template.get(parameter.ctx.getFile());
+
+        var predefinesStats = ProcessFlywheelPredefine(tree, parameter, vertexTemplate);
+        var prependMainStats = ProcessFlywheelCreateVertex(tree, vertexTemplate);
+
+        tree.injectNodes(ASTInjectionPoint.BEFORE_DECLARATIONS, predefinesStats);
+        tree.prependMainFunctionBody(prependMainStats);
+
+        root.replaceReferenceExpressions(transformer, "gl_Vertex", "inverse(gl_ProjectionMatrix*gl_ModelViewMatrix)*_flw_patched_vertex_pos");
+        root.replaceReferenceExpressions(transformer, "gl_MultiTexCoord0", "vec4(_flw_v.texCoords,0,1)");
+        root.replaceReferenceExpressions(transformer, "gl_Normal", "_flw_v.normal");
+        root.replaceReferenceExpressions(transformer, "gl_Color", "_flw_v.color");
+
+        root.replaceExpressionMatches(transformer, ftransformExpr, "_flw_patched_vertex_pos");
+
+        Map<String, Integer> originalAttrVecDims = new HashMap<>();
+        RemoveOriginalAttributes(root, originalAttrVecDims);
+
+        var atTangentDim = originalAttrVecDims.getOrDefault("at_tangent", 4);
+        var atMidBlockDim = originalAttrVecDims.getOrDefault("at_midBlock", 4);
+        var mcMidTexCoordDim = originalAttrVecDims.getOrDefault("mc_midTexCoord", 4);
+        var mcEntityDim = originalAttrVecDims.getOrDefault("mc_Entity", 2);
+
+        if (IrisFlw.isUsingExtendedVertexFormat()) {
+            replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "at_tangent", "_flw_at_tangent", atTangentDim);
+            replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "mc_Entity", "_flw_v_mc_Entity", atTangentDim);
+            replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "mc_midTexCoord", "_flw_mc_midTexCoord", mcMidTexCoordDim);
+            replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "at_midBlock", "_flw_at_midBlock", atMidBlockDim);
+        } else {
+            root.replaceReferenceExpressions(transformer, "at_tangent", getSwizzleFromDimension("_flw_fake_tangent", atTangentDim));
+            root.replaceReferenceExpressions(transformer, "mc_Entity", getZeroFromDimension(mcEntityDim));
+            root.replaceReferenceExpressions(transformer, "mc_midTexCoord", getZeroFromDimension(mcMidTexCoordDim));
+            root.replaceReferenceExpressions(transformer, "at_midBlock", getZeroFromDimension(atMidBlockDim));
+        }
+
+        if (parameter.hasBoxCoord) {
+            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(max(_flw_v.light,texture3D(uLightVolume,BoxCoord).rg)*240.0,0,1))");
+        } else {
+            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(_flw_v.light*240.0,0,1))");
+        }
+    }
+
+    private static void RemoveOriginalAttributes(Root root, Map<String, Integer> attrVectorDims) {
+        root.process(root.nodeIndex.getStream(DeclarationExternalDeclaration.class).distinct(),
+                node -> {
+                    if (node.getDeclaration() instanceof TypeAndInitDeclaration typeAndInitDeclaration) {
+                        var foundMember = typeAndInitDeclaration.getMembers().stream().filter(member -> toRemoveAttributesSet.contains(member.getName().getName())).findAny();
+                        if (foundMember.isPresent()) {
+                            if (typeAndInitDeclaration.getType().getTypeSpecifier() instanceof BuiltinNumericTypeSpecifier numericTypeSpecifier) {
+                                var name = foundMember.get().getName().getName();
+                                var dimensions = numericTypeSpecifier.type.getDimensions();
+                                var dim = dimensions.length > 0 ? dimensions[0] : 1;
+                                attrVectorDims.put(name, dim);
+                            }
+                            node.detachAndDelete();
+                        }
+                    }
+                }
+        );
+    }
+
+    private ChildNodeList<ExternalDeclaration> ProcessFlywheelPredefine(TranslationUnit tree, ContextParameter parameter, VertexData vertexTemplate) {
         var beforeDeclarationContent = new StringBuilder();
-        var vertexTemplate = template.get(parameter.ctx.file);
 
         if (IrisFlw.isUsingExtendedVertexFormat()) {
             beforeDeclarationContent.append("vec4 _flw_at_tangent;");
             beforeDeclarationContent.append("vec4 _flw_at_midBlock;");
             beforeDeclarationContent.append("vec4 _flw_mc_midTexCoord;");
-            beforeDeclarationContent.append("""
-                    float unpackTangentX(int val) {
-                        return float(val & 255) * 0.007874016 - 1.0;
-                    }
-                    float unpackTangentY(int val) {
-                        return float((val >> 8) & 255) * 0.007874016 - 1.0;
-                    }
-                    float unpackTangentZ(int val) {
-                        return float((val >> 16) & 255) * 0.007874016 - 1.0;
-                    }
-                    float unpackTangentW(int val) {
-                        return float((val >> 24) & 255) * 0.007874016 - 1.0;
-                    }
-                    float unpackMidBlockX(int val) {
-                        return float(val & 255) * 0.015625 - 2.0;
-                    }
-                    float unpackMidBlockY(int val) {
-                        return float((val >> 8) & 255) * 0.015625 - 2.0;
-                    }
-                    float unpackMidBlockZ(int val) {
-                        return float((val >> 16) & 255) * 0.015625 - 2.0;
-                    }
-                    // In Iris 1.7 and newer, the last component stores the light level of the current block
-                    float unpackMidBlockW(int val) {
-                        return float((val >> 24) & 255);
-                    }
-                    """);
+            beforeDeclarationContent.append(getUnpackFunctions());
         } else {
             beforeDeclarationContent.append("vec4 _flw_fake_tangent;");
         }
@@ -156,6 +195,9 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
 
         var flwTree = flwTransformer.parseSeparateTranslationUnit(predefineContent);
         var flwPredefineRoot = flwTree.getRoot();
+
+        //This ensures that the shader code correctly transforms the _flw_at_tangent and the _flw_mc_midTexCoord.
+        //We find the assignments of v.normal such as v.normal = m * v.normal and inject a new statement like _flw_at_tangent.xyz = m * _flw_at_tangent.xyz
         flwPredefineRoot.process(flwTree.getRoot().nodeIndex.getStream(ExpressionStatement.class),
                 statement -> {
                     if (vNormalMemberReassignMatchVisitor.startVisit(statement)) {
@@ -181,11 +223,42 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         // Rename v to _flw_v to avoid conflict
         flwPredefineRoot.rename("v", "_flw_v");
 
-        var declarationMembers = flwTree.getChildren();
+        parameter.hasBoxCoord = boxCoordDetector.matcher(predefineContent).find();
+        return flwTree.getChildren();
+    }
 
-        tree.injectNodes(ASTInjectionPoint.BEFORE_DECLARATIONS, declarationMembers);
+    @NotNull
+    private static String getUnpackFunctions() {
+        return """
+                float unpackTangentX(int val) {
+                    return float(val & 255) * 0.007874016 - 1.0;
+                }
+                float unpackTangentY(int val) {
+                    return float((val >> 8) & 255) * 0.007874016 - 1.0;
+                }
+                float unpackTangentZ(int val) {
+                    return float((val >> 16) & 255) * 0.007874016 - 1.0;
+                }
+                float unpackTangentW(int val) {
+                    return float((val >> 24) & 255) * 0.007874016 - 1.0;
+                }
+                float unpackMidBlockX(int val) {
+                    return float(val & 255) * 0.015625 - 2.0;
+                }
+                float unpackMidBlockY(int val) {
+                    return float((val >> 8) & 255) * 0.015625 - 2.0;
+                }
+                float unpackMidBlockZ(int val) {
+                    return float((val >> 16) & 255) * 0.015625 - 2.0;
+                }
+                // In Iris 1.7 and newer, the last component stores the light level of the current block
+                float unpackMidBlockW(int val) {
+                    return float((val >> 24) & 255);
+                }
+                """;
+    }
 
-
+    private ChildNodeList<Statement> ProcessFlywheelCreateVertex(TranslationUnit tree, VertexData vertexTemplate) {
         StringBuilder createVertexBuilder = new StringBuilder();
         createVertexBuilder.append("{\n");
 
@@ -219,65 +292,14 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         compoundStatement.getRoot().rename("i", "_flw_instance");
         compoundStatement.getRoot().rename("v", "_flw_v");
 
-        var prependMainFuncStatements = compoundStatement.getStatements();
-        tree.prependMainFunctionBody(prependMainFuncStatements);
-
-        root.replaceReferenceExpressions(transformer, "gl_Vertex", "inverse(gl_ProjectionMatrix*gl_ModelViewMatrix)*_flw_patched_vertex_pos");
-        root.replaceReferenceExpressions(transformer, "gl_MultiTexCoord0", "vec4(_flw_v.texCoords,0,1)");
-        root.replaceReferenceExpressions(transformer, "gl_Normal", "_flw_v.normal");
-        root.replaceReferenceExpressions(transformer, "gl_Color", "_flw_v.color");
-
-        root.replaceExpressionMatches(transformer, ftransformExpr, "_flw_patched_vertex_pos");
-
-        Map<String, Integer> attrVectorDims = new HashMap<>();
-        root.process(root.nodeIndex.getStream(DeclarationExternalDeclaration.class).distinct(),
-                node -> {
-                    if (node.getDeclaration() instanceof TypeAndInitDeclaration typeAndInitDeclaration) {
-                        var foundMember = typeAndInitDeclaration.getMembers().stream().filter(member -> toRemoveAttributesSet.contains(member.getName().getName())).findAny();
-                        if (foundMember.isPresent()) {
-                            if (typeAndInitDeclaration.getType().getTypeSpecifier() instanceof BuiltinNumericTypeSpecifier numericTypeSpecifier) {
-                                var name = foundMember.get().getName().getName();
-                                var dimensions = numericTypeSpecifier.type.getDimensions();
-                                var dim = dimensions.length > 0 ? dimensions[0] : 1;
-                                attrVectorDims.put(name, dim);
-                            }
-                            node.detachAndDelete();
-                        }
-                    }
-                }
-        );
-
-        var atTangentDim = attrVectorDims.getOrDefault("at_tangent", 4);
-        var atMidBlockDim = attrVectorDims.getOrDefault("at_midBlock", 4);
-        var mcMidTexCoordDim = attrVectorDims.getOrDefault("mc_midTexCoord", 4);
-        var mcEntityDim = attrVectorDims.getOrDefault("mc_Entity", 2);
-
-        if (IrisFlw.isUsingExtendedVertexFormat()) {
-            replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "at_tangent", "_flw_at_tangent", atTangentDim);
-            replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "mc_Entity", "_flw_v_mc_Entity", atTangentDim);
-//            root.replaceReferenceExpressions(transformer, "mc_Entity", getZeroFromDimension(mcEntityDim));
-            replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "mc_midTexCoord", "_flw_mc_midTexCoord", mcMidTexCoordDim);
-            replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "at_midBlock", "_flw_at_midBlock", atMidBlockDim);
-        } else {
-            root.replaceReferenceExpressions(transformer, "at_tangent", getSwizzleFromDimension("_flw_fake_tangent", atTangentDim));
-            root.replaceReferenceExpressions(transformer, "mc_Entity", getZeroFromDimension(mcEntityDim));
-            root.replaceReferenceExpressions(transformer, "mc_midTexCoord", getZeroFromDimension(mcMidTexCoordDim));
-            root.replaceReferenceExpressions(transformer, "at_midBlock", getZeroFromDimension(atMidBlockDim));
-        }
-
-
-        //root.replaceExpressionMatches(transformer, glTextureMatrix0, "mat4(1.0)");
-
-        if (boxCoordDetector.matcher(predefineContent).find()) {
-            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(max(_flw_v.light,texture3D(uLightVolume,BoxCoord).rg)*240.0,0,1))");
-        } else {
-            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(_flw_v.light*240.0,0,1))");
-        }
-
-        //root.replaceExpressionMatches(transformer, CommonTransformer.glTextureMatrix1, "1.0");
-        //root.replaceExpressionMatches(transformer, CommonTransformer.glTextureMatrix2, "1.0");
+        //tree.prependMainFunctionBody(prependMainFuncStatements);
+        return compoundStatement.getStatements();
     }
 
+    /**
+     * Attributes may be defined in different type in different shader, so we need to replace the original attributes with the correct swizzle
+     * We define all attributes as vec4. If a shader defines an attribute as vec3, we need to add .xyz when referencing it.
+     */
     private void replaceReferenceExpressionsWithCorrectSwizzle(Root root, SingleASTTransformer<ContextParameter> transformer, String name, String expression, int dimension) {
         root.process(root.identifierIndex.getStream(name), identifier -> {
             var parent = identifier.getParent();
@@ -324,6 +346,10 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
 
     public static class ContextParameter implements JobParameters {
         public Context ctx;
+
+        public boolean useExtendedVertexFormat;
+
+        public boolean hasBoxCoord;
 
         public ContextParameter(Context ctx) {
             this.ctx = ctx;

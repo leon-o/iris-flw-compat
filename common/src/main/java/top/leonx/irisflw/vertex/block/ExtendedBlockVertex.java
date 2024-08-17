@@ -1,4 +1,4 @@
-package top.leonx.irisflw.vertex;
+package top.leonx.irisflw.vertex.block;
 
 import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
@@ -7,9 +7,14 @@ import com.jozufozu.flywheel.core.vertex.BlockVertexListUnsafe;
 import com.jozufozu.flywheel.core.vertex.BlockWriterUnsafe;
 import org.jetbrains.annotations.NotNull;
 import top.leonx.irisflw.IrisFlw;
+import top.leonx.irisflw.vertex.ExtendedLayoutItems;
+import top.leonx.irisflw.vertex.IrisBlockVertexListUnsafe;
 
 import java.nio.ByteBuffer;
 
+/**
+ * A vertex format for the extended vertex format. It will replace the block vertex format used by Flywheel.
+ */
 public class ExtendedBlockVertex extends BlockVertex {
     public static final BufferLayout FORMAT = BufferLayout.builder()
             .addItems(CommonItems.VEC3,
@@ -61,16 +66,19 @@ public class ExtendedBlockVertex extends BlockVertex {
     }
 
     @Override
-    public @NotNull BlockWriterUnsafe createWriter(ByteBuffer buffer) {
+    public @NotNull BlockWriterUnsafe createWriter(@NotNull ByteBuffer buffer) {
         if (IrisFlw.isUsingExtendedVertexFormat()) {
+            // When using the extended vertex format, we need to use our custom writer.
+            // This writer will write the extended vertex data to the buffer.
             return new ExtendedBlockWriterUnsafe(this, buffer);
         }
         return super.createWriter(buffer);
     }
 
     @Override
-    public @NotNull BlockVertexListUnsafe createReader(ByteBuffer buffer, int vertexCount) {
+    public @NotNull BlockVertexListUnsafe createReader(@NotNull ByteBuffer buffer, int vertexCount) {
         if (IrisFlw.isUsingExtendedVertexFormat()) {
+            // This is used to read the extended vertex format used by Iris.
             return new IrisBlockVertexListUnsafe(buffer, vertexCount);
         }
         return super.createReader(buffer, vertexCount);
@@ -78,6 +86,7 @@ public class ExtendedBlockVertex extends BlockVertex {
 
     public BlockVertexListUnsafe.@NotNull Shaded createReader(ByteBuffer buffer, int vertexCount, int unshadedStartVertex) {
         if (IrisFlw.isUsingExtendedVertexFormat()) {
+            // This is used to read the extended vertex format used by Iris.
             return new IrisBlockVertexListUnsafe.Shaded(buffer, vertexCount, unshadedStartVertex);
         }
         return super.createReader(buffer, vertexCount, unshadedStartVertex);
@@ -106,22 +115,6 @@ public class ExtendedBlockVertex extends BlockVertex {
                     }
                     """;
         }
-        return """
-                layout (location = 0) in vec3 _flw_v_pos;
-                layout (location = 1) in vec4 _flw_v_color;
-                layout (location = 2) in vec2 _flw_v_texCoords;
-                layout (location = 3) in vec2 _flw_v_light;
-                layout (location = 4) in vec3 _flw_v_normal;
-
-                Vertex FLWCreateVertex() {
-                	Vertex v;
-                	v.pos = _flw_v_pos;
-                	v.color = _flw_v_color;
-                	v.texCoords = _flw_v_texCoords;
-                	v.light = _flw_v_light;
-                	v.normal = _flw_v_normal;
-                	return v;
-                }
-                """;
+        return super.getShaderHeader();
     }
 }
