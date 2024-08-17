@@ -47,6 +47,9 @@ subprojects {
 
     loom {
         silentMojangMappingsLicense()
+        runs.configureEach {
+            vmArg("-Dmixin.debug.export=true")
+        }
     }
 
     dependencies {

@@ -20,7 +20,8 @@
   },
   "mixins": [
     "irisflw.mixins.flw.json",
-    "irisflw.mixins.iris.json"
+    "irisflw.mixins.iris.json",
+    "irisflw.mixins.fabric.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.19",
