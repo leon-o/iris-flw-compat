@@ -1,4 +1,4 @@
-package top.leonx.irisflw.mixin;
+package top.leonx.irisflw.mixin.iris;
 
 import net.coderbot.iris.gl.blending.AlphaTest;
 import net.coderbot.iris.shaderpack.ProgramDirectives;

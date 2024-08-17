@@ -39,13 +39,13 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
     protected final GlProgram.Factory<P> factory;
     private static int programCounter = 0;
 
-    public IrisProgramCompilerBase(GlProgram.Factory<P> factory, Template<? extends VertexData> template, FileResolution header) {
+    public IrisProgramCompilerBase(GlProgram.Factory<P> factory, Template<? extends VertexData> ignoredTemplate, FileResolution ignoredHeader) {
         this.factory = factory;
     }
 
-    public P getProgram(ProgramContext ctx,boolean isShadow) {
+    public P getProgram(ProgramContext ctx, boolean isShadow) {
 
-        if (IrisApi.getInstance().isShaderPackInUse()) {
+        if (IrisFlw.isShaderPackInUse()) {
             WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
             HashMap<ProgramContext, P> cache;
             if (isShadow) {
@@ -91,11 +91,11 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
             if (isShadow) {
                 override = pipeline.callCreateShadowShader(
                         getFlwShaderName(ctx.spec.name, true), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, false, false, false);
+                        IrisVertexFormats.TERRAIN, false, false, false);
             } else {
                 override = pipeline.callCreateShader(
                         getFlwShaderName(ctx.spec.name, false), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR, FogMode.OFF, false, false,false,false);
+                        IrisVertexFormats.TERRAIN, FogMode.OFF, false, false, false, false);
             }
 
         } catch (Exception exception) {
@@ -115,11 +115,10 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
         ShaderProperties properties = ((ProgramSourceAccessor) source).getShaderProperties();
         BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) source).getBlendModeOverride();
         //Get a copy of program
-        ProgramSource processedSource = new ProgramSource(source.getName() + "_" + ctx.spec.name.getNamespace() + "_" +
+        return new ProgramSource(source.getName() + "_" + ctx.spec.name.getNamespace() + "_" +
                 ctx.spec.name.getPath(), vertexSource,
                 source.getGeometrySource().orElse(null),
                 source.getFragmentSource().orElse(null), programSet, properties, blendModeOverride);
-        return processedSource;
     }
 
     public void clear() {

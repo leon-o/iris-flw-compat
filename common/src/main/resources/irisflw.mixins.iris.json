@@ -1,16 +1,16 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "top.leonx.irisflw.mixin",
+  "package": "top.leonx.irisflw.mixin.iris",
   "compatibilityLevel": "JAVA_17",
   "client": [
     "ProgramSetMixin",
     "MixinIrisRenderingPipeline",
     "MixinShaderPackSourceNames",
+    "MixinProgramSamplers",
     "MixinProgramSource",
-    "MixinBufferBuilder",
     "MixinProgramDirectives",
-    "ExtendedShaderAccessor",
+    "AccessorExtendedShader",
     "MixinShadowRenderer"
   ],
   "injectors": {

@@ -1,4 +1,4 @@
-package top.leonx.irisflw.mixin;
+package top.leonx.irisflw.mixin.iris;
 
 import com.google.common.collect.ImmutableList;
 import net.coderbot.iris.shaderpack.include.ShaderPackSourceNames;

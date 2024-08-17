@@ -1,4 +1,4 @@
-package top.leonx.irisflw.mixin;
+package top.leonx.irisflw.mixin.iris;
 
 import net.coderbot.iris.gl.program.ProgramSamplers;
 import org.spongepowered.asm.mixin.Mixin;
