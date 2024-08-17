@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(value = WorldModelBuilder.class, remap = false)
+@Mixin(value = WorldModelBuilder.class)
 public class MixinWorldModelBuilder {
 
     @Unique
@@ -43,7 +43,7 @@ public class MixinWorldModelBuilder {
                     "Lnet/minecraft/client/resources/model/BakedModel;" +
                     "Lnet/minecraft/world/level/block/state/BlockState;" +
                     "Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;" +
-                    "Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;JI)V"), remap = false, require = 0)
+                    "Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;JI)V"), require = 0)
     public void irisflw$bufferInto(ModelBlockRenderer instance, BlockAndTintGetter level, BakedModel model, BlockState state, BlockPos pos, PoseStack poseStack, VertexConsumer consumer, boolean checkSides, RandomSource random, long seed, int packedOverlay) {
 
         // The WorldModelBuilder is used to buffer the Contraption's block models vertex data.
