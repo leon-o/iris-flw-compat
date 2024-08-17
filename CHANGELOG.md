@@ -1,5 +1,3 @@
-**This version only compatible with Iris&Oculus 1.7.0 and above.**
-
 TL;DR: 
 - Fix issues in **PBR** and **Parallax Occlusion Mapping**.
 - Support **Seus PTGI HRR 3**, **Shrimple**, and **UShader**, etc.
