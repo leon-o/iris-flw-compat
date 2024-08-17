@@ -10,16 +10,11 @@ name: Publish Jar
 on:
   workflow_dispatch:
     inputs:
-      fabric_title:
-        description: 'Fabric Title'
+      version:
+        description: 'Version'
         required: true
         type: 'string'
-        default: 'Fabric 1.19.2 1.0.1 for Iris 1.6.9+'
-      forge_title:
-        description: 'Forge Title'
-        required: true
-        type: 'string'
-        default: 'Forge 1.19.2 1.0.1 for Iris 1.6.9+'
+        default: '1.0.0'
       version_type:
         description: 'Version Type'
         required: true
@@ -88,7 +83,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build
-        run: ./gradlew clean build
+        run: ./gradlew clean build -Pmod_version=${{inputs.version}}
 
       - name: Publish Fabric GitHub Release
         if: ${{ inputs.publish_fabric == true && inputs.publish_github_release == true }}
@@ -96,7 +91,7 @@ jobs:
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: "${{inputs.fabric_title}}"
+          name: "1.19.2+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -109,7 +104,7 @@ jobs:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          name: ""
+          name: "Fabric 1.19.2+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
@@ -131,7 +126,7 @@ jobs:
           modrinth-id: iris-flw-compat
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-          name: "${{inputs.fabric_title}}"
+          name: "Fabric 1.19.2+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
@@ -152,7 +147,7 @@ jobs:
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: "${{inputs.forge_title}}"
+          name: "1.19.2+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
@@ -166,7 +161,7 @@ jobs:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          name: ""
+          name: "Forge 1.19.2+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
@@ -189,7 +184,7 @@ jobs:
           modrinth-id: iris-flw-compat
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-          name: "${{inputs.forge_title}}"
+          name: "Forge 1.19.2+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
           files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
