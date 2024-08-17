@@ -1,16 +1,20 @@
-## 1.0.2
-1. Fix issue [#143](https://github.com/leon-o/iris-flw-compat/issues/143), [#36](https://github.com/leon-o/iris-flw-compat/issues/136), [#89](https://github.com/leon-o/iris-flw-compat/issues/89): OpenGL error messages occur when shaders have too many attributes. Now is completely compatible with Bliss and Euphoria Patches.
+TL;DR: 
+- Fix issues in **PBR** and **Parallax Occlusion Mapping**.
+- Support **Seus PTGI HRR 3**, **Shrimple**, and **UShader**, etc.
+- Includes Flywheel in the jar file, so you don't need to install it separately.
 
-## 1.0.1
-1. Fix issue [#125](https://github.com/leon-o/iris-flw-compat/issues/125): occasional crashes when shaders are not enabled. Thanks [MoePus](https://github.com/leon-o/iris-flw-compat/pull/141) for the contribution.
+### 1.0.3
+- Fix issue [#146](https://github.com/leon-o/iris-flw-compat/issues/146).
+  - Fix issues in PBR. Normals and tangents of moving contraptions now are correct.
+  - Support Parallax Occlusion Mapping.
+- Fix issue [#150](https://github.com/leon-o/iris-flw-compat/issues/150).
+  - Replace `vertex v` with `vertex _flw_v` to avoid conflict with existing variables.
+- Include Flywheel in jar file.
+  - Because some users don't use the Create mod and have trouble with the Flywheel installation, I decided to include it in the jar file.
 
-## 1.0.0
+**New compatible shaders**:
+- Seus PTGI HRR 3
+- Shrimple
+- UShader
 
-This version only support Iris 1.6.9+.
-
-1. Fix lighting issues of the moving contraption.
-   - The vertex light strength was incorrectly set to a fixed value, causing the moving contraption won't be affected by the light source.
-2. Use architecture to reorganize the project.
-   - Forge and Fabric forge are now merged into a single project, which is more convenient for future development.
-3. New version number format.
-   - Now the version number starts from 1.0.0. The first number represents the major version and will be increased when the mod has a significant update. The second number represents the Iris/Oculus compatibility and will be increased when the mod is no longer compatible with older versions of iris.
+There are still many that have not been tested but may be compatible.

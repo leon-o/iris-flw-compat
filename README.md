@@ -2,6 +2,7 @@
 <h1 align="center">Iris & Oculus Flywheel Compat<br>
 	<a href="https://www.curseforge.com/minecraft/mc-mods/iris-flywheel-compat"><img src="http://cf.way2muchnoise.eu/659897.svg" alt="CF"></a>
   <a href="https://www.curseforge.com/minecraft/mc-mods/iris-flywheel-compat/files"><img src="https://cf.way2muchnoise.eu/versions/For%20MC_659897_all.svg" alt="Supported Versions"></a>
+  <a herf="https://modrinth.com/mod/iris-flw-compat"><image src = "https://img.shields.io/modrinth/dt/iris-flw-compat?style=flat&label=Modrinth%20Downloads&color=%234bd965" alt="Modrinth Downloads"></image></a>
   <a href="https://github.com/leon-o/iris-flw-compat/blob/main/LICENSE"><img src="https://img.shields.io/github/license/leon-o/iris-flw-compat" alt="License"></a>
     <br><br>
 </h1>
