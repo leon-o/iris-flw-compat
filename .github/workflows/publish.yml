@@ -96,7 +96,7 @@ jobs:
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
-          name: ""
+          name: "${{inputs.fabric_title}}"
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
 
@@ -131,9 +131,10 @@ jobs:
           modrinth-id: iris-flw-compat
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-          name: ""
+          name: "${{inputs.fabric_title}}"
           changelog-file: CHANGELOG.md
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          version-type: ${{inputs.version_type}}
           java: |
             Java 17
           game-versions: |
