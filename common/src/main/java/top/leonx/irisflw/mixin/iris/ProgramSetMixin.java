@@ -21,11 +21,11 @@ import java.util.function.Function;
 public abstract class ProgramSetMixin implements ProgramSetAccessor {
     @Invoker(remap = false)
     @Override
-    public abstract ProgramSource callReadProgramSource(AbsolutePackPath directory, Function<AbsolutePackPath, String> sourceProvider, String program, ProgramSet programSet, ShaderProperties properties, boolean readTesselation);
+    public abstract ProgramSource callReadProgramSource(AbsolutePackPath directory, Function<AbsolutePackPath, String> sourceProvider, String program, ProgramSet programSet, ShaderProperties properties, boolean readTessellation);
 
     @Invoker(remap = false)
     @Override
-    public abstract ProgramSource callReadProgramSource(AbsolutePackPath directory, Function<AbsolutePackPath, String> sourceProvider, String program, ProgramSet programSet, ShaderProperties properties, BlendModeOverride var5, boolean readTesselation);
+    public abstract ProgramSource callReadProgramSource(AbsolutePackPath directory, Function<AbsolutePackPath, String> sourceProvider, String program, ProgramSet programSet, ShaderProperties properties, BlendModeOverride var5, boolean readTessellation);
 
     private ProgramSource gbuffersFlw;
     private ProgramSource shadowFlw;
@@ -33,9 +33,9 @@ public abstract class ProgramSetMixin implements ProgramSetAccessor {
     @Inject(method = "<init>",remap = false,at = @At(value="RETURN"))
     private void initGBufferFlw(AbsolutePackPath directory, Function<AbsolutePackPath, String> sourceProvider,
                                 ShaderProperties shaderProperties, ShaderPack pack, CallbackInfo ci){
-	boolean readTesselation = pack.hasFeature(FeatureFlags.getValue("TESSELATION_SHADERS"));
-        gbuffersFlw = callReadProgramSource(directory, sourceProvider, "gbuffers_flw", (ProgramSet) (Object)this, shaderProperties, readTesselation);
-        shadowFlw = callReadProgramSource(directory, sourceProvider, "shadow_flw", (ProgramSet) (Object)this,shaderProperties, BlendModeOverride.OFF, readTesselation);
+	boolean readTessellation = pack.hasFeature(FeatureFlags.getValue("TESSELLATION_SHADERS"));
+        gbuffersFlw = callReadProgramSource(directory, sourceProvider, "gbuffers_flw", (ProgramSet) (Object)this, shaderProperties, readTessellation);
+        shadowFlw = callReadProgramSource(directory, sourceProvider, "shadow_flw", (ProgramSet) (Object)this,shaderProperties, BlendModeOverride.OFF, readTessellation);
     }
 
     @Override
