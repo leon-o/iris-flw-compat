@@ -33,7 +33,11 @@ public abstract class ProgramSetMixin implements ProgramSetAccessor {
     @Inject(method = "<init>",remap = false,at = @At(value="RETURN"))
     private void initGBufferFlw(AbsolutePackPath directory, Function<AbsolutePackPath, String> sourceProvider,
                                 ShaderProperties shaderProperties, ShaderPack pack, CallbackInfo ci){
-	boolean readTessellation = pack.hasFeature(FeatureFlags.getValue("TESSELLATION_SHADERS"));
+        FeatureFlags tessellationFlag = FeatureFlags.getValue("TESSELLATION_SHADERS");
+        if (tessellationFlag == FeatureFlags.UNKNOWN) {
+            tessellationFlag = FeatureFlags.getValue("TESSELATION_SHADERS");
+        }
+	    boolean readTessellation = pack.hasFeature(tessellationFlag);
         gbuffersFlw = callReadProgramSource(directory, sourceProvider, "gbuffers_flw", (ProgramSet) (Object)this, shaderProperties, readTessellation);
         shadowFlw = callReadProgramSource(directory, sourceProvider, "shadow_flw", (ProgramSet) (Object)this,shaderProperties, BlendModeOverride.OFF, readTessellation);
     }
