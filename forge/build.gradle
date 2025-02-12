@@ -45,11 +45,10 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
 
     modCompileOnly ("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}")
-    modCompileOnly ("maven.modrinth:oculus:${oculus_version}")
 
     forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
-    modLocalRuntime files("libs/Iris-1.8.0.jar")
-    modLocalRuntime files("libs/Sodium-0.6.0.jar")
+    modCompileOnly files("libs/Iris-1.8.0.jar")
+    modCompileOnly files("libs/Sodium-0.6.0.jar")
     modLocalRuntime ("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
     modLocalRuntime ("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}")
     modLocalRuntime ("com.tterrag.registrate:Registrate:${registrate_version}")
