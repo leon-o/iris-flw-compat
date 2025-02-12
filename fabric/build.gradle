@@ -33,6 +33,7 @@ repositories {
     maven { // forge config api port
         name = "Fuzs Mod Resources"
         url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+        allowInsecureProtocol = true
     }
 }
 
