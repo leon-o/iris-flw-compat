@@ -90,11 +90,11 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
             if (isShadow) {
                 override = pipeline.callCreateShadowShader(
                         getFlwShaderName(ctx.spec.name, true), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        IrisVertexFormats.TERRAIN, false, false, false);
+                        IrisVertexFormats.TERRAIN, false, false, false, false);
             } else {
                 override = pipeline.callCreateShader(
                         getFlwShaderName(ctx.spec.name, false), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        IrisVertexFormats.TERRAIN, FogMode.OFF, false, false, false, false);
+                        IrisVertexFormats.TERRAIN, FogMode.OFF, false, false, false, false, false);
             }
 
         } catch (Exception exception) {

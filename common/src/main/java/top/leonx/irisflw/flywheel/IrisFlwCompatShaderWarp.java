@@ -3,6 +3,7 @@ package top.leonx.irisflw.flywheel;
 import com.mojang.blaze3d.shaders.Uniform;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import net.irisshaders.iris.uniforms.CapturedRenderingState;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.lwjgl.opengl.GL20;
@@ -47,11 +48,11 @@ public class IrisFlwCompatShaderWarp {
     public int getProgramHandle(){
         return shader.getId();
     }
-    public void setProjectionMatrix(Matrix4f projectionMatrix){
+    public void setProjectionMatrix(Matrix4fc projectionMatrix){
         uniformIrisProjMat.set(projectionMatrix);
     }
 
-    public void setModelViewMatrix(Matrix4f modelView) {
+    public void setModelViewMatrix(Matrix4fc modelView) {
         iris_uniformModelViewMat.set(modelView);
 
         if (this.uniformNormalMatrix != null) {
