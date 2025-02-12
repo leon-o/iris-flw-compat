@@ -1,211 +1,42 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+# Used when a commit is pushed to the repository
+# This makes use of caching for faster builds and uploads the resulting artifacts
+name: build-commit
 
-name: Publish Jar
-
-on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch'
-        required: true
-        type: 'string'
-        default: 'main'
-      mc_version:
-        description: 'Minecraft Version'
-        required: true
-        type: 'string'
-        default: '1.20.1'
-      version:
-        description: 'Version'
-        required: true
-        type: 'string'
-        default: '1.0.0'
-      version_type:
-        description: 'Version Type'
-        required: true
-        type: 'choice'
-        options:
-          - 'alpha'
-          - 'beta'
-          - 'release'
-        default: 'beta'
-      publish_forge:
-        description: 'Publish Forge'
-        required: true
-        type: 'boolean'
-        default: true
-      publish_fabric:
-        description: 'Publish Fabric'
-        required: true
-        type: 'boolean'
-        default: true
-      publish_to_curseforge:
-        description: 'Publish to CurseForge'
-        required: true
-        type: 'boolean'
-        default: false
-      publish_to_modrinth:
-        description: 'Publish to Modrinth'
-        required: true
-        type: 'boolean'
-        default: false
-      publish_github_release:
-        description: 'Publish GitHub Release'
-        required: true
-        type: 'boolean'
-        default: true
-
-env:
-  JAVA_VERSION: 17
-
-permissions:
-  contents: write
+on: [ push ]
 
 jobs:
-  build:
-
+  job:
     runs-on: ubuntu-latest
     steps:
-      - name: Check Environment Variables
-        run: env
+      - name: Extract current branch name
+        shell: bash
+        # bash pattern expansion to grab branch name without slashes
+        run: ref="${GITHUB_REF#refs/heads/}" && echo "branch=${ref////-}" >> $GITHUB_OUTPUT
+        id: ref
+      - name: Checkout sources
+        uses: actions/checkout@v4
 
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          submodules: true
-          ref: ${{ inputs.branch }}
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v3
 
-      - name: Setup Java
-        uses: actions/setup-java@v2
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
+          distribution: temurin
           java-version: 17
-
-      - name: Make Gradle Wrapper Executable
-        if: ${{ runner.os != 'Windows' }}
-        run: chmod +x ./gradlew
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-
-      - name: Build
-        run: ./gradlew clean build -Pmod_version=${{inputs.version}}
-
-      - name: Publish Fabric GitHub Release
-        if: ${{ inputs.publish_fabric == true && inputs.publish_github_release == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
         with:
-          github-token: "${{secrets.PUBLISH_TOKEN}}"
+          cache-read-only: false
 
-          name: "${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
-          changelog-file: CHANGELOG.md
-          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+      - name: Execute Gradle build
+        run: ./gradlew clean build
 
-          fail-mode: warn
-
-      - name: Publish Fabric CurseForge
-        if: ${{ inputs.publish_fabric == true && inputs.publish_to_curseforge == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          curseforge-id: 659897
-          curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
-
-          name: "Fabric ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
-          changelog-file: CHANGELOG.md
-          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          java: |
-            Java 17
-          game-versions: |
-            ${{inputs.mc_version}}
-
-          dependencies: |
-            IrisShader(required){modrinth:iris}{curseforge:455508}
-            CreateFabric(optional){modrithn:create-fabric}{curseforge:624165}
-
-          fail-mode: warn
-
-      - name: Publish Fabric Modrinth
-        if: ${{ inputs.publish_fabric == true && inputs.publish_to_modrinth == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          modrinth-id: iris-flw-compat
-          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
-
-          name: "Fabric ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
-          changelog-file: CHANGELOG.md
-          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          java: |
-            Java 17
-          game-versions: |
-            ${{inputs.mc_version}}
-
-          dependencies: |
-            IrisShader(required){modrinth:iris}{curseforge:455508}
-            CreateFabric(optional){modrithn:create-fabric}{curseforge:624165}
-
-          fail-mode: warn
-
-      - name: Publish Forge GitHub Release
-        if: ${{ inputs.publish_forge == true && inputs.publish_github_release == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          github-token: "${{secrets.PUBLISH_TOKEN}}"
-
-          name: "${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
-          changelog-file: CHANGELOG.md
-          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-
-          fail-mode: warn
-
-      - name: Publish Forge CurseForge
-        if: ${{ inputs.publish_forge == true && inputs.publish_to_curseforge == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          curseforge-id: 659897
-          curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
-
-          name: "Forge ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
-          changelog-file: CHANGELOG.md
-          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          java: |
-            Java 17
-          game-versions: |
-            ${{inputs.mc_version}}
-
-          dependencies: |
-            Oculus(required){modrinth:oculus}{curseforge:581495}
-            Create(optional){modrithn:create}{curseforge:328085}
-
-          fail-mode: warn
-
-
-      - name: Publish Forge Modrinth
-        if: ${{ inputs.publish_forge == true && inputs.publish_to_modrinth == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          modrinth-id: iris-flw-compat
-          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
-
-          name: "Forge ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
-          changelog-file: CHANGELOG.md
-          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          java: |
-            Java 17
-          game-versions: |
-            ${{inputs.mc_version}}
-
-          dependencies: |
-            Oculus(required){modrinth:oculus}{curseforge:581495}
-            Create(optional){modrithn:create}{curseforge:328085}
-
-          fail-mode: warn
+          name: Iris-flw-compat-artifacts-${{ steps.ref.outputs.branch }}
+          path: |
+            neoforge/build/libs/*.jar
+            fabric/build/libs/*.jar
