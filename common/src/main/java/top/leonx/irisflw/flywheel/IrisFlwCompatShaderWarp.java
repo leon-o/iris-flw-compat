@@ -78,11 +78,17 @@ public class IrisFlwCompatShaderWarp {
 
     private void updateShaderUniforms() {
         // Ensure all Shader uniform variables are set
-        uniformIrisProjMat.upload();
-        iris_uniformModelViewMat.upload();
-        if (uniformNormalMatrix != null) {
-            uniformNormalMatrix.upload();
+        if (uniformIrisProjMat != null) {
+            GL20.glUniformMatrix4fv(uniformIrisProjMat.getLocation(), false, uniformIrisProjMat.getMatrix().get(new float[16]));
         }
-        uniformModelViewProjMat.upload();
+        if (iris_uniformModelViewMat != null) {
+            GL20.glUniformMatrix4fv(iris_uniformModelViewMat.getLocation(), false, iris_uniformModelViewMat.getMatrix().get(new float[16]));
+        }
+        if (uniformNormalMatrix != null) {
+            GL20.glUniformMatrix3fv(uniformNormalMatrix.getLocation(), false, uniformNormalMatrix.getMatrix().get(new float[9]));
+        }
+        if (uniformModelViewProjMat != null) {
+            GL20.glUniformMatrix4fv(uniformModelViewProjMat.getLocation(), false, uniformModelViewProjMat.getMatrix().get(new float[16]));
+        }
     }
 }
