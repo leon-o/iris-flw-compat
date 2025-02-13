@@ -38,5 +38,5 @@ jobs:
         with:
           name: Iris-flw-compat-artifacts-${{ steps.ref.outputs.branch }}
           path: |
-            neoforge/build/libs/*.jar
+            forge/build/libs/*.jar
             fabric/build/libs/*.jar
