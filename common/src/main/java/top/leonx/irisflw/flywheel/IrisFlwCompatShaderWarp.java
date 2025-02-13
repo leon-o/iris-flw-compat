@@ -25,7 +25,7 @@ public class IrisFlwCompatShaderWarp {
         // Instead of modifying the final field, we create a new Uniform instance
         // and ensure it is properly initialized.
         if (shader.MODEL_VIEW_MATRIX == null) {
-            shader.MODEL_VIEW_MATRIX = new Uniform("ModelViewMat", 11, 17, shader);
+            shader.MODEL_VIEW_MATRIX = new Uniform("ModelViewMat", 10, 16, shader);
             shader.MODEL_VIEW_MATRIX.set(new Matrix4f().identity());
         }
 
