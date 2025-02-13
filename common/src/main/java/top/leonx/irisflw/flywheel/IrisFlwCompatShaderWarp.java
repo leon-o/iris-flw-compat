@@ -54,11 +54,11 @@ public class IrisFlwCompatShaderWarp {
     }
 
     public void setProjectionMatrix(Matrix4fc projectionMatrix) {
-        uniformIrisProjMat.set((Matrix4f) projectionMatrix);
+        uniformIrisProjMat.set(projectionMatrix);
     }
 
     public void setModelViewMatrix(Matrix4fc modelView) {
-        iris_uniformModelViewMat.set((Matrix4f) modelView);
+        iris_uniformModelViewMat.set(modelView);
 
         if (this.uniformNormalMatrix != null) {
             Matrix4f normalMatrix = new Matrix4f(modelView);
