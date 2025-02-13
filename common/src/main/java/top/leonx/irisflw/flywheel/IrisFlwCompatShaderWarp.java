@@ -8,9 +8,6 @@ import org.lwjgl.opengl.GL20;
 import top.leonx.irisflw.iris.GlUniformMcMatrix3f;
 import top.leonx.irisflw.iris.GlUniformMcMatrix4f;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-
 public class IrisFlwCompatShaderWarp {
     public ShaderInstance shader;
     protected GlUniformMcMatrix4f uniformIrisProjMat;
@@ -41,6 +38,10 @@ public class IrisFlwCompatShaderWarp {
         GL20.glEnable(GL20.GL_DEPTH_TEST);
         GL20.glDepthMask(true);
 
+        // Clear depth buffer to ensure proper rendering
+        GL20.glClear(GL20.GL_DEPTH_BUFFER_BIT);
+
+        // Set projection and model-view matrices
         setProjectionMatrix(CapturedRenderingState.INSTANCE.getGbufferProjection());
         setModelViewMatrix(CapturedRenderingState.INSTANCE.getGbufferModelView());
     }
