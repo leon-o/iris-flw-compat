@@ -21,7 +21,7 @@ public class IrisFlwCompatShaderWarp {
 
         // Ensure MODEL_VIEW_MATRIX is properly initialized
         if (shader.MODEL_VIEW_MATRIX == null) {
-            shader.MODEL_VIEW_MATRIX = new Uniform("ModelViewMat", 10, 16, shader);
+            shader.MODEL_VIEW_MATRIX = new Uniform("ModelViewMat", 11, 17, shader);
             shader.MODEL_VIEW_MATRIX.set(new Matrix4f().identity());
         }
 
@@ -38,12 +38,12 @@ public class IrisFlwCompatShaderWarp {
         GL20.glEnable(GL20.GL_DEPTH_TEST);
         GL20.glDepthMask(true);
 
-        // Clear depth buffer to ensure proper rendering
-        GL20.glClear(GL20.GL_DEPTH_BUFFER_BIT);
-
         // Set projection and model-view matrices
         setProjectionMatrix(CapturedRenderingState.INSTANCE.getGbufferProjection());
         setModelViewMatrix(CapturedRenderingState.INSTANCE.getGbufferModelView());
+
+        // Ensure Shader uniform variables are set
+        updateShaderUniforms();
     }
 
     public void unbind() {
@@ -74,5 +74,15 @@ public class IrisFlwCompatShaderWarp {
 
         // Ensure MODEL_VIEW_MATRIX is updated
         shader.MODEL_VIEW_MATRIX.set(new Matrix4f(modelView));
+    }
+
+    private void updateShaderUniforms() {
+        // Ensure all Shader uniform variables are set
+        uniformIrisProjMat.upload();
+        iris_uniformModelViewMat.upload();
+        if (uniformNormalMatrix != null) {
+            uniformNormalMatrix.upload();
+        }
+        uniformModelViewProjMat.upload();
     }
 }
