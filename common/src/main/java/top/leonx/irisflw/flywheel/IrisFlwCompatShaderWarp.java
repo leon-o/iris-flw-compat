@@ -1,12 +1,13 @@
 package top.leonx.irisflw.flywheel;
 
 import com.mojang.blaze3d.shaders.Uniform;
+import net.irisshaders.iris.uniforms.CapturedRenderingState;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
-import net.irisshaders.iris.uniforms.CapturedRenderingState;
-import net.minecraft.client.renderer.ShaderInstance;
 import org.lwjgl.opengl.GL20;
+
+import net.minecraft.client.renderer.ShaderInstance;
 import top.leonx.irisflw.iris.GlUniformMcMatrix3f;
 import top.leonx.irisflw.iris.GlUniformMcMatrix4f;
 
@@ -14,46 +15,55 @@ import java.lang.reflect.Field;
 
 public class IrisFlwCompatShaderWarp {
     public ShaderInstance shader;
+    protected GlUniformMcMatrix3f iris_uniformNormalMatrix;
     protected GlUniformMcMatrix4f uniformIrisProjMat;
     protected GlUniformMcMatrix4f iris_uniformModelViewMat;
-    protected GlUniformMcMatrix3f uniformNormalMatrix;
-    protected GlUniformMcMatrix4f uniformModelViewProjMat;
+    protected GlUniformMcMatrix4f flw_uniformModelViewProjMat;
+    private static final Field MODEL_VIEW_MATRIX;
 
     public IrisFlwCompatShaderWarp(ShaderInstance shader) {
         this.shader = shader;
         int progId = shader.getId();
 
-        // 使用反射来修改 final 字段（不推荐）
         try {
-            Field modelViewMatrixField = ShaderInstance.class.getDeclaredField("MODEL_VIEW_MATRIX");
-            modelViewMatrixField.setAccessible(true);
-            Uniform modelViewMatrix = (Uniform) modelViewMatrixField.get(shader);
-
-            if (modelViewMatrix == null) {
-                modelViewMatrix = new Uniform("ModelViewMat", 10, 16, shader);
-                modelViewMatrix.set(new Matrix4f());
-                modelViewMatrixField.set(shader, modelViewMatrix);
+            // 初始化MODEL_VIEW_MATRIX
+            Uniform modelView = (Uniform) MODEL_VIEW_MATRIX.get(shader);
+            if (modelView == null) {
+                // 使用原版着色器定义的Uniform名
+                modelView = new Uniform("ModelViewMat", 10, 16, shader);
+                modelView.set(new Matrix4f());
+                MODEL_VIEW_MATRIX.set(shader, modelView); // Java 17允许修改非final字段
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to access MODEL_VIEW_MATRIX field", e);
+            throw new RuntimeException("模型视图矩阵初始化失败", e);
         }
 
+        // 统一使用原版Uniform命名
         uniformIrisProjMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId, "iris_ProjMat"));
         iris_uniformModelViewMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId, "iris_ModelViewMat"));
-        uniformNormalMatrix = new GlUniformMcMatrix3f(GL20.glGetUniformLocation(progId, "iris_NormalMat"));
-        uniformModelViewProjMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId, "flw_ModelViewProjMat"));
+        iris_uniformNormalMatrix = new GlUniformMcMatrix3f(GL20.glGetUniformLocation(progId, "iris_NormalMat"));
+        flw_uniformModelViewProjMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId, "flw_ModelViewProjMat"));
+
+        // 防御性校验
+        if (iris_uniformModelViewMat.getIndex() == -1) {
+            throw new IllegalStateException("必需Uniform iris_ModelViewMat 未找到");
+        }
     }
 
     public void bind() {
-        GL20.glEnable(GL20.GL_DEPTH_TEST); // 启用深度测试
         shader.apply();
+
+        // 显式上传关键矩阵（Java 17需要更严格的状态管理）
+        shader.MODEL_VIEW_MATRIX.upload();
+        shader.PROJECTION_MATRIX.upload();
+
         setProjectionMatrix(CapturedRenderingState.INSTANCE.getGbufferProjection());
         setModelViewMatrix(CapturedRenderingState.INSTANCE.getGbufferModelView());
     }
 
+
     public void unbind() {
         shader.clear();
-        GL20.glDisable(GL20.GL_DEPTH_TEST); // 禁用深度测试
     }
 
     public int getProgramHandle() {
@@ -66,12 +76,22 @@ public class IrisFlwCompatShaderWarp {
 
     public void setModelViewMatrix(Matrix4fc modelView) {
         iris_uniformModelViewMat.set(modelView);
-
-        if (this.uniformNormalMatrix != null) {
+        this.iris_uniformModelViewMat.set(modelView);
+        if (this.iris_uniformNormalMatrix != null) {
             Matrix4f normalMatrix = new Matrix4f(modelView);
             normalMatrix.invert();
             normalMatrix.transpose();
-            this.uniformNormalMatrix.set(new Matrix3f(normalMatrix));
+            this.iris_uniformNormalMatrix.set(new Matrix3f(normalMatrix));
         }
     }
+
+    static {
+        try {
+            MODEL_VIEW_MATRIX = ShaderInstance.class.getDeclaredField("f_173308_");
+            MODEL_VIEW_MATRIX.setAccessible(true);
+        } catch (Exception e) {
+            throw new RuntimeException("反射初始化失败，请检查MODEL_VIEW_MATRIX字段是否存在", e);
+        }
+    }
+
 }
