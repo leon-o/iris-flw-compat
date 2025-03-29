@@ -12,9 +12,9 @@ dependencies {
     // Do NOT use other classes from Fabric Loader.
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
 
-    modCompileOnly ("maven.modrinth:iris:$iris_version")
-    modCompileOnly ("maven.modrinth:sodium:${sodium_version}")
-    modCompileOnly ("com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}")
+    modCompileOnly ("maven.modrinth:iris:$iris_version-fabric")
+    modCompileOnly ("maven.modrinth:sodium:${sodium_version}-fabric")
+    modCompileOnly ("dev.engine-room.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}")
 
     implementation 'io.github.douira:glsl-transformer:2.0.0-pre14'
 }

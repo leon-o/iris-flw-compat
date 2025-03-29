@@ -44,15 +44,17 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionForge')
 
-    modCompileOnly ("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}")
+    modCompileOnly ("dev.engine-room.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
     modCompileOnly ("maven.modrinth:oculus:${oculus_version}")
 
     forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
-    modLocalRuntime ("org.embeddedt:embeddium-${minecraft_version}:${embeddium_version}+mc${minecraft_version}")
-    modLocalRuntime ("maven.modrinth:oculus:${oculus_version}")
-    modLocalRuntime ("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
-    modLocalRuntime ("com.jozufozu.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}")
-    modLocalRuntime ("com.tterrag.registrate:Registrate:${registrate_version}")
+
+//    modCompileOnly ("org.embeddedt:embeddium-${minecraft_version}:${embeddium_version}+mc${minecraft_version}")
+//    modLocalRuntime ("maven.modrinth:oculus:${oculus_version}")
+//    modLocalRuntime ("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
+//    modLocalRuntime ("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
+    modLocalRuntime ("dev.engine-room.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
+//    modLocalRuntime ("com.tterrag.registrate:Registrate:${registrate_version}")
 }
 
 processResources {

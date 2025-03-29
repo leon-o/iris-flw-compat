@@ -4,7 +4,6 @@
   "package": "top.leonx.irisflw.forge.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "MixinWorldModelBuilder"
   ],
   "injectors": {
     "defaultRequire": 1

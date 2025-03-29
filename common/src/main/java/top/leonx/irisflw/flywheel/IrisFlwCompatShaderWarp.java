@@ -36,8 +36,8 @@ public class IrisFlwCompatShaderWarp {
 
     public void bind() {
         shader.apply();
-        setProjectionMatrix(CapturedRenderingState.INSTANCE.getGbufferProjection());
-        setModelViewMatrix(CapturedRenderingState.INSTANCE.getGbufferModelView());
+        setProjectionMatrix((Matrix4f) CapturedRenderingState.INSTANCE.getGbufferProjection());
+        setModelViewMatrix((Matrix4f)CapturedRenderingState.INSTANCE.getGbufferModelView());
     }
 
     public void unbind(){

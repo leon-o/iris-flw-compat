@@ -1,6 +1,6 @@
 package top.leonx.irisflw.fabric.mixin;
 
-import com.jozufozu.flywheel.core.model.WorldModelBuilder;
+/*import com.jozufozu.flywheel.core.model.WorldModelBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -62,4 +62,4 @@ public class MixinWorldModelBuilder {
             instance.tesselateBlock(level, model, state, pos, poseStack, consumer, checkSides, random, seed, packedOverlay);
         }
     }
-}
+}*/

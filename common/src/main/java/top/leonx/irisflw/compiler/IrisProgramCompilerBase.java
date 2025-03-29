@@ -1,34 +1,23 @@
+/*
+
 package top.leonx.irisflw.compiler;
 
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.compile.ProgramContext;
-import com.jozufozu.flywheel.core.compile.Template;
-import com.jozufozu.flywheel.core.compile.VertexData;
-import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.jozufozu.flywheel.core.source.FileResolution;
+
 import net.irisshaders.iris.Iris;
-import net.irisshaders.iris.gl.blending.AlphaTest;
 import net.irisshaders.iris.gl.blending.BlendModeOverride;
-import net.irisshaders.iris.gl.state.FogMode;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
-import net.irisshaders.iris.shaderpack.loading.ProgramId;
 import net.irisshaders.iris.shaderpack.programs.ProgramSet;
 import net.irisshaders.iris.shaderpack.programs.ProgramSource;
 import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
-import net.irisshaders.iris.vertices.IrisVertexFormats;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import top.leonx.irisflw.IrisFlw;
 import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramSourceAccessor;
-import top.leonx.irisflw.accessors.WorldProgramAccessor;
-import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
     Map<WorldRenderingPipeline, HashMap<ProgramContext, P>> programCache = new HashMap<>();
@@ -42,7 +31,7 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
         this.factory = factory;
     }
 
-    public P getProgram(ProgramContext ctx, boolean isShadow) {
+    public P getProgram(String shaderName, boolean isShadow) {
 
         if (IrisFlw.isShaderPackInUse()) {
             WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
@@ -58,11 +47,9 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
                 if (created == null) {
                     if (Minecraft.getInstance().player != null) {
                         if (isShadow) Minecraft.getInstance().player.displayClientMessage(Component.literal(
-                                String.format("Fail to compile %s_%s_%s", "Shadow", ctx.spec.name.getNamespace(),
-                                        ctx.spec.name.getPath())), false);
+                                String.format("Fail to compile %s_%s", "Shadow", shaderName)), false);
                         else Minecraft.getInstance().player.displayClientMessage(Component.literal(
-                                String.format("Fail to compile %s_%s_%s", "Gbuffers_flw", ctx.spec.name.getNamespace(),
-                                        ctx.spec.name.getPath())), false);
+                                String.format("Fail to compile %s_%s", "Gbuffers_flw", shaderName)), false);
                     }
                 }
             }
@@ -110,12 +97,11 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
     }
 
     @NotNull
-    protected ProgramSource programSourceOverrideVertexSource(ProgramContext ctx, ProgramSet programSet, ProgramSource source, String vertexSource) {
+    protected ProgramSource programSourceOverrideVertexSource(String shaderName, ProgramSet programSet, ProgramSource source, String vertexSource) {
         ShaderProperties properties = ((ProgramSourceAccessor) source).getShaderProperties();
         BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) source).getBlendModeOverride();
         //Get a copy of program
-        return new ProgramSource(source.getName() + "_" + ctx.spec.name.getNamespace() + "_" +
-                ctx.spec.name.getPath(), vertexSource,
+        return new ProgramSource(source.getName() + "_" + shaderName, vertexSource,
                 source.getGeometrySource().orElse(null),
                 source.getTessControlSource().orElse(null),
                 source.getTessEvalSource().orElse(null),
@@ -127,3 +113,4 @@ public abstract class IrisProgramCompilerBase<P extends WorldProgram> {
         shadowProgramCache.clear();
     }
 }
+*/

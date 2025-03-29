@@ -1,6 +1,6 @@
 package top.leonx.irisflw.vertex.block;
 
-import com.jozufozu.flywheel.api.vertex.VertexList;
+/*import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.core.vertex.BlockVertex;
 import com.jozufozu.flywheel.core.vertex.BlockWriterUnsafe;
 import com.jozufozu.flywheel.util.RenderMath;
@@ -10,10 +10,10 @@ import top.leonx.irisflw.vertex.IrisBlockVertexReader;
 
 import java.nio.ByteBuffer;
 
-/**
+*//**
  * A vertex writer for the extended vertex format.
  * This writer will write the additional data to the buffer, including the midTexCoords, tangent, mid block pos, and blockId.
- */
+ *//*
 public class ExtendedBlockWriterUnsafe extends BlockWriterUnsafe {
     public ExtendedBlockWriterUnsafe(BlockVertex type, ByteBuffer buffer) {
         super(type, buffer);
@@ -100,4 +100,4 @@ public class ExtendedBlockWriterUnsafe extends BlockWriterUnsafe {
 
         return (int)(x * 64.0F) & 255 | ((int)(y * 64.0F) & 255) << 8 | ((int)(z * 64.0F) & 255) << 16 | emission << 24;
     }
-}
+}*/

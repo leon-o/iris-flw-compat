@@ -1,6 +1,6 @@
 package top.leonx.irisflw.mixin.flw.vertex;
 
-import com.jozufozu.flywheel.core.model.BlockModel;
+//import com.jozufozu.flywheel.core.model.BlockModel;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import top.leonx.irisflw.IrisFlw;
 
-@Mixin(value = BlockModel.class)
+/*@Mixin(value = BlockModel.class)
 public class MixinBlockModel {
     @Redirect(method = "<init>*", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferBuilder$DrawState;format()Lcom/mojang/blaze3d/vertex/VertexFormat;"))
     private VertexFormat irisFlw$ReturnIrisFormat(BufferBuilder.DrawState drawState) {
@@ -20,4 +20,4 @@ public class MixinBlockModel {
         }
         return drawState.format();
     }
-}
+}*/

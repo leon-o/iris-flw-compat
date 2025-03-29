@@ -1,9 +1,6 @@
 package top.leonx.irisflw.mixin.flw;
 
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.compile.*;
-import com.jozufozu.flywheel.core.shader.WorldProgram;
-import net.irisshaders.iris.Iris;
+/*import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
 import net.irisshaders.iris.pipeline.programs.ExtendedShader;
 import net.irisshaders.iris.pipeline.WorldRenderingPipeline;
@@ -72,4 +69,4 @@ public abstract class MixinProgramCompiler<P extends WorldProgram> {
         irisProgramCompiler.clear();
         // todo remove cache when shader pack reloaded.
     }
-}
+}*/

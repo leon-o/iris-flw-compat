@@ -1,6 +1,6 @@
 package top.leonx.irisflw.iris;
 
-import me.jellysquid.mods.sodium.client.gl.shader.uniform.GlUniform;
+import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniform;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.system.MemoryStack;
@@ -11,7 +11,6 @@ public class GlUniformMcMatrix4f extends GlUniform<Matrix4f>{
     public GlUniformMcMatrix4f(int index) {
         super(index);
     }
-
 
     public void set(Matrix4f value) {
         try (MemoryStack stack = MemoryStack.stackPush()) {

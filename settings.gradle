@@ -11,4 +11,4 @@ rootProject.name = 'irisflw'
 
 include 'common'
 include 'fabric'
-include 'forge'
+include 'neoforge'

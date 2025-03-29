@@ -1,6 +1,6 @@
 package top.leonx.irisflw.forge.mixin;
 
-import com.jozufozu.flywheel.core.model.ShadeSeparatingVertexConsumer;
+/*import com.jozufozu.flywheel.core.model.ShadeSeparatingVertexConsumer;
 import com.jozufozu.flywheel.core.model.WorldModelBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -69,4 +69,4 @@ public class MixinWorldModelBuilder {
             instance.tesselateBlock(tintGetter, model, state, pos, poseStack, consumer, checkSides, random, seed, packedOverlay, modelData, renderType);
         }
     }
-}
+}*/

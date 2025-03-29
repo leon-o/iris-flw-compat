@@ -1,19 +1,9 @@
 package top.leonx.irisflw.mixin.flw;
 
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.irisshaders.iris.gl.blending.BlendModeStorage;
-import net.minecraft.resources.ResourceLocation;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import top.leonx.irisflw.accessors.WorldProgramAccessor;
-import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
+//import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
+//import com.jozufozu.flywheel.core.shader.WorldProgram;
 
-@Mixin(WorldProgram.class)
+/*@Mixin(WorldProgram.class)
 public abstract class MixinWorldProgram extends GlProgram implements WorldProgramAccessor {
     @Unique
     private IrisFlwCompatShaderWarp shader;
@@ -48,4 +38,4 @@ public abstract class MixinWorldProgram extends GlProgram implements WorldProgra
         if(this.shader!=null)
             this.shader.unbind();
     }
-}
+}*/

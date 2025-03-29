@@ -1,11 +1,6 @@
+/*
 package top.leonx.irisflw.compiler;
 
-import com.jozufozu.flywheel.backend.gl.shader.GlProgram;
-import com.jozufozu.flywheel.core.compile.ProgramContext;
-import com.jozufozu.flywheel.core.compile.Template;
-import com.jozufozu.flywheel.core.compile.VertexData;
-import com.jozufozu.flywheel.core.shader.WorldProgram;
-import com.jozufozu.flywheel.core.source.FileResolution;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gl.blending.AlphaTest;
 import net.irisshaders.iris.gl.blending.AlphaTestFunction;
@@ -21,10 +16,6 @@ import net.irisshaders.iris.shaderpack.programs.ProgramSet;
 import net.irisshaders.iris.shaderpack.programs.ProgramSource;
 import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
 import net.minecraft.resources.ResourceLocation;
-import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
-import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
-import top.leonx.irisflw.accessors.ProgramSourceAccessor;
-import top.leonx.irisflw.transformer.ShaderPatcherBase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -119,3 +110,4 @@ public class NewProgramCompiler <TP extends ShaderPatcherBase,P extends WorldPro
         resolvers.clear();
     }
 }
+*/

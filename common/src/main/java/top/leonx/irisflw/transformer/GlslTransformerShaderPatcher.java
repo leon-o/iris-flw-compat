@@ -1,8 +1,5 @@
 package top.leonx.irisflw.transformer;
 
-import com.jozufozu.flywheel.core.compile.Template;
-import com.jozufozu.flywheel.core.compile.VertexData;
-import com.jozufozu.flywheel.core.source.FileResolution;
 import io.github.douira.glsl_transformer.GLSLParser;
 import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
@@ -45,7 +42,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
-public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
+public class GlslTransformerShaderPatcher {
+    private String flwVertexTemplate;
     private final SingleASTTransformer<ContextParameter> transformer;
     private final SingleASTTransformer<ContextParameter> flwTransformer;
     public static final AutoHintedMatcher<Expression> glTextureMatrix0 = new AutoHintedMatcher<>(
@@ -80,8 +78,7 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
 
     private static final Pattern versionPattern = Pattern.compile("^.*#version\\s+(\\d+)", Pattern.DOTALL);
 
-    public GlslTransformerShaderPatcher(Template<? extends VertexData> template, FileResolution header) {
-        super(template, header);
+    public GlslTransformerShaderPatcher() {
         transformer = new SingleASTTransformer<>() {
             {
                 setRootSupplier(RootSupplier.PREFIX_UNORDERED_ED_EXACT);
@@ -116,10 +113,12 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
     }
 
     private void transform(TranslationUnit tree, Root root, ContextParameter parameter) {
-        var vertexTemplate = template.get(parameter.ctx.getFile());
+        var vertexTemplate = flwVertexTemplate;
+        var processedFlwSource = JcppProcessor.glslPreprocessSource(vertexTemplate, List.of(new StringPair("VERTEX_SHADER", "1")));
+        var flwTree = flwTransformer.parseSeparateTranslationUnit(processedFlwSource);
 
-        var predefinesStats = ProcessFlywheelPredefine(tree, parameter, vertexTemplate);
-        var prependMainStats = ProcessFlywheelCreateVertex(tree, vertexTemplate);
+        var predefinesStats = ProcessFlywheelPredefine(tree, parameter, flwTree, vertexTemplate);
+        var prependMainStats = ProcessFlywheelCreateVertex(tree, flwTree, vertexTemplate);
 
         tree.injectNodes(ASTInjectionPoint.BEFORE_DECLARATIONS, predefinesStats);
         tree.prependMainFunctionBody(prependMainStats);
@@ -177,7 +176,7 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         );
     }
 
-    private ChildNodeList<ExternalDeclaration> ProcessFlywheelPredefine(TranslationUnit tree, ContextParameter parameter, VertexData vertexTemplate) {
+    private ChildNodeList<ExternalDeclaration> ProcessFlywheelPredefine(TranslationUnit tree, ContextParameter parameter, TranslationUnit flwTree, String flwSource) {
         var beforeDeclarationContent = new StringBuilder();
 
         if (IrisFlw.isUsingExtendedVertexFormat()) {
@@ -188,12 +187,10 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         } else {
             beforeDeclarationContent.append("vec4 _flw_fake_tangent;");
         }
-        genHeadSource(beforeDeclarationContent, parameter.ctx);
-        genCommonSource(beforeDeclarationContent, parameter.ctx, vertexTemplate);
-
-        var predefineContent = JcppProcessor.glslPreprocessSource(beforeDeclarationContent.toString(), List.of(new StringPair("VERTEX_SHADER", "1")));
-
-        var flwTree = flwTransformer.parseSeparateTranslationUnit(predefineContent);
+//        genHeadSource(beforeDeclarationContent, flwTree);
+//        genCommonSource(beforeDeclarationContent, flwTree);
+        var additionDeclarations = flwTransformer.parseNodeSeparate(flwTransformer.getRootSupplier(), ParseShape.EXTERNAL_DECLARATION, beforeDeclarationContent.toString());
+        flwTree.injectNode(ASTInjectionPoint.BEFORE_DECLARATIONS, additionDeclarations);
         var flwPredefineRoot = flwTree.getRoot();
 
         //This ensures that the shader code correctly transforms the _flw_at_tangent and the _flw_mc_midTexCoord.
@@ -223,8 +220,9 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         // Rename v to _flw_v to avoid conflict
         flwPredefineRoot.rename("v", "_flw_v");
 
-        parameter.hasBoxCoord = boxCoordDetector.matcher(predefineContent).find();
-        return flwTree.getChildren();
+        parameter.hasBoxCoord = boxCoordDetector.matcher(flwSource).find();
+        var mainFunc = flwTree.getOneMainDefinitionBody().getAncestor(ExternalDeclaration.class);
+        return ChildNodeList.collect(flwTree.getChildren().stream().filter(x->x!=mainFunc), flwTree);
     }
 
     @NotNull
@@ -258,9 +256,14 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
                 """;
     }
 
-    private ChildNodeList<Statement> ProcessFlywheelCreateVertex(TranslationUnit tree, VertexData vertexTemplate) {
+    private ChildNodeList<Statement> ProcessFlywheelCreateVertex(TranslationUnit irisTree, TranslationUnit flwTree, String vertexTemplate) {
         StringBuilder createVertexBuilder = new StringBuilder();
         createVertexBuilder.append("{\n");
+
+        var flwMainBody = flwTree.getOneMainDefinitionBody();
+        flwMainBody.getRoot().rename("gl_Position", "_flw_patched_vertex_pos");
+
+        createVertexBuilder.append(ASTPrinter.printSimple(flwMainBody));
 
         if (IrisFlw.isUsingExtendedVertexFormat()) {
 
@@ -279,18 +282,13 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
                     """);
         }
 
-        generateCreateVertex(vertexTemplate, createVertexBuilder);
-        createVertexBuilder.append("""
-                _flw_patched_vertex_pos = FLWVertex(v);
-                """);
-
         createVertexBuilder.append("\n}");
 
-        var prependMainFuncContent = JcppProcessor.glslPreprocessSource(createVertexBuilder.toString(), List.of(new StringPair("VERTEX_SHADER", "1")));
+//        var prependMainFuncContent = JcppProcessor.glslPreprocessSource(createVertexBuilder.toString(), List.of(new StringPair("VERTEX_SHADER", "1")));
 
-        var compoundStatement = flwTransformer.parseNodeSeparate(flwTransformer.getRootSupplier(), CompoundStatementShape, prependMainFuncContent);
-        compoundStatement.getRoot().rename("i", "_flw_instance");
-        compoundStatement.getRoot().rename("v", "_flw_v");
+        var compoundStatement = flwTransformer.parseNodeSeparate(flwTransformer.getRootSupplier(), CompoundStatementShape, createVertexBuilder.toString());
+//        compoundStatement.getRoot().rename("i", "_flw_instance");
+//        compoundStatement.getRoot().rename("v", "_flw_v");
 
         //tree.prependMainFunctionBody(prependMainFuncStatements);
         return compoundStatement.getStatements();
@@ -338,21 +336,20 @@ public class GlslTransformerShaderPatcher extends ShaderPatcherBase {
         };
     }
 
-    @Override
-    public String patch(String irisSource, Context key) {
-        return transformer.transform(irisSource, new ContextParameter(key));
+    public String patch(String irisSource) {
+        return transformer.transform(irisSource, new ContextParameter());
     }
 
 
     public static class ContextParameter implements JobParameters {
-        public Context ctx;
+//        public Context ctx;
 
         public boolean useExtendedVertexFormat;
 
         public boolean hasBoxCoord;
 
-        public ContextParameter(Context ctx) {
-            this.ctx = ctx;
+        public ContextParameter() {
+//            this.ctx = ctx;
         }
     }
 

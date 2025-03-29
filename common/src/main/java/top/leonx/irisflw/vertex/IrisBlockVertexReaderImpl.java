@@ -1,6 +1,6 @@
 package top.leonx.irisflw.vertex;
 
-import com.jozufozu.flywheel.core.vertex.AbstractVertexList;
+/*import com.jozufozu.flywheel.core.vertex.AbstractVertexList;
 import com.jozufozu.flywheel.util.RenderMath;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -10,9 +10,9 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 
-/**
+*//**
  * A vertex list reader for the Iris extended vertex format.
- */
+ *//*
 public class IrisBlockVertexReaderImpl extends AbstractVertexList implements IrisBlockVertexReader {
     private final IntList offsets = new IntArrayList();
     private final int vertexSize;
@@ -134,4 +134,4 @@ public class IrisBlockVertexReaderImpl extends AbstractVertexList implements Iri
         MemoryUtil.memCopy(ptr(index), dst, vertexSize);
         return vertexSize;
     }
-}
+}*/

@@ -1,17 +1,8 @@
 package top.leonx.irisflw.mixin.flw.vertex;
 
-import com.jozufozu.flywheel.core.model.ShadeSeparatingVertexConsumer;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.irisshaders.iris.vertices.BlockSensitiveBufferBuilder;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import top.leonx.irisflw.IrisFlw;
-import top.leonx.irisflw.accessors.BufferBuilderAccessor;
+//import com.jozufozu.flywheel.core.model.ShadeSeparatingVertexConsumer;
 
-@Mixin(ShadeSeparatingVertexConsumer.class)
+/*@Mixin(ShadeSeparatingVertexConsumer.class)
 public class MixinShadeSeparatingVertexConsumer implements BlockSensitiveBufferBuilder {
 
     // Mixin this class to implement BlockSensitiveBufferBuilder interface
@@ -55,4 +46,4 @@ public class MixinShadeSeparatingVertexConsumer implements BlockSensitiveBufferB
             sensitiveBufferBuilder.endBlock();
         }
     }
-}
+}*/

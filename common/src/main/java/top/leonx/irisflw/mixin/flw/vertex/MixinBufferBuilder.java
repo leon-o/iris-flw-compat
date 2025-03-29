@@ -25,7 +25,7 @@ public class MixinBufferBuilder implements BufferBuilderAccessor {
         this.irisFlw$forceBlockFormat = isFlyWheel;
     }
 
-    @ModifyVariable(method = "begin", at = @At("HEAD"), argsOnly = true)
+    /*@ModifyVariable(method = "begin", at = @At("HEAD"), argsOnly = true)
     private VertexFormat irisflw$begin(VertexFormat format) {
         // If forceBlockFormat is true, we set the format to BLOCK.
         // Notice that we only handle the format when shader pack is in use.
@@ -38,5 +38,5 @@ public class MixinBufferBuilder implements BufferBuilderAccessor {
         // If we are using extended vertex format, we should leave the format as it is.
         // Since the Iris's mixin will handle the format.
         return format;
-    }
+    }*/
 }

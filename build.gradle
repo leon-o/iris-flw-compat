@@ -1,5 +1,5 @@
 plugins {
-    id 'dev.architectury.loom' version '1.6-SNAPSHOT' apply false
+    id 'dev.architectury.loom' version '1.9-SNAPSHOT' apply false
     id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 }
@@ -10,7 +10,8 @@ architectury {
 
 allprojects {
     group = rootProject.maven_group
-    version = "${project.name}${minecraft_version}+${mod_version}"
+//    version = "${project.name}${minecraft_version}+${mod_version}"
+    version = "${mod_version}"
 }
 
 subprojects {
@@ -19,8 +20,8 @@ subprojects {
     apply plugin: 'maven-publish'
 
     base {
-        if (project.name == "forge"){
-            archivesName = "$rootProject.forge_archives_name"
+        if (project.name == "neoforge"){
+            archivesName = "$rootProject.neoforge_archives_name"
         }else if(project.name == "fabric"){
             archivesName = "$rootProject.fabric_archives_name"
         }else{
@@ -37,11 +38,23 @@ subprojects {
         maven {
             url "https://cursemaven.com"
         }
-        maven {
-            url = "https://api.modrinth.com/maven"
+        exclusiveContent {
+            forRepository {
+                maven {
+                    name = "Modrinth"
+                    url = "https://api.modrinth.com/maven"
+                }
+            }
+            filter {
+                includeGroup "maven.modrinth"
+            }
         }
         maven {
             url "https://maven.blamejared.com"
+        }
+        maven {
+            name "createmod maven"
+            url "https://maven.createmod.net/"
         }
     }
 
@@ -57,7 +70,7 @@ subprojects {
         //mappings loom.officialMojangMappings()
         mappings loom.layered() {
             officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+            parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
         }
     }
 
@@ -67,12 +80,12 @@ subprojects {
         // If you remove this line, sources will not be generated.
         withSourcesJar()
 
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     tasks.withType(JavaCompile).configureEach {
-        it.options.release = 17
+        it.options.release = 21
     }
 
     // Configure Maven publishing.

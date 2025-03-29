@@ -1,6 +1,6 @@
 package top.leonx.irisflw.vertex.block;
 
-import com.jozufozu.flywheel.core.layout.BufferLayout;
+/*import com.jozufozu.flywheel.core.layout.BufferLayout;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.vertex.BlockVertex;
 import com.jozufozu.flywheel.core.vertex.BlockVertexListUnsafe;
@@ -12,9 +12,9 @@ import top.leonx.irisflw.vertex.IrisBlockVertexListUnsafe;
 
 import java.nio.ByteBuffer;
 
-/**
+*//**
  * A vertex format for the extended vertex format. It will replace the block vertex format used by Flywheel.
- */
+ *//*
 public class ExtendedBlockVertex extends BlockVertex {
     public static final BufferLayout FORMAT = BufferLayout.builder()
             .addItems(CommonItems.VEC3,
@@ -117,4 +117,4 @@ public class ExtendedBlockVertex extends BlockVertex {
         }
         return super.getShaderHeader();
     }
-}
+}*/

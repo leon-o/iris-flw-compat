@@ -1,6 +1,6 @@
 package top.leonx.irisflw.vertex.postexnormal;
 
-import com.jozufozu.flywheel.api.vertex.VertexList;
+/*import com.jozufozu.flywheel.api.vertex.VertexList;
 import com.jozufozu.flywheel.core.layout.CommonItems;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalVertex;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalVertexListUnsafe;
@@ -181,4 +181,4 @@ public class ExtendedPosTexNormalWriterUnsafe extends PosTexNormalWriterUnsafe i
             return 0;
         }
     }
-}
+}*/

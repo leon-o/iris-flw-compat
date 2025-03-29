@@ -1,6 +1,6 @@
 package top.leonx.irisflw.mixin.flw.vertex;
 
-import com.jozufozu.flywheel.core.hardcoded.PartBuilder;
+/*import com.jozufozu.flywheel.core.hardcoded.PartBuilder;
 import com.jozufozu.flywheel.core.vertex.PosTexNormalWriterUnsafe;
 import net.irisshaders.iris.vertices.NormalHelper;
 import org.joml.Vector3f;
@@ -33,4 +33,4 @@ public class MixinCubiodBuilder {
             ci.cancel();
         }
     }
-}
+}*/

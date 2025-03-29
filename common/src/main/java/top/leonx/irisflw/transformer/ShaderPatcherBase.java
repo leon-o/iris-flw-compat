@@ -1,12 +1,6 @@
+/*
 package top.leonx.irisflw.transformer;
 
-import com.jozufozu.flywheel.api.vertex.VertexType;
-import com.jozufozu.flywheel.core.compile.*;
-import com.jozufozu.flywheel.core.shader.StateSnapshot;
-import com.jozufozu.flywheel.core.source.FileIndexImpl;
-import com.jozufozu.flywheel.core.source.FileResolution;
-import com.jozufozu.flywheel.core.source.SourceFile;
-import com.jozufozu.flywheel.core.source.parse.StructField;
 
 public abstract class ShaderPatcherBase {
     protected final FileResolution header;
@@ -83,33 +77,5 @@ public abstract class ShaderPatcherBase {
                                      """);
         headerBuilder.append(key.vertexType.getShaderHeader());
     }
-
-    /**
-     * @param file       The file to compile.
-     * @param ctx        The shader constants to apply.
-     * @param vertexType The vertex type to use.
-     */
-    public record Context(SourceFile file, StateSnapshot ctx, VertexType vertexType) {
-
-        public SourceFile getFile() {
-            return file;
-        }
-
-        public StateSnapshot getCtx() {
-            return ctx;
-        }
-
-        public VertexType getVertexType() {
-            return vertexType;
-        }
-
-        @Override
-            public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                var that = (Context) o;
-                return file == that.file && vertexType == that.vertexType && ctx.equals(that.ctx);
-            }
-
-    }
 }
+*/
