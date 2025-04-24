@@ -21,6 +21,7 @@ import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
+import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,8 +48,6 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
     private final InstancedLight light;
 
     private final OitFramebuffer oitFramebuffer;
-
-    private boolean isShadow;
 
     public IrisInstancedDrawManager(IrisInstancingPrograms programs) {
         programs.acquire();
@@ -143,12 +142,16 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
     }
 
     private void submitDraws() {
+        var isShadow = RenderLayerEventStateManager.isRenderingShadow();
         for (var drawCall : draws) {
             var material = drawCall.material();
             var groupKey = drawCall.groupKey;
             var environment = groupKey.environment();
 
             var program = programs.get(groupKey.instanceType(), environment.contextShader(), material, PipelineCompiler.OitMode.OFF, isShadow);
+            if(program == null) {
+                continue;
+            }
             program.bind();
 
             environment.setupDraw(program);
@@ -163,10 +166,12 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
             Samplers.INSTANCE_BUFFER.makeActive();
 
             drawCall.render(instanceTexture);
+//            program.clear();
         }
     }
 
     private void submitOitDraws(PipelineCompiler.OitMode mode) {
+        var isShadow = RenderLayerEventStateManager.isRenderingShadow();
         for (var drawCall : oitDraws) {
             var material = drawCall.material();
             var groupKey = drawCall.groupKey;
@@ -187,6 +192,7 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
             Samplers.INSTANCE_BUFFER.makeActive();
 
             drawCall.render(instanceTexture);
+            program.clear();
         }
     }
 
@@ -238,6 +244,8 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
 
     @Override
     public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {
+        var isShadow = RenderLayerEventStateManager.isRenderingShadow();
+
         // Sort draw calls into buckets, so we don't have to do as many shader binds.
         var byType = doCrumblingSort(crumblingBlocks, handle -> {
             // AbstractInstancer directly implement HandleState, so this check is valid.

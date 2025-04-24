@@ -43,7 +43,14 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public class GlslTransformerShaderPatcher {
-    private String flwVertexTemplate;
+
+    final static String FLW_VERTEX_POS_DECL = "flw_vertexPos";
+    final static String flw_vertexTexCoord = "flw_vertexTexCoord";
+    final static String flw_vertexColor = "flw_vertexColor";
+    final static String flw_vertexOverlay = "flw_vertexOverlay";
+    final static String flw_vertexLight = "flw_vertexLight";
+    final static String flw_vertexNormal = "flw_vertexNormal";
+
     private final SingleASTTransformer<ContextParameter> transformer;
     private final SingleASTTransformer<ContextParameter> flwTransformer;
     public static final AutoHintedMatcher<Expression> glTextureMatrix0 = new AutoHintedMatcher<>(
@@ -113,22 +120,22 @@ public class GlslTransformerShaderPatcher {
     }
 
     private void transform(TranslationUnit tree, Root root, ContextParameter parameter) {
-        var vertexTemplate = flwVertexTemplate;
+        var vertexTemplate = parameter.flwVertexTemplate;
         var processedFlwSource = JcppProcessor.glslPreprocessSource(vertexTemplate, List.of(new StringPair("VERTEX_SHADER", "1")));
-        var flwTree = flwTransformer.parseSeparateTranslationUnit(processedFlwSource);
+        parameter.flwTree = flwTransformer.parseSeparateTranslationUnit(processedFlwSource);
 
-        var predefinesStats = ProcessFlywheelPredefine(tree, parameter, flwTree, vertexTemplate);
-        var prependMainStats = ProcessFlywheelCreateVertex(tree, flwTree, vertexTemplate);
+        var predefinesStats = ProcessFlywheelPredefine(tree, parameter);
+        var prependMainStats = ProcessFlywheelCreateVertex(tree, parameter);
 
         tree.injectNodes(ASTInjectionPoint.BEFORE_DECLARATIONS, predefinesStats);
         tree.prependMainFunctionBody(prependMainStats);
 
-        root.replaceReferenceExpressions(transformer, "gl_Vertex", "inverse(gl_ProjectionMatrix*gl_ModelViewMatrix)*_flw_patched_vertex_pos");
-        root.replaceReferenceExpressions(transformer, "gl_MultiTexCoord0", "vec4(_flw_v.texCoords,0,1)");
-        root.replaceReferenceExpressions(transformer, "gl_Normal", "_flw_v.normal");
-        root.replaceReferenceExpressions(transformer, "gl_Color", "_flw_v.color");
+        root.replaceReferenceExpressions(transformer, "gl_Vertex", String.format("inverse(gl_ProjectionMatrix*gl_ModelViewMatrix)* flw_viewProjection * %s", FLW_VERTEX_POS_DECL));
+        root.replaceReferenceExpressions(transformer, "gl_MultiTexCoord0", String.format("vec4(%s,0,1)", flw_vertexTexCoord));
+        root.replaceReferenceExpressions(transformer, "gl_Normal", flw_vertexNormal);
+        root.replaceReferenceExpressions(transformer, "gl_Color", flw_vertexColor);
 
-        root.replaceExpressionMatches(transformer, ftransformExpr, "_flw_patched_vertex_pos");
+        root.replaceExpressionMatches(transformer, ftransformExpr, String.format("flw_viewProjection * %s", FLW_VERTEX_POS_DECL));
 
         Map<String, Integer> originalAttrVecDims = new HashMap<>();
         RemoveOriginalAttributes(root, originalAttrVecDims);
@@ -151,9 +158,9 @@ public class GlslTransformerShaderPatcher {
         }
 
         if (parameter.hasBoxCoord) {
-            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(max(_flw_v.light,texture3D(uLightVolume,BoxCoord).rg)*240.0,0,1))");
+            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", String.format("(vec4(max(%s,texture3D(uLightVolume,BoxCoord).rg)*240.0,0,1))", flw_vertexLight));
         } else {
-            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", "(vec4(_flw_v.light*240.0,0,1))");
+            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", String.format("(vec4(%s*240.0,0,1))", flw_vertexLight));
         }
     }
 
@@ -176,7 +183,7 @@ public class GlslTransformerShaderPatcher {
         );
     }
 
-    private ChildNodeList<ExternalDeclaration> ProcessFlywheelPredefine(TranslationUnit tree, ContextParameter parameter, TranslationUnit flwTree, String flwSource) {
+    private ChildNodeList<ExternalDeclaration> ProcessFlywheelPredefine(TranslationUnit tree, ContextParameter parameter) {
         var beforeDeclarationContent = new StringBuilder();
 
         if (IrisFlw.isUsingExtendedVertexFormat()) {
@@ -187,6 +194,9 @@ public class GlslTransformerShaderPatcher {
         } else {
             beforeDeclarationContent.append("vec4 _flw_fake_tangent;");
         }
+
+        var flwTree = parameter.flwTree;
+        var flwSource = parameter.flwVertexTemplate;
 //        genHeadSource(beforeDeclarationContent, flwTree);
 //        genCommonSource(beforeDeclarationContent, flwTree);
         var additionDeclarations = flwTransformer.parseNodeSeparate(flwTransformer.getRootSupplier(), ParseShape.EXTERNAL_DECLARATION, beforeDeclarationContent.toString());
@@ -217,8 +227,6 @@ public class GlslTransformerShaderPatcher {
                     }
                 }
         );
-        // Rename v to _flw_v to avoid conflict
-        flwPredefineRoot.rename("v", "_flw_v");
 
         parameter.hasBoxCoord = boxCoordDetector.matcher(flwSource).find();
         var mainFunc = flwTree.getOneMainDefinitionBody().getAncestor(ExternalDeclaration.class);
@@ -256,12 +264,15 @@ public class GlslTransformerShaderPatcher {
                 """;
     }
 
-    private ChildNodeList<Statement> ProcessFlywheelCreateVertex(TranslationUnit irisTree, TranslationUnit flwTree, String vertexTemplate) {
+    private ChildNodeList<Statement> ProcessFlywheelCreateVertex(TranslationUnit irisTree, ContextParameter context) {
         StringBuilder createVertexBuilder = new StringBuilder();
         createVertexBuilder.append("{\n");
 
+        var flwTree = context.flwTree;
+        var flwSource = context.flwVertexTemplate;
+
         var flwMainBody = flwTree.getOneMainDefinitionBody();
-        flwMainBody.getRoot().rename("gl_Position", "_flw_patched_vertex_pos");
+//        flwMainBody.getRoot().rename("gl_Position", "_flw_patched_vertex_pos");
 
         createVertexBuilder.append(ASTPrinter.printSimple(flwMainBody));
 
@@ -276,10 +287,10 @@ public class GlslTransformerShaderPatcher {
                     """);
         } else {
             //fake tangent
-            createVertexBuilder.append("""
-                    vec3 skewedNormal = _flw_v.normal+vec3(0.5,0.5,0.5);
-                    _flw_fake_tangent = vec4(normalize(skewedNormal - _flw_v.normal*dot(skewedNormal, _flw_v.normal)).xyz,1.0);
-                    """);
+            createVertexBuilder.append(String.format("""
+                    vec3 skewedNormal = %s+vec3(0.5,0.5,0.5);
+                    _flw_fake_tangent = vec4(normalize(skewedNormal - %s*dot(skewedNormal, %s)).xyz,1.0);
+                    """,flw_vertexNormal, flw_vertexNormal, flw_vertexNormal));
         }
 
         createVertexBuilder.append("\n}");
@@ -288,7 +299,6 @@ public class GlslTransformerShaderPatcher {
 
         var compoundStatement = flwTransformer.parseNodeSeparate(flwTransformer.getRootSupplier(), CompoundStatementShape, createVertexBuilder.toString());
 //        compoundStatement.getRoot().rename("i", "_flw_instance");
-//        compoundStatement.getRoot().rename("v", "_flw_v");
 
         //tree.prependMainFunctionBody(prependMainFuncStatements);
         return compoundStatement.getStatements();
@@ -336,8 +346,8 @@ public class GlslTransformerShaderPatcher {
         };
     }
 
-    public String patch(String irisSource) {
-        return transformer.transform(irisSource, new ContextParameter());
+    public String patch(String irisSource, String flwSource) {
+        return transformer.transform(irisSource, new ContextParameter(flwSource));
     }
 
 
@@ -348,8 +358,12 @@ public class GlslTransformerShaderPatcher {
 
         public boolean hasBoxCoord;
 
-        public ContextParameter() {
-//            this.ctx = ctx;
+        public String flwVertexTemplate;
+
+        public TranslationUnit flwTree;
+
+        public ContextParameter(String flwVertexSource) {
+            this.flwVertexTemplate = flwVertexSource;
         }
     }
 

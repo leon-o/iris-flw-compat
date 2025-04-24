@@ -17,7 +17,8 @@ public final class IrisFlw {
     }
 
     public static boolean isUsingExtendedVertexFormat() {
+        return false;
         // Currently, there is no other choice but to extend the vertex format when shaders are enabled.
-        return isShaderPackInUse();
+        //return isShaderPackInUse();
     }
 }

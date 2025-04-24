@@ -1,0 +1,35 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+#issueTrackerURL = ""
+license = "MIT"
+
+[[mods]]
+modId = "irisflw"
+version = "${version}"
+displayName = "Oculus Flywheel Compat"
+logoFile = "icon.png"
+authors = "Leon"
+description = '''
+Allow Flywheel instancing optimization to be enabled when using iris.
+'''
+#logoFile = ""
+
+[[dependencies.irisflw]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.irisflw]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[mixins]]
+config = "irisflw.mixins.flw.json"
+
+[[mixins]]
+config = "irisflw.mixins.iris.json"

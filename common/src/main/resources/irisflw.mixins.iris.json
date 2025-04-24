@@ -11,7 +11,8 @@
     "MixinProgramSource",
     "MixinProgramDirectives",
     "AccessorExtendedShader",
-    "MixinShadowRenderer"
+    "MixinShadowRenderer",
+    "MixinPipelineManager"
   ],
   "injectors": {
     "defaultRequire": 1

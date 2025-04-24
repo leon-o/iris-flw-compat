@@ -1,6 +1,9 @@
 package top.leonx.irisflw.flywheel;
 
 import com.mojang.blaze3d.shaders.Uniform;
+import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
+import dev.engine_room.flywheel.backend.gl.shader.GlShader;
+import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import net.irisshaders.iris.uniforms.CapturedRenderingState;
@@ -9,7 +12,7 @@ import org.lwjgl.opengl.GL20;
 import top.leonx.irisflw.iris.GlUniformMcMatrix3f;
 import top.leonx.irisflw.iris.GlUniformMcMatrix4f;
 
-public class IrisFlwCompatShaderWarp {
+public class IrisFlwCompatShaderWarp extends GlProgram {
     public ShaderInstance shader;
     protected GlUniformMcMatrix4f uniformIrisProjMat;
     protected GlUniformMcMatrix4f iris_uniformModelViewMat;
@@ -17,7 +20,8 @@ public class IrisFlwCompatShaderWarp {
     protected GlUniformMcMatrix3f uniformNormalMatrix;
     protected GlUniformMcMatrix4f uniformModelViewProjMat;
 
-    public IrisFlwCompatShaderWarp(ShaderInstance shader) {
+    public IrisFlwCompatShaderWarp(ShaderInstance shader, ShaderType type, String name) {
+        super(shader.getId());
         this.shader = shader;
         int progId = shader.getId();
 
@@ -40,7 +44,7 @@ public class IrisFlwCompatShaderWarp {
         setModelViewMatrix((Matrix4f)CapturedRenderingState.INSTANCE.getGbufferModelView());
     }
 
-    public void unbind(){
+    public void clear(){
         shader.clear();
     }
 

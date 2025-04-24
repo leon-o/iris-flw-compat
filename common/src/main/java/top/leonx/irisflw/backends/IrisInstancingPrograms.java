@@ -11,9 +11,8 @@ import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.backend.util.AtomicReferenceCounted;
 import org.jetbrains.annotations.Nullable;
+import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.List;
 
 public class IrisInstancingPrograms extends AtomicReferenceCounted {
@@ -22,11 +21,11 @@ public class IrisInstancingPrograms extends AtomicReferenceCounted {
     @Nullable
     private static IrisInstancingPrograms instance;
 
-    private final PipelineCompiler pipeline;
+    private final IrisPipelineCompiler pipeline;
 
     private final OitPrograms oitPrograms;
 
-    private IrisInstancingPrograms(PipelineCompiler pipeline, OitPrograms oitPrograms) {
+    private IrisInstancingPrograms(IrisPipelineCompiler pipeline, OitPrograms oitPrograms) {
         this.pipeline = pipeline;
         this.oitPrograms = oitPrograms;
     }
@@ -43,18 +42,13 @@ public class IrisInstancingPrograms extends AtomicReferenceCounted {
         if (!GlCompat.SUPPORTS_INSTANCING) {
             return;
         }
-        try {
-            var createMethod = PipelineCompiler.class.getDeclaredMethod("create", ShaderSources.class, Pipeline.class, List.class, List.class, Collection.class);
-            // ignore package private
-            createMethod.setAccessible(true);
-            var pipelineCompiler = (PipelineCompiler) createMethod.invoke(null, sources, IrisFlwPipelines.IRIS_INSTANCING, vertexComponents, fragmentComponents, EXTENSIONS);
-            var fullscreen = OitPrograms.createFullscreenCompiler(sources);
-            IrisInstancingPrograms newInstance = new IrisInstancingPrograms(pipelineCompiler, fullscreen);
-
-            setInstance(newInstance);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+//      var createMethod = PipelineCompiler.class.getDeclaredMethod("create", ShaderSources.class, Pipeline.class, List.class, List.class, Collection.class);
+        // ignore package private
+//      createMethod.setAccessible(true);
+        var pipelineCompiler = IrisPipelineCompiler.create(sources, IrisFlwPipelines.IRIS_INSTANCING, vertexComponents, fragmentComponents, EXTENSIONS);
+        var fullscreen = OitPrograms.createFullscreenCompiler(sources);
+        IrisInstancingPrograms newInstance = new IrisInstancingPrograms(pipelineCompiler, fullscreen);
+        setInstance(newInstance);
     }
 
     public static void setInstance(@Nullable IrisInstancingPrograms newInstance) {
@@ -80,8 +74,8 @@ public class IrisInstancingPrograms extends AtomicReferenceCounted {
         setInstance(null);
     }
 
-    public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode mode, boolean isShadow) {
-        return pipeline.get(instanceType, contextShader, material, mode);
+    public IrisFlwCompatShaderWarp get(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode mode, boolean isShadow) {
+        return (IrisFlwCompatShaderWarp)pipeline.get(instanceType, contextShader, material, mode);
     }
 
     public OitPrograms oitPrograms() {

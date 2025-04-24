@@ -5,9 +5,12 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "IrisHandlerMixin",
+    "MixinFlwPrograms",
     "MixinProgramStitcher",
     "ShaderCompilerAccessor",
-    "MixinFlwPrograms"
+    "FlwCompilationAccessor",
+    "MixinPipelineCompiler",
+    "PipelineCompilerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
