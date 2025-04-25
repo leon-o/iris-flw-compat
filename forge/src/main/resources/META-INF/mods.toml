@@ -4,7 +4,7 @@ license="MIT"
 [[mods]]
 modId="irisflw"
 version="${version}"
-displayName="Oculus Flywheel Compat"
+displayName="Iris Flywheel Compat"
 logoFile="icon.png"
 authors="Leon"
 description='''

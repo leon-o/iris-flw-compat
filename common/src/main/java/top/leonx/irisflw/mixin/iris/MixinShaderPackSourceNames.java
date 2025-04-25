@@ -1,6 +1,7 @@
 package top.leonx.irisflw.mixin.iris;
 
 import com.google.common.collect.ImmutableList;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.irisshaders.iris.shaderpack.include.ShaderPackSourceNames;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
