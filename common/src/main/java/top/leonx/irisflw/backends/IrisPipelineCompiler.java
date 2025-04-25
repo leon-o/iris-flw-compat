@@ -3,7 +3,6 @@ package top.leonx.irisflw.backends;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.backend.BackendConfig;
-import dev.engine_room.flywheel.backend.InternalVertex;
 import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
@@ -201,30 +200,4 @@ public class IrisPipelineCompiler {
         var harness = new IrisCompilationHarness<>(pipeline.compilerMarker(), sources, harnessStitcher);
         return new IrisPipelineCompiler(harness);
     }
-
-//    public static void createFogComponent() {
-//        FOG = UberShaderComponent.builder(ResourceUtil.rl("fog"))
-//                .materialSources(MaterialShaderIndices.fogSources()
-//                        .all())
-//                .adapt(FnSignature.create()
-//                        .returnType("vec4")
-//                        .name("flw_fogFilter")
-//                        .arg("vec4", "color")
-//                        .build(), GlslExpr.variable("color"))
-//                .switchOn(GlslExpr.variable("_flw_uberFogIndex"))
-//                .build(FlwPrograms.SOURCES);
-//    }
-//
-//    private static void createCutoutComponent() {
-//        CUTOUT = UberShaderComponent.builder(ResourceUtil.rl("cutout"))
-//                .materialSources(MaterialShaderIndices.cutoutSources()
-//                        .all())
-//                .adapt(FnSignature.create()
-//                        .returnType("bool")
-//                        .name("flw_discardPredicate")
-//                        .arg("vec4", "color")
-//                        .build(), GlslExpr.boolLiteral(false))
-//                .switchOn(GlslExpr.variable("_flw_uberCutoutIndex"))
-//                .build(FlwPrograms.SOURCES);
-//    }
 }

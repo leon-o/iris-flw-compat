@@ -74,7 +74,7 @@ public class IrisInstancingPrograms extends AtomicReferenceCounted {
         setInstance(null);
     }
 
-    public IrisFlwCompatShaderWarp get(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode mode, boolean isShadow) {
+    public IrisFlwCompatShaderWarp get(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode mode) {
         return (IrisFlwCompatShaderWarp)pipeline.get(instanceType, contextShader, material, mode);
     }
 

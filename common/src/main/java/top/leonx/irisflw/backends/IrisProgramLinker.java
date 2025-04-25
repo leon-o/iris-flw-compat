@@ -20,6 +20,8 @@ import net.irisshaders.iris.shaderpack.programs.ProgramFallbackResolver;
 import net.irisshaders.iris.shaderpack.programs.ProgramSet;
 import net.irisshaders.iris.shaderpack.programs.ProgramSource;
 import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
+import net.irisshaders.iris.shadows.ShadowRenderer;
+import net.irisshaders.iris.shadows.ShadowRenderingState;
 import net.irisshaders.iris.vertices.IrisVertexFormats;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +30,7 @@ import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
 import top.leonx.irisflw.accessors.ProgramSourceAccessor;
 import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
+import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
 import top.leonx.irisflw.transformer.GlslTransformerShaderPatcher;
 
 import java.util.*;
@@ -67,7 +70,8 @@ public class IrisProgramLinker extends ProgramLinker {
 
         if (pipeline instanceof IrisRenderingPipeline newPipeline && vertexSource != null && vertexShaderName != null) {
             ProgramSet programSet = ((IrisRenderingPipelineAccessor) newPipeline).getProgramSet();
-            Optional<ProgramSource> sourceReferenceOpt = getProgramSourceReference(programSet, vertexShaderName, false);
+            var isShadow = RenderLayerEventStateManager.isRenderingShadow();
+            Optional<ProgramSource> sourceReferenceOpt = getProgramSourceReference(programSet, vertexShaderName, isShadow);
             if(sourceReferenceOpt.isEmpty())
                 return null;
 
@@ -81,7 +85,7 @@ public class IrisProgramLinker extends ProgramLinker {
             ProgramSource newProgramSource = programSourceOverrideVertexSource(vertexShaderName, programSet, sourceRef, newVertexSource);
             ((ProgramDirectivesAccessor) newProgramSource.getDirectives()).setFlwAlphaTestOverride(
                     new AlphaTest(AlphaTestFunction.GREATER, 0.5f));
-            return createWorldProgramBySource(vertexShaderName, false, (IrisRenderingPipelineAccessor) newPipeline, newProgramSource);
+            return createWorldProgramBySource(vertexShaderName, isShadow, (IrisRenderingPipelineAccessor) newPipeline, newProgramSource);
         }
 
         var out = new GlProgram(handle);

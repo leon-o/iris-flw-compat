@@ -47,24 +47,24 @@ public abstract class MixinShadowRenderer {
         RenderLayerEventStateManager.setSkip(true);
     }
 
-//    @Inject(method = "renderShadows",
-//            at = {@At(
-//            value = "INVOKE_STRING",
-//            target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V",
-//            args = {"ldc=draw entities"}
-//    )})
-//    private void injectRenderShadowBeforeDrawEntities(LevelRendererAccessor levelRenderer, Camera playerCamera, CallbackInfo ci){
-//        if(shouldRenderBlockEntities)
-//        {
-//            var modelMatrix = ShadowRenderer.MODELVIEW;
-//            var projectionMatrix = ShadowRenderer.PROJECTION;
-//            var deltaTracker = Minecraft.getInstance().getTimer();
-//            this.flywheel$renderContext = RenderContextImpl.create((LevelRenderer) levelRenderer, levelRenderer.getLevel(), this.buffers, modelMatrix, projectionMatrix, playerCamera, deltaTracker.getGameTimeDeltaPartialTick(false));
-//            VisualizationManager manager = VisualizationManager.get(levelRenderer.getLevel());
-//            if (manager != null) {
-//                manager.renderDispatcher().onStartLevelRender(this.flywheel$renderContext);
-//                manager.renderDispatcher().afterEntities(this.flywheel$renderContext);
-//            }
-//        }
-//    }
+    @Inject(method = "renderShadows",
+            at = {@At(
+            value = "INVOKE_STRING",
+            target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V",
+            args = {"ldc=draw entities"}
+    )})
+    private void injectRenderShadowBeforeDrawEntities(LevelRendererAccessor levelRenderer, Camera playerCamera, CallbackInfo ci){
+        if(shouldRenderBlockEntities)
+        {
+            var modelMatrix = ShadowRenderer.MODELVIEW;
+            var projectionMatrix = ShadowRenderer.PROJECTION;
+            var deltaTracker = Minecraft.getInstance().getTimer();
+            this.flywheel$renderContext = RenderContextImpl.create((LevelRenderer) levelRenderer, levelRenderer.getLevel(), this.buffers, modelMatrix, projectionMatrix, playerCamera, deltaTracker.getGameTimeDeltaPartialTick(false));
+            VisualizationManager manager = VisualizationManager.get(levelRenderer.getLevel());
+            if (manager != null) {
+                manager.renderDispatcher().onStartLevelRender(this.flywheel$renderContext);
+                manager.renderDispatcher().afterEntities(this.flywheel$renderContext);
+            }
+        }
+    }
 }

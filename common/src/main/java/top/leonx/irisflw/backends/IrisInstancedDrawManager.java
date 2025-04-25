@@ -21,7 +21,6 @@ import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
-import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -142,13 +141,12 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
     }
 
     private void submitDraws() {
-        var isShadow = RenderLayerEventStateManager.isRenderingShadow();
         for (var drawCall : draws) {
             var material = drawCall.material();
             var groupKey = drawCall.groupKey;
             var environment = groupKey.environment();
 
-            var program = programs.get(groupKey.instanceType(), environment.contextShader(), material, PipelineCompiler.OitMode.OFF, isShadow);
+            var program = programs.get(groupKey.instanceType(), environment.contextShader(), material, PipelineCompiler.OitMode.OFF);
             if(program == null) {
                 continue;
             }
@@ -171,13 +169,12 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
     }
 
     private void submitOitDraws(PipelineCompiler.OitMode mode) {
-        var isShadow = RenderLayerEventStateManager.isRenderingShadow();
         for (var drawCall : oitDraws) {
             var material = drawCall.material();
             var groupKey = drawCall.groupKey;
             var environment = groupKey.environment();
 
-            var program = programs.get(groupKey.instanceType(), environment.contextShader(), material, mode, isShadow);
+            var program = programs.get(groupKey.instanceType(), environment.contextShader(), material, mode);
             program.bind();
 
             environment.setupDraw(program);
@@ -244,7 +241,6 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
 
     @Override
     public void renderCrumbling(List<Engine.CrumblingBlock> crumblingBlocks) {
-        var isShadow = RenderLayerEventStateManager.isRenderingShadow();
 
         // Sort draw calls into buckets, so we don't have to do as many shader binds.
         var byType = doCrumblingSort(crumblingBlocks, handle -> {
@@ -282,7 +278,7 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
 
                     for (InstancedDraw draw : instancer.draws()) {
                         CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
-                        var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial, PipelineCompiler.OitMode.OFF, isShadow);
+                        var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial, PipelineCompiler.OitMode.OFF);
                         program.bind();
                         program.setInt("_flw_baseInstance", index);
                         uploadMaterialUniform(program, crumblingMaterial);
