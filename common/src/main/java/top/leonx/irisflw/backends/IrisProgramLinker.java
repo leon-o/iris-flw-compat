@@ -20,8 +20,6 @@ import net.irisshaders.iris.shaderpack.programs.ProgramFallbackResolver;
 import net.irisshaders.iris.shaderpack.programs.ProgramSet;
 import net.irisshaders.iris.shaderpack.programs.ProgramSource;
 import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
-import net.irisshaders.iris.shadows.ShadowRenderer;
-import net.irisshaders.iris.shadows.ShadowRenderingState;
 import net.irisshaders.iris.vertices.IrisVertexFormats;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.jetbrains.annotations.NotNull;

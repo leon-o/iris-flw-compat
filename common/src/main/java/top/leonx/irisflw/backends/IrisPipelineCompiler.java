@@ -1,7 +1,9 @@
 package top.leonx.irisflw.backends;
 
 import dev.engine_room.flywheel.api.instance.InstanceType;
+import dev.engine_room.flywheel.api.material.LightShader;
 import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.api.material.MaterialShaders;
 import dev.engine_room.flywheel.backend.BackendConfig;
 import dev.engine_room.flywheel.backend.MaterialShaderIndices;
 import dev.engine_room.flywheel.backend.Samplers;
@@ -22,7 +24,6 @@ import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.lib.material.CutoutShaders;
 import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.resources.ResourceLocation;
-import dev.engine_room.flywheel.backend.compile.PipelineCompiler.PipelineProgramKey;
 import top.leonx.irisflw.mixin.flw.PipelineCompilerAccessor;
 
 import java.util.*;
@@ -31,9 +32,6 @@ public class IrisPipelineCompiler {
     private static final Set<IrisPipelineCompiler> ALL = Collections.newSetFromMap(new WeakHashMap<>());
 
     private static final Compile<PipelineProgramKey> PIPELINE = new Compile<>();
-
-//    private static UberShaderComponent FOG;
-//    private static UberShaderComponent CUTOUT;
 
     private static final ResourceLocation API_IMPL_VERT = ResourceUtil.rl("internal/api_impl.vert");
     private static final ResourceLocation API_IMPL_FRAG = ResourceUtil.rl("internal/api_impl.frag");
@@ -45,7 +43,7 @@ public class IrisPipelineCompiler {
         ALL.add(this);
     }
 
-    public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode oit) {
+    public GlProgram get(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode oit, boolean isShadow) {
         var light = material.light();
         var cutout = material.cutout();
         var shaders = material.shaders();
@@ -61,7 +59,7 @@ public class IrisPipelineCompiler {
         MaterialShaderIndices.cutoutSources()
                 .index(cutout.source());
 
-        return harness.get(new PipelineCompiler.PipelineProgramKey(instanceType, contextShader, light, shaders, cutout != CutoutShaders.OFF, FrameUniforms.debugOn(), oit));
+        return harness.get(new PipelineProgramKey(instanceType, contextShader, light, shaders, cutout != CutoutShaders.OFF, FrameUniforms.debugOn(), oit, isShadow));
     }
 
     public void delete() {
@@ -69,8 +67,6 @@ public class IrisPipelineCompiler {
     }
 
     public static void deleteAll() {
-//        createFogComponent();
-//        createCutoutComponent();
         ALL.forEach(IrisPipelineCompiler::delete);
     }
 
@@ -199,5 +195,36 @@ public class IrisPipelineCompiler {
 
         var harness = new IrisCompilationHarness<>(pipeline.compilerMarker(), sources, harnessStitcher);
         return new IrisPipelineCompiler(harness);
+    }
+
+    public record PipelineProgramKey(InstanceType<?> instanceType, ContextShader contextShader, LightShader light, MaterialShaders materialShaders, boolean useCutout, boolean debugEnabled, PipelineCompiler.OitMode oit, boolean isShadow) {
+
+        public InstanceType<?> instanceType() {
+            return this.instanceType;
+        }
+
+        public ContextShader contextShader() {
+            return this.contextShader;
+        }
+
+        public LightShader light() {
+            return this.light;
+        }
+
+        public MaterialShaders materialShaders() {
+            return this.materialShaders;
+        }
+
+        public boolean useCutout() {
+            return this.useCutout;
+        }
+
+        public boolean debugEnabled() {
+            return this.debugEnabled;
+        }
+
+        public PipelineCompiler.OitMode oit() {
+            return this.oit;
+        }
     }
 }
