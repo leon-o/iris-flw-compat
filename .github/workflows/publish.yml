@@ -19,12 +19,12 @@ on:
         description: 'Minecraft Version'
         required: true
         type: 'string'
-        default: '1.20.1'
+        default: '1.21.1'
       version:
         description: 'Version'
         required: true
         type: 'string'
-        default: '1.0.0'
+        default: '2.0.0'
       version_type:
         description: 'Version Type'
         required: true
@@ -61,7 +61,7 @@ on:
         default: true
 
 env:
-  JAVA_VERSION: 17
+  JAVA_VERSION: 21
 
 permissions:
   contents: write
@@ -84,7 +84,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: "temurin"
-          java-version: 17
+          java-version: 21
 
       - name: Make Gradle Wrapper Executable
         if: ${{ runner.os != 'Windows' }}
@@ -120,7 +120,7 @@ jobs:
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
           java: |
-            Java 17
+            Java 21
           game-versions: |
             ${{inputs.mc_version}}
 
@@ -142,7 +142,7 @@ jobs:
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
           java: |
-            Java 17
+            Java 21
           game-versions: |
             ${{inputs.mc_version}}
 
@@ -177,7 +177,7 @@ jobs:
           files: neoforge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
           java: |
-            Java 17
+            Java 21
           game-versions: |
             ${{inputs.mc_version}}
 
@@ -200,7 +200,7 @@ jobs:
           files: neoforge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
           java: |
-            Java 17
+            Java 21
           game-versions: |
             ${{inputs.mc_version}}
 
