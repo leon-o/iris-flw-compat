@@ -33,3 +33,6 @@ config = "irisflw.mixins.flw.json"
 
 [[mixins]]
 config = "irisflw.mixins.iris.json"
+
+[[mixins]]
+config = "irisflw.mixins.neoforge.json"

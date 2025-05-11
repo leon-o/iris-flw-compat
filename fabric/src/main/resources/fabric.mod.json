@@ -15,15 +15,12 @@
   "icon": "assets/irisflw/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "top.leonx.irisflw.fabric.ExampleModFabric"
-    ],
     "client": [
-      "top.leonx.irisflw.fabric.client.ExampleModFabricClient"
+      "top.leonx.irisflw.fabric.IrisFlwFabric"
     ]
   },
   "mixins": [
-    "irisflw.mixins.json"
+    "irisflw.mixins.fabric.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.10",

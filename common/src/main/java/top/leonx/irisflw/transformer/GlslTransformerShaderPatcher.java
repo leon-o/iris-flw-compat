@@ -32,7 +32,6 @@ import io.github.douira.glsl_transformer.ast.traversal.ASTVisitor;
 import io.github.douira.glsl_transformer.parser.ParseShape;
 import net.irisshaders.iris.helpers.StringPair;
 import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
-import org.jetbrains.annotations.NotNull;
 import top.leonx.irisflw.IrisFlw;
 
 import java.util.HashMap;
@@ -186,21 +185,19 @@ public class GlslTransformerShaderPatcher {
     private ChildNodeList<ExternalDeclaration> ProcessFlywheelPredefine(TranslationUnit tree, ContextParameter parameter) {
         var beforeDeclarationContent = new StringBuilder();
 
-        if (IrisFlw.isUsingExtendedVertexFormat()) {
-            beforeDeclarationContent.append("vec4 _flw_at_tangent;");
-            beforeDeclarationContent.append("vec4 _flw_at_midBlock;");
-            beforeDeclarationContent.append("vec4 _flw_mc_midTexCoord;");
-            beforeDeclarationContent.append(getUnpackFunctions());
-        } else {
+        if (!IrisFlw.isUsingExtendedVertexFormat()) {
             beforeDeclarationContent.append("vec4 _flw_fake_tangent;");
         }
 
         var flwTree = parameter.flwTree;
         var flwSource = parameter.flwVertexTemplate;
-//        genHeadSource(beforeDeclarationContent, flwTree);
-//        genCommonSource(beforeDeclarationContent, flwTree);
-        var additionDeclarations = flwTransformer.parseNodeSeparate(flwTransformer.getRootSupplier(), ParseShape.EXTERNAL_DECLARATION, beforeDeclarationContent.toString());
-        flwTree.injectNode(ASTInjectionPoint.BEFORE_DECLARATIONS, additionDeclarations);
+
+        if(!beforeDeclarationContent.isEmpty())
+        {
+            var additionDeclarations = flwTransformer.parseNodeSeparate(flwTransformer.getRootSupplier(), ParseShape.EXTERNAL_DECLARATION, beforeDeclarationContent.toString());
+            flwTree.injectNode(ASTInjectionPoint.BEFORE_DECLARATIONS, additionDeclarations);
+        }
+
         var flwPredefineRoot = flwTree.getRoot();
 
         //This ensures that the shader code correctly transforms the _flw_at_tangent and the _flw_mc_midTexCoord.
@@ -233,37 +230,6 @@ public class GlslTransformerShaderPatcher {
         return ChildNodeList.collect(flwTree.getChildren().stream().filter(x->x!=mainFunc), flwTree);
     }
 
-    @NotNull
-    private static String getUnpackFunctions() {
-        return """
-                float unpackTangentX(int val) {
-                    return float(val & 255) * 0.007874016 - 1.0;
-                }
-                float unpackTangentY(int val) {
-                    return float((val >> 8) & 255) * 0.007874016 - 1.0;
-                }
-                float unpackTangentZ(int val) {
-                    return float((val >> 16) & 255) * 0.007874016 - 1.0;
-                }
-                float unpackTangentW(int val) {
-                    return float((val >> 24) & 255) * 0.007874016 - 1.0;
-                }
-                float unpackMidBlockX(int val) {
-                    return float(val & 255) * 0.015625 - 2.0;
-                }
-                float unpackMidBlockY(int val) {
-                    return float((val >> 8) & 255) * 0.015625 - 2.0;
-                }
-                float unpackMidBlockZ(int val) {
-                    return float((val >> 16) & 255) * 0.015625 - 2.0;
-                }
-                // In Iris 1.7 and newer, the last component stores the light level of the current block
-                float unpackMidBlockW(int val) {
-                    return float((val >> 24) & 255);
-                }
-                """;
-    }
-
     private ChildNodeList<Statement> ProcessFlywheelCreateVertex(TranslationUnit irisTree, ContextParameter context) {
         StringBuilder createVertexBuilder = new StringBuilder();
         createVertexBuilder.append("{\n");
@@ -272,20 +238,10 @@ public class GlslTransformerShaderPatcher {
         var flwSource = context.flwVertexTemplate;
 
         var flwMainBody = flwTree.getOneMainDefinitionBody();
-//        flwMainBody.getRoot().rename("gl_Position", "_flw_patched_vertex_pos");
 
         createVertexBuilder.append(ASTPrinter.printSimple(flwMainBody));
 
-        if (IrisFlw.isUsingExtendedVertexFormat()) {
-
-            createVertexBuilder.append("""
-                    _flw_mc_midTexCoord = vec4(_flw_v_packed_extended.xy, 0.0, 1.0);
-                    int pTangent = floatBitsToInt(_flw_v_packed_extended.z);
-                    int pMidBlock = floatBitsToInt(_flw_v_packed_extended.w);
-                    _flw_at_tangent = vec4(unpackTangentX(pTangent), unpackTangentY(pTangent), unpackTangentZ(pTangent), unpackTangentW(pTangent));
-                    _flw_at_midBlock = vec4(unpackMidBlockX(pMidBlock), unpackMidBlockY(pMidBlock), unpackMidBlockZ(pMidBlock), unpackMidBlockW(pMidBlock));
-                    """);
-        } else {
+        if (!IrisFlw.isUsingExtendedVertexFormat()) {
             //fake tangent
             createVertexBuilder.append(String.format("""
                     vec3 skewedNormal = %s+vec3(0.5,0.5,0.5);
@@ -295,12 +251,9 @@ public class GlslTransformerShaderPatcher {
 
         createVertexBuilder.append("\n}");
 
-//        var prependMainFuncContent = JcppProcessor.glslPreprocessSource(createVertexBuilder.toString(), List.of(new StringPair("VERTEX_SHADER", "1")));
 
         var compoundStatement = flwTransformer.parseNodeSeparate(flwTransformer.getRootSupplier(), CompoundStatementShape, createVertexBuilder.toString());
-//        compoundStatement.getRoot().rename("i", "_flw_instance");
 
-        //tree.prependMainFunctionBody(prependMainFuncStatements);
         return compoundStatement.getStatements();
     }
 

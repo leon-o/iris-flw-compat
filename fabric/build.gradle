@@ -46,7 +46,8 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
 //    modCompileOnly ("com.jozufozu.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}")
-//    modCompileOnly "maven.modrinth:iris:$iris_version"
+    modCompileOnly ("maven.modrinth:iris:${iris_version}-fabric")
+    modCompileOnly ("maven.modrinth:sodium:${sodium_version}-fabric")
 //
 //    localRuntime ("org.joml:joml:1.10.4")
 //    localRuntime ('org.anarres:jcpp:1.4.14')

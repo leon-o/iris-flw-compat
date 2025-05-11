@@ -30,13 +30,10 @@ public abstract class MixinShadowRenderer {
     @Shadow
     private RenderBuffers buffers;
 
-    private RenderContextImpl flywheel$renderContext;
-
     @Inject(method = "renderShadows",at = @At("HEAD"))
     private void injectRenderShadow(LevelRendererAccessor levelRendererAccessor, Camera camera, CallbackInfo ci){
         if (shouldRenderBlockEntities){
             RenderLayerEventStateManager.setRenderingShadow(true);
-            RenderLayerEventStateManager.setSkip(false);
         }
     }
 
@@ -44,7 +41,6 @@ public abstract class MixinShadowRenderer {
     @Inject(method = "renderShadows",at = @At("TAIL"))
     private void injectRenderShadowTail(LevelRendererAccessor levelRendererAccessor, Camera camera, CallbackInfo ci){
         RenderLayerEventStateManager.setRenderingShadow(false);
-        RenderLayerEventStateManager.setSkip(true);
     }
 
     @Inject(method = "renderShadows",
@@ -59,11 +55,11 @@ public abstract class MixinShadowRenderer {
             var modelMatrix = ShadowRenderer.MODELVIEW;
             var projectionMatrix = ShadowRenderer.PROJECTION;
             var deltaTracker = Minecraft.getInstance().getTimer();
-            this.flywheel$renderContext = RenderContextImpl.create((LevelRenderer) levelRenderer, levelRenderer.getLevel(), this.buffers, modelMatrix, projectionMatrix, playerCamera, deltaTracker.getGameTimeDeltaPartialTick(false));
+            var flywheel$renderContext = RenderContextImpl.create((LevelRenderer) levelRenderer, levelRenderer.getLevel(), this.buffers, modelMatrix, projectionMatrix, playerCamera, deltaTracker.getGameTimeDeltaPartialTick(false));
             VisualizationManager manager = VisualizationManager.get(levelRenderer.getLevel());
             if (manager != null) {
-                manager.renderDispatcher().onStartLevelRender(this.flywheel$renderContext);
-                manager.renderDispatcher().afterEntities(this.flywheel$renderContext);
+//                manager.renderDispatcher().onStartLevelRender(flywheel$renderContext);
+                manager.renderDispatcher().afterEntities(flywheel$renderContext);
             }
         }
     }

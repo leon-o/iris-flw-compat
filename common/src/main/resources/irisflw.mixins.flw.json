@@ -4,13 +4,16 @@
   "package": "top.leonx.irisflw.mixin.flw",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "IrisHandlerMixin",
     "MixinFlwPrograms",
     "MixinProgramStitcher",
     "ShaderCompilerAccessor",
     "FlwCompilationAccessor",
     "MixinPipelineCompiler",
-    "PipelineCompilerAccessor"
+    "PipelineCompilerAccessor",
+    "vertex.MixinMeshHelper",
+    "SimpleQuadMeshAccessor",
+    "MixinPooledMesh",
+    "vertex.MixinMeshEmitter",
   ],
   "injectors": {
     "defaultRequire": 1

@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import top.leonx.irisflw.backends.IrisPipelineCompiler;
+import top.leonx.irisflw.backend.IrisPipelineCompiler;
 
 @Mixin(value = PipelineManager.class)
 public class MixinPipelineManager {

@@ -10,7 +10,6 @@
     "MixinProgramSamplers",
     "MixinProgramSource",
     "MixinProgramDirectives",
-    "AccessorExtendedShader",
     "MixinShadowRenderer",
     "MixinPipelineManager"
   ],

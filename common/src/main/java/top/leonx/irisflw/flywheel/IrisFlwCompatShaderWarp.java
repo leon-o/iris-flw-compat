@@ -4,6 +4,8 @@ import com.mojang.blaze3d.shaders.Uniform;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.gl.shader.GlShader;
 import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
+import net.irisshaders.iris.shadows.ShadowRenderer;
+import net.irisshaders.iris.shadows.ShadowRenderingState;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import net.irisshaders.iris.uniforms.CapturedRenderingState;
@@ -40,8 +42,14 @@ public class IrisFlwCompatShaderWarp extends GlProgram {
 
     public void bind() {
         shader.apply();
-        setProjectionMatrix((Matrix4f) CapturedRenderingState.INSTANCE.getGbufferProjection());
-        setModelViewMatrix((Matrix4f)CapturedRenderingState.INSTANCE.getGbufferModelView());
+        if(RenderLayerEventStateManager.isRenderingShadow())
+        {
+            setProjectionMatrix(ShadowRenderer.PROJECTION);
+            setModelViewMatrix(ShadowRenderer.MODELVIEW);
+        }else{
+            setProjectionMatrix((Matrix4f) CapturedRenderingState.INSTANCE.getGbufferProjection());
+            setModelViewMatrix((Matrix4f)CapturedRenderingState.INSTANCE.getGbufferModelView());
+        }
     }
 
     public void clear(){
