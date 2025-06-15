@@ -1,9 +1,11 @@
-**This version only compatible with Iris&Oculus 1.7.0 and above.**
+**This version only compatible with _Iris_ 1.8.0 above and _Sodium_.**
 
-TL;DR: 
-- Fix issues in **PBR** and **Parallax Occlusion Mapping**.
-- Support **Seus PTGI HRR 3**, **Shrimple**, and **UShader**, etc.
-- Includes Flywheel in the jar file, so you don't need to install it separately.
+### 2.0.1
+- Fix issue [#203](https://github.com/leon-o/iris-flw-compat/issues/203): Disable shaders will result in improper rendering.
+- Maybe fix issue [#205](https://github.com/leon-o/iris-flw-compat/issues/205). Same reason as above issue, I guess.
+
+### 2.0.0
+- Support Create 6.0.
 
 ### 1.1.4
 - Fix issue [#168](https://github.com/leon-o/iris-flw-compat/issues/168)

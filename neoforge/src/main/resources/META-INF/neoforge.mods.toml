@@ -28,6 +28,18 @@ versionRange = "[1.21.1,)"
 ordering = "NONE"
 side = "CLIENT"
 
+[[dependencies.irisflw]]
+modId = "sodium"
+type = "required"
+versionRange = "[0.6.9,)"
+side = "CLIENT"
+
+[[dependencies.irisflw]]
+modId = "iris"
+type = "required"
+versionRange = "[1.8.1,)"
+side = "CLIENT"
+
 [[mixins]]
 config = "irisflw.mixins.flw.json"
 

@@ -27,7 +27,8 @@ import top.leonx.irisflw.IrisFlw;
 import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
 import top.leonx.irisflw.accessors.ProgramSourceAccessor;
-import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
+import top.leonx.irisflw.flywheel.IrisFlwCompatGlProgram;
+import top.leonx.irisflw.flywheel.IrisFlwCompatGlProgramBase;
 import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
 import top.leonx.irisflw.transformer.GlslTransformerShaderPatcher;
 
@@ -49,7 +50,10 @@ public class IrisProgramLinker extends ProgramLinker {
 
     public GlProgram link(List<GlShader> shaders, Consumer<GlProgram> preLink) {
         // this probably doesn't need caching
-        return linkInternal(shaders, preLink).unwrap();
+        LinkResult linkResult = linkInternal(shaders, preLink);
+        if(linkResult == null || linkResult instanceof LinkResult.Failure)
+            return IrisFlwCompatGlProgramBase.Invalid.INSTANCE;
+        return linkResult.unwrap();
     }
 
     private LinkResult linkInternal(List<GlShader> shaders, Consumer<GlProgram> preLink) {
@@ -127,7 +131,7 @@ public class IrisProgramLinker extends ProgramLinker {
         }
 
         if (override != null) {
-            return LinkResult.success(new IrisFlwCompatShaderWarp(override, ShaderType.VERTEX, name), "");
+            return LinkResult.success(new IrisFlwCompatGlProgram(override, ShaderType.VERTEX, name), "");
         }
         return null;
     }

@@ -33,6 +33,7 @@ import io.github.douira.glsl_transformer.parser.ParseShape;
 import net.irisshaders.iris.helpers.StringPair;
 import net.irisshaders.iris.shaderpack.preprocessor.JcppProcessor;
 import top.leonx.irisflw.IrisFlw;
+import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -83,6 +84,7 @@ public class GlslTransformerShaderPatcher {
     private static final Pattern boxCoordDetector = Pattern.compile("BoxCoord");
 
     private static final Pattern versionPattern = Pattern.compile("^.*#version\\s+(\\d+)", Pattern.DOTALL);
+    private static final boolean useLightSector = false;
 
     public GlslTransformerShaderPatcher() {
         transformer = new SingleASTTransformer<>() {
@@ -132,7 +134,10 @@ public class GlslTransformerShaderPatcher {
         root.replaceReferenceExpressions(transformer, "gl_Vertex", String.format("inverse(gl_ProjectionMatrix*gl_ModelViewMatrix)* flw_viewProjection * %s", FLW_VERTEX_POS_DECL));
         root.replaceReferenceExpressions(transformer, "gl_MultiTexCoord0", String.format("vec4(%s,0,1)", flw_vertexTexCoord));
         root.replaceReferenceExpressions(transformer, "gl_Normal", flw_vertexNormal);
-        root.replaceReferenceExpressions(transformer, "gl_Color", flw_vertexColor);
+        if(!RenderLayerEventStateManager.isRenderingShadow() && useLightSector)
+            root.replaceReferenceExpressions(transformer, "gl_Color", String.format("%s * vec4(_flw_ao, _flw_ao, _flw_ao, 1)", flw_vertexColor));
+        else
+            root.replaceReferenceExpressions(transformer, "gl_Color", flw_vertexColor);
 
         root.replaceExpressionMatches(transformer, ftransformExpr, String.format("flw_viewProjection * %s", FLW_VERTEX_POS_DECL));
 
@@ -156,10 +161,10 @@ public class GlslTransformerShaderPatcher {
             root.replaceReferenceExpressions(transformer, "at_midBlock", getZeroFromDimension(atMidBlockDim));
         }
 
-        if (parameter.hasBoxCoord) {
-            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", String.format("(vec4(max(%s,texture3D(uLightVolume,BoxCoord).rg)*240.0,0,1))", flw_vertexLight));
-        } else {
-            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", String.format("(vec4(%s*240.0,0,1))", flw_vertexLight));
+        // TODO do not use RenderLayerEventStateManager.isRenderingShadow()
+        if(!RenderLayerEventStateManager.isRenderingShadow())
+        {
+            root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", String.format("(vec4(%s*256.0,0,1))", flw_vertexLight));
         }
     }
 
@@ -187,6 +192,12 @@ public class GlslTransformerShaderPatcher {
 
         if (!IrisFlw.isUsingExtendedVertexFormat()) {
             beforeDeclarationContent.append("vec4 _flw_fake_tangent;");
+        }
+
+        // TODO do not use RenderLayerEventStateManager.isRenderingShadow()
+        if(!RenderLayerEventStateManager.isRenderingShadow() && useLightSector)
+        {
+            beforeDeclarationContent.append("float _flw_ao;");
         }
 
         var flwTree = parameter.flwTree;
@@ -248,6 +259,15 @@ public class GlslTransformerShaderPatcher {
                     _flw_fake_tangent = vec4(normalize(skewedNormal - %s*dot(skewedNormal, %s)).xyz,1.0);
                     """,flw_vertexNormal, flw_vertexNormal, flw_vertexNormal));
         }
+        // TODO do not use RenderLayerEventStateManager.isRenderingShadow()
+        if(!RenderLayerEventStateManager.isRenderingShadow() && useLightSector) {
+            createVertexBuilder.append("""
+                    FlwLightAo _flw_light;
+                    flw_light(flw_vertexPos.xyz, flw_vertexNormal, _flw_light);
+                    flw_vertexLight = _flw_light.light;
+                    _flw_ao = _flw_light.ao;
+                    """);
+        }
 
         createVertexBuilder.append("\n}");
 
@@ -306,8 +326,6 @@ public class GlslTransformerShaderPatcher {
 
     public static class ContextParameter implements JobParameters {
 //        public Context ctx;
-
-        public boolean useExtendedVertexFormat;
 
         public boolean hasBoxCoord;
 

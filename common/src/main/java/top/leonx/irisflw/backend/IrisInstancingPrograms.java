@@ -10,7 +10,7 @@ import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.backend.util.AtomicReferenceCounted;
 import org.jetbrains.annotations.Nullable;
-import top.leonx.irisflw.flywheel.IrisFlwCompatShaderWarp;
+import top.leonx.irisflw.flywheel.IrisFlwCompatGlProgramBase;
 
 import java.util.List;
 
@@ -73,8 +73,8 @@ public class IrisInstancingPrograms extends AtomicReferenceCounted {
         setInstance(null);
     }
 
-    public IrisFlwCompatShaderWarp get(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode mode, boolean isShadow) {
-        return (IrisFlwCompatShaderWarp)pipeline.get(instanceType, contextShader, material, mode, isShadow);
+    public IrisFlwCompatGlProgramBase get(InstanceType<?> instanceType, ContextShader contextShader, Material material, PipelineCompiler.OitMode mode, boolean isShadow) {
+        return (IrisFlwCompatGlProgramBase)pipeline.get(instanceType, contextShader, material, mode, isShadow);
     }
 
     public OitPrograms oitPrograms() {

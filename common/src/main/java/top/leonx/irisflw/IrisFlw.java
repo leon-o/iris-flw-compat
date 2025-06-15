@@ -17,6 +17,6 @@ public final class IrisFlw {
     }
 
     public static boolean isUsingExtendedVertexFormat() {
-        return true;
+        return isShaderPackInUse();
     }
 }

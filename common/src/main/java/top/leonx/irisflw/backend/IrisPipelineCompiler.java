@@ -111,7 +111,7 @@ public class IrisPipelineCompiler {
                         .withResource(key -> key.materialShaders()
                                 .vertexSource())
                         .withComponents(vertexComponents)
-                        .withResource(IrisFlw.isUsingExtendedVertexFormat() ? IrisInternalVertex.EXT_LAYOUT_SHADER : IrisInternalVertex.LAYOUT_SHADER)
+                        .withResource(($)->IrisFlw.isUsingExtendedVertexFormat() ? IrisInternalVertex.EXT_LAYOUT_SHADER : IrisInternalVertex.LAYOUT_SHADER)
                         .withComponent(key -> pipeline.assembler()
                                 .assemble(key.instanceType()))
                         .withResource(pipeline.vertexMain()))
