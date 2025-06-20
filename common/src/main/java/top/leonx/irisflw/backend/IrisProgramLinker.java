@@ -1,5 +1,6 @@
 package top.leonx.irisflw.backend;
 
+import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.core.LinkResult;
 import dev.engine_room.flywheel.backend.compile.core.ProgramLinker;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
@@ -23,6 +24,7 @@ import net.irisshaders.iris.shaderpack.properties.ShaderProperties;
 import net.irisshaders.iris.vertices.IrisVertexFormats;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import top.leonx.irisflw.IrisFlw;
 import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramDirectivesAccessor;
@@ -30,7 +32,8 @@ import top.leonx.irisflw.accessors.ProgramSourceAccessor;
 import top.leonx.irisflw.flywheel.IrisFlwCompatGlProgram;
 import top.leonx.irisflw.flywheel.IrisFlwCompatGlProgramBase;
 import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
-import top.leonx.irisflw.transformer.GlslTransformerShaderPatcher;
+import top.leonx.irisflw.transformer.GlslTransformerFragPatcher;
+import top.leonx.irisflw.transformer.GlslTransformerVertPatcher;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -42,10 +45,19 @@ import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
 public class IrisProgramLinker extends ProgramLinker {
     private final Map<ProgramSet,ProgramFallbackResolver> resolvers = new HashMap<>();
     private final Iterable<StringPair> environmentDefines;
-    private final GlslTransformerShaderPatcher patcher;
+    private final GlslTransformerVertPatcher vertPatcher;
+
+    public static final boolean PATCH_FRAG = false;
+
+    private GlslTransformerFragPatcher fragPatcher;
+
+    public ContextShader contextShader = ContextShader.DEFAULT;
+
     public IrisProgramLinker() {
         environmentDefines = StandardMacros.createStandardEnvironmentDefines();
-        patcher = new GlslTransformerShaderPatcher();
+        vertPatcher = new GlslTransformerVertPatcher();
+        if(PATCH_FRAG)
+            fragPatcher = new GlslTransformerFragPatcher();
     }
 
     public GlProgram link(List<GlShader> shaders, Consumer<GlProgram> preLink) {
@@ -62,32 +74,24 @@ public class IrisProgramLinker extends ProgramLinker {
 
         String vertexSource = null;
         String vertexShaderName = null;
+        String fragSource = null;
+        String fragShaderName = null;
         for (GlShader shader : shaders) {
-            if(shader instanceof IntermediateGlShader intermediateGlShader && intermediateGlShader.type == ShaderType.VERTEX){
-                vertexSource = intermediateGlShader.getSource();
-                vertexShaderName = intermediateGlShader.getName();
-                break;
-            }
+            if (shader instanceof IntermediateGlShader intermediateGlShader)
+                if (intermediateGlShader.type == ShaderType.VERTEX) {
+                    vertexSource = intermediateGlShader.getSource();
+                    vertexShaderName = intermediateGlShader.getName();
+                }else if (intermediateGlShader.type == ShaderType.FRAGMENT)
+                {
+                    fragSource = intermediateGlShader.getSource();
+                    fragShaderName = intermediateGlShader.getName();
+                }
         }
 
-        if (pipeline instanceof IrisRenderingPipeline newPipeline && vertexSource != null && vertexShaderName != null) {
-            ProgramSet programSet = ((IrisRenderingPipelineAccessor) newPipeline).getProgramSet();
-            var isShadow = RenderLayerEventStateManager.isRenderingShadow();
-            Optional<ProgramSource> sourceReferenceOpt = getProgramSourceReference(programSet, vertexShaderName, isShadow);
-            if(sourceReferenceOpt.isEmpty())
-                return null;
-
-            ProgramSource sourceRef = sourceReferenceOpt.get();
-            if(sourceRef.getVertexSource().isEmpty())
-                return null;
-
-            String irisShaderSource = sourceRef.getVertexSource().get();
-            String newVertexSource = patcher.patch(irisShaderSource, vertexSource);
-            newVertexSource = JcppProcessor.glslPreprocessSource(newVertexSource, environmentDefines);
-            ProgramSource newProgramSource = programSourceOverrideVertexSource(vertexShaderName, programSet, sourceRef, newVertexSource);
-            ((ProgramDirectivesAccessor) newProgramSource.getDirectives()).setFlwAlphaTestOverride(
-                    new AlphaTest(AlphaTestFunction.GREATER, 0.5f));
-            return createWorldProgramBySource(vertexShaderName, isShadow, (IrisRenderingPipelineAccessor) newPipeline, newProgramSource);
+        if (pipeline instanceof IrisRenderingPipeline newPipeline) {
+            if (vertexSource != null && vertexShaderName != null && fragSource != null && fragShaderName != null) {
+                return getIrisShaderLinkResult((IrisRenderingPipelineAccessor) newPipeline, vertexShaderName, vertexSource, fragShaderName, fragSource);
+            }
         }
 
         var out = new GlProgram(handle);
@@ -107,6 +111,34 @@ public class IrisProgramLinker extends ProgramLinker {
             out.delete();
             return LinkResult.failure(log);
         }
+    }
+
+    private @Nullable LinkResult getIrisShaderLinkResult(IrisRenderingPipelineAccessor newPipeline, String vertexName, String vertexSource, String fragName, String newFragSource) {
+        ProgramSet programSet = newPipeline.getProgramSet();
+        var isShadow = RenderLayerEventStateManager.isRenderingShadow();
+        var isEmbedded = contextShader == ContextShader.EMBEDDED;
+        Optional<ProgramSource> sourceReferenceOpt = getProgramSourceReference(programSet, vertexName, isShadow, isEmbedded);
+        if (sourceReferenceOpt.isEmpty())
+            return null;
+
+        ProgramSource sourceRef = sourceReferenceOpt.get();
+        var vertexRef = sourceRef.getVertexSource().orElseThrow();
+        var fragRef = sourceRef.getFragmentSource().orElseThrow();
+
+        String newVertexSource = vertPatcher.patch(vertexRef, vertexSource, isShadow, isEmbedded, IrisFlw.isUsingExtendedVertexFormat());
+        newVertexSource = JcppProcessor.glslPreprocessSource(newVertexSource, environmentDefines);
+
+        if(PATCH_FRAG)
+            newFragSource = fragPatcher.patch(fragRef, newFragSource);
+        else
+            newFragSource = fragRef;
+
+        var shaderName = vertexName+"_"+fragName;
+
+        ProgramSource newProgramSource = programSourceOverrideVertexSource(shaderName, programSet, sourceRef, newVertexSource, newFragSource);
+        ((ProgramDirectivesAccessor) newProgramSource.getDirectives()).setFlwAlphaTestOverride(
+                new AlphaTest(AlphaTestFunction.GREATER, 0.5f));
+        return createWorldProgramBySource(shaderName, isShadow, newPipeline, newProgramSource);
     }
 
     private static boolean linkSuccessful(int handle) {
@@ -146,7 +178,7 @@ public class IrisProgramLinker extends ProgramLinker {
     }
 
     @NotNull
-    protected ProgramSource programSourceOverrideVertexSource(String shaderName, ProgramSet programSet, ProgramSource source, String vertexSource) {
+    protected ProgramSource programSourceOverrideVertexSource(String shaderName, ProgramSet programSet, ProgramSource source, String vertexSource, String fragSource) {
         ShaderProperties properties = ((ProgramSourceAccessor) source).getShaderProperties();
         BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) source).getBlendModeOverride();
         //Get a copy of program
@@ -154,10 +186,10 @@ public class IrisProgramLinker extends ProgramLinker {
                 source.getGeometrySource().orElse(null),
                 source.getTessControlSource().orElse(null),
                 source.getTessEvalSource().orElse(null),
-                source.getFragmentSource().orElse(null), programSet, properties, blendModeOverride);
+                fragSource, programSet, properties, blendModeOverride);
     }
 
-    protected Optional<ProgramSource> getProgramSourceReference(ProgramSet programSet, String flwShaderName, boolean isShadow){
+    protected Optional<ProgramSource> getProgramSourceReference(ProgramSet programSet, String flwShaderName, boolean isShadow, boolean isEmbedded){
 
         // Tessellation is currently not supported
         var resolver = resolvers.computeIfAbsent(programSet, ProgramFallbackResolver::new);
@@ -177,7 +209,7 @@ public class IrisProgramLinker extends ProgramLinker {
                     programSet, properties, blendModeOverride));
         }else{
             var refProgramId = ProgramId.Block;
-            if(flwShaderName.contains("embedded")){
+            if(isEmbedded){
                 // Temporarily hardcoded, maybe configurable in the future
                 refProgramId = ProgramId.Terrain;
             }

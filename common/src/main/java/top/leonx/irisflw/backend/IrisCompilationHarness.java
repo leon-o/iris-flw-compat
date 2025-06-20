@@ -1,5 +1,6 @@
 package top.leonx.irisflw.backend;
 
+import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.core.CompilationHarness;
 import dev.engine_room.flywheel.backend.compile.core.ProgramLinker;
 import dev.engine_room.flywheel.backend.compile.core.ShaderCache;
@@ -15,7 +16,7 @@ public class IrisCompilationHarness<K> extends CompilationHarness<K> {
     private final ShaderSources sources;
     private final KeyCompiler<K> compiler;
     private final ShaderCache shaderCache;
-    private final ProgramLinker programLinker;
+    private final IrisProgramLinker programLinker;
     private final Map<K, GlProgram> programs = new HashMap<>();
 
     public IrisCompilationHarness(String marker, ShaderSources sources, KeyCompiler<K> compiler) {
@@ -31,6 +32,11 @@ public class IrisCompilationHarness<K> extends CompilationHarness<K> {
     }
 
     private GlProgram compile(K key) {
+        if(key instanceof IrisPipelineCompiler.PipelineProgramKey pipelineKey) {
+            programLinker.contextShader = pipelineKey.contextShader();
+        }else{
+            programLinker.contextShader = ContextShader.DEFAULT;
+        }
         return this.compiler.compile(key, this.sources, this.shaderCache, this.programLinker);
     }
 

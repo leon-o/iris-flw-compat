@@ -42,7 +42,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
-public class GlslTransformerShaderPatcher {
+public class GlslTransformerVertPatcher {
 
     final static String FLW_VERTEX_POS_DECL = "flw_vertexPos";
     final static String flw_vertexTexCoord = "flw_vertexTexCoord";
@@ -84,9 +84,9 @@ public class GlslTransformerShaderPatcher {
     private static final Pattern boxCoordDetector = Pattern.compile("BoxCoord");
 
     private static final Pattern versionPattern = Pattern.compile("^.*#version\\s+(\\d+)", Pattern.DOTALL);
-    private static final boolean useLightSector = false;
+//    private static final boolean useLightSector = true;
 
-    public GlslTransformerShaderPatcher() {
+    public GlslTransformerVertPatcher() {
         transformer = new SingleASTTransformer<>() {
             {
                 setRootSupplier(RootSupplier.PREFIX_UNORDERED_ED_EXACT);
@@ -134,7 +134,7 @@ public class GlslTransformerShaderPatcher {
         root.replaceReferenceExpressions(transformer, "gl_Vertex", String.format("inverse(gl_ProjectionMatrix*gl_ModelViewMatrix)* flw_viewProjection * %s", FLW_VERTEX_POS_DECL));
         root.replaceReferenceExpressions(transformer, "gl_MultiTexCoord0", String.format("vec4(%s,0,1)", flw_vertexTexCoord));
         root.replaceReferenceExpressions(transformer, "gl_Normal", flw_vertexNormal);
-        if(!RenderLayerEventStateManager.isRenderingShadow() && useLightSector)
+        if(parameter.getUseLightLut())
             root.replaceReferenceExpressions(transformer, "gl_Color", String.format("%s * vec4(_flw_ao, _flw_ao, _flw_ao, 1)", flw_vertexColor));
         else
             root.replaceReferenceExpressions(transformer, "gl_Color", flw_vertexColor);
@@ -195,7 +195,7 @@ public class GlslTransformerShaderPatcher {
         }
 
         // TODO do not use RenderLayerEventStateManager.isRenderingShadow()
-        if(!RenderLayerEventStateManager.isRenderingShadow() && useLightSector)
+        if(parameter.getUseLightLut())
         {
             beforeDeclarationContent.append("float _flw_ao;");
         }
@@ -236,7 +236,6 @@ public class GlslTransformerShaderPatcher {
                 }
         );
 
-        parameter.hasBoxCoord = boxCoordDetector.matcher(flwSource).find();
         var mainFunc = flwTree.getOneMainDefinitionBody().getAncestor(ExternalDeclaration.class);
         return ChildNodeList.collect(flwTree.getChildren().stream().filter(x->x!=mainFunc), flwTree);
     }
@@ -259,8 +258,8 @@ public class GlslTransformerShaderPatcher {
                     _flw_fake_tangent = vec4(normalize(skewedNormal - %s*dot(skewedNormal, %s)).xyz,1.0);
                     """,flw_vertexNormal, flw_vertexNormal, flw_vertexNormal));
         }
-        // TODO do not use RenderLayerEventStateManager.isRenderingShadow()
-        if(!RenderLayerEventStateManager.isRenderingShadow() && useLightSector) {
+
+        if(context.getUseLightLut()) {
             createVertexBuilder.append("""
                     FlwLightAo _flw_light;
                     flw_light(flw_vertexPos.xyz, flw_vertexNormal, _flw_light);
@@ -319,22 +318,34 @@ public class GlslTransformerShaderPatcher {
         };
     }
 
-    public String patch(String irisSource, String flwSource) {
-        return transformer.transform(irisSource, new ContextParameter(flwSource));
+    public String patch(String irisSource, String flwSource, boolean isShadow, boolean isEmbedded, boolean isExtendedVertexFormat){
+        return transformer.transform(irisSource, new ContextParameter(flwSource, isShadow, isEmbedded, isExtendedVertexFormat));
     }
 
 
     public static class ContextParameter implements JobParameters {
 //        public Context ctx;
 
-        public boolean hasBoxCoord;
+        public boolean isShadow;
+
+        public boolean isEmbedded;
+
+        public boolean isExtendedVertexFormat;
 
         public String flwVertexTemplate;
 
         public TranslationUnit flwTree;
 
-        public ContextParameter(String flwVertexSource) {
-            this.flwVertexTemplate = flwVertexSource;
+        public boolean getUseLightLut()
+        {
+            return !isShadow && isEmbedded;
+        }
+
+        public ContextParameter(String flwVertexTemplate, boolean isShadow, boolean isEmbedded, boolean isExtendedVertexFormat) {
+            this.flwVertexTemplate = flwVertexTemplate;
+            this.isShadow = isShadow;
+            this.isEmbedded = isEmbedded;
+            this.isExtendedVertexFormat = isExtendedVertexFormat;
         }
     }
 
