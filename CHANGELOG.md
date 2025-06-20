@@ -1,5 +1,8 @@
 **This version only compatible with _Iris_ 1.8.0 above and _Sodium_.**
 
+### 2.0.2
+- Fix issue [#206](https://github.com/leon-o/iris-flw-compat/issues/206): Lighting not being applied on moving glued contraptions.
+
 ### 2.0.1
 - Fix issue [#203](https://github.com/leon-o/iris-flw-compat/issues/203): Disable shaders will result in improper rendering.
 - Maybe fix issue [#205](https://github.com/leon-o/iris-flw-compat/issues/205). Same reason as above issue, I guess.
