@@ -1,5 +1,8 @@
 **This version only compatible with _Iris_ 1.8.0 above and _Sodium_.**
 
+### 2.0.3
+- Fix issue [#209](https://github.com/leon-o/iris-flw-compat/issues/209): Incompatibility with Vanillin mod on NeoForge 1.21.1.
+
 ### 2.0.2
 - Fix issue [#206](https://github.com/leon-o/iris-flw-compat/issues/206): Lighting not being applied on moving glued contraptions.
 

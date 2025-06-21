@@ -2,7 +2,6 @@ package top.leonx.irisflw.mixin.flw;
 
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.backend.engine.MeshPool;
-import dev.engine_room.flywheel.lib.model.SimpleQuadMesh;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,13 +20,9 @@ public abstract class MixinPooledMesh {
     @Inject(method = "byteSize", at = @At("HEAD"), cancellable = true)
     public void irisflw$byteSize(CallbackInfoReturnable<Integer> cir)
     {
-        if(IrisFlw.isUsingExtendedVertexFormat() && this.mesh instanceof SimpleQuadMesh simpleQuadMesh)
+        if(IrisFlw.isUsingExtendedVertexFormat())
         {
-            var vertexList = ((SimpleQuadMeshAccessor)(Object)simpleQuadMesh).getVertexList();
-            if(vertexList instanceof IrisExtVertexView)
-            {
-                cir.setReturnValue((int) (IrisExtVertexView.STRIDE * this.vertexCount()));
-            }
+            cir.setReturnValue((int) (IrisExtVertexView.STRIDE * this.vertexCount()));
         }
     }
 }
