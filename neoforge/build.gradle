@@ -59,15 +59,14 @@ dependencies {
     modCompileOnly ("maven.modrinth:iris:${iris_version}-neoforge")
 
 //    forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
-    implementation 'io.github.douira:glsl-transformer:2.0.0-pre14'
-
+    localRuntime 'io.github.douira:glsl-transformer:2.0.1'
     localRuntime ("maven.modrinth:iris:${iris_version}-neoforge")
     localRuntime ("maven.modrinth:sodium:${sodium_version}-neoforge")
     modLocalRuntime ("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
     modLocalRuntime ("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
     modLocalRuntime ("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
     modLocalRuntime ("com.tterrag.registrate:Registrate:${registrate_version}")
-    modLocalRuntime ("maven.modrinth:flw-vanillin:1.1.3-neoforge")
+    modLocalRuntime ("dev.engine-room.vanillin:vanillin-neoforge-${flywheel_minecraft_version}:${vanillin_neoforge_version}")
 }
 
 processResources {

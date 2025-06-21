@@ -7,6 +7,7 @@ public final class IrisFlwFabric implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        IrisFlw.LOGGER.info("Iris-Flywheel-Compat initialized!");
+        // Run our common setup.
+        IrisFlw.init();
     }
 }

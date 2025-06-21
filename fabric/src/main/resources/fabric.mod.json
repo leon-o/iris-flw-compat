@@ -20,13 +20,17 @@
     ]
   },
   "mixins": [
-    "irisflw.mixins.fabric.json"
+    "irisflw.mixins.fabric.json",
+    "irisflw.mixins.flw.json",
+    "irisflw.mixins.iris.json"
   ],
   "depends": {
     "fabricloader": ">=0.16.10",
     "minecraft": "~1.21.1",
     "java": ">=21",
-    "fabric-api": "*"
+    "fabric-api": "*",
+    "iris": ">=1.8.1",
+    "flywheel": ">=1.0.0"
   },
   "suggests": {
     "another-mod": "*"

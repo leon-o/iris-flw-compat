@@ -29,6 +29,12 @@ ordering = "NONE"
 side = "CLIENT"
 
 [[dependencies.irisflw]]
+modId = "flywheel"
+type = "required"
+versionRange = "[1.0.0,)"
+side = "CLIENT"
+
+[[dependencies.irisflw]]
 modId = "sodium"
 type = "required"
 versionRange = "[0.6.9,)"

@@ -16,5 +16,5 @@ dependencies {
     modCompileOnly ("maven.modrinth:sodium:${sodium_version}-fabric")
     modCompileOnly ("dev.engine-room.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}")
 
-    implementation 'io.github.douira:glsl-transformer:2.0.0-pre14'
+    implementation 'io.github.douira:glsl-transformer:2.0.1'
 }
