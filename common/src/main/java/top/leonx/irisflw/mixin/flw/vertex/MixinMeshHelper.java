@@ -1,8 +1,9 @@
 package top.leonx.irisflw.mixin.flw.vertex;
 
-import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import dev.engine_room.flywheel.lib.model.SimpleQuadMesh;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,16 +18,16 @@ import java.nio.ByteBuffer;
 @Mixin(targets = "dev.engine_room.flywheel.lib.model.baked.MeshHelper", remap = false)
 public class MixinMeshHelper {
     @Inject(method = "blockVerticesToMesh", remap = false, at = @At("HEAD"), cancellable = true)
-    private static void irisflw$blockVerticesToMesh(MeshData data, String meshDescriptor, CallbackInfoReturnable<SimpleQuadMesh> cir)
+    private static void irisflw$blockVerticesToMesh(BufferBuilder.RenderedBuffer buffer, @Nullable String meshDescriptor, CallbackInfoReturnable<SimpleQuadMesh> cir)
     {
         if(IrisFlw.isUsingExtendedVertexFormat())
         {
-            MeshData.DrawState drawState = data.drawState();
+            BufferBuilder.DrawState drawState = buffer.drawState();
             int vertexCount = drawState.vertexCount();
             long srcStride = drawState.format().getVertexSize();
             IrisExtVertexView vertexView = new IrisExtVertexView();
             long dstStride = vertexView.stride();
-            ByteBuffer src = data.vertexBuffer();
+            ByteBuffer src = buffer.vertexBuffer();
             MemoryBlock dst = MemoryBlock.mallocTracked((long)vertexCount * dstStride);
             long srcPtr = MemoryUtil.memAddress(src);
             long dstPtr = dst.ptr();

@@ -1,6 +1,6 @@
 package top.leonx.irisflw.forge;
 
-import net.neoforged.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod;
 import top.leonx.irisflw.IrisFlw;
 
 @Mod(IrisFlw.MOD_ID)

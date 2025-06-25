@@ -17,7 +17,7 @@ public abstract class MixinMeshEmitter implements VertexConsumer, BlockSensitive
     @Unique
     private int currentBlock = -1;
     @Unique
-    private byte currentRenderType = -1;
+    private short currentRenderType = -1;
     @Unique
     private int currentLocalPosX;
     @Unique
@@ -30,14 +30,14 @@ public abstract class MixinMeshEmitter implements VertexConsumer, BlockSensitive
     {
         if(this.bufferBuilder instanceof BlockSensitiveBufferBuilder blockSensitiveBufferBuilder)
         {
-            blockSensitiveBufferBuilder.beginBlock(this.currentBlock, this.currentRenderType, (byte) 0, this.currentLocalPosX, this.currentLocalPosY, this.currentLocalPosZ);
+            blockSensitiveBufferBuilder.beginBlock((short)this.currentBlock, this.currentRenderType, this.currentLocalPosX, this.currentLocalPosY, this.currentLocalPosZ);
         }
     }
 
 
 
     @Override
-    public void beginBlock(int block, byte renderType, byte blockEmission, int localPosX, int localPosY, int localPosZ) {
+    public void beginBlock(short block, short renderType, int localPosX, int localPosY, int localPosZ) {
         this.currentBlock = block;
         this.currentRenderType = renderType;
         this.currentLocalPosX = localPosX;

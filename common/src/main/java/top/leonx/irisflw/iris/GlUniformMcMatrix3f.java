@@ -1,6 +1,6 @@
 package top.leonx.irisflw.iris;
 
-import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniform;
+import me.jellysquid.mods.sodium.client.gl.shader.uniform.GlUniform;
 import org.joml.Matrix3f;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.system.MemoryStack;

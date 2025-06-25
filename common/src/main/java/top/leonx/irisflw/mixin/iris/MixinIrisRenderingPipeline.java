@@ -41,11 +41,11 @@ public abstract class MixinIrisRenderingPipeline implements IrisRenderingPipelin
     public abstract ShaderInstance callCreateShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha,
                                                     VertexFormat vertexFormat, FogMode fogMode,
                                                     boolean isIntensity, boolean isFullbright, boolean isGlint,
-                                                    boolean isText, boolean isIE) throws IOException;
+                                                    boolean isText) throws IOException;
 
     @Invoker(remap = false)
     @Override
     public abstract ShaderInstance callCreateShadowShader(String name, ProgramSource source, ProgramId programId, AlphaTest fallbackAlpha,
                                                           VertexFormat vertexFormat, boolean isIntensity, boolean isFullbright,
-                                                          boolean isText, boolean isIE) throws IOException;
+                                                          boolean isText) throws IOException;
 }

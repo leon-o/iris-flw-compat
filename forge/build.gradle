@@ -3,24 +3,22 @@ plugins {
 }
 
 loom {
-    neoForge {
+    forge {
+        mixinConfig "irisflw.mixins.flw.json"
+        mixinConfig "irisflw.mixins.iris.json"
+        mixinConfig "irisflw.mixins.forge.json"
     }
-    mixin {
-        useLegacyMixinAp = true
-        add("main", "irisflw.refmap.json")
-    }
-
     runs {
-        configureEach {
-            property("forge.logging.markers", "")
-            property("forge.logging.console.level", "debug")
+        client {
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
         }
     }
 }
 
 architectury {
     platformSetupLoomIde()
-    neoForge()
+    forge()
 }
 
 configurations {
@@ -30,7 +28,7 @@ configurations {
     }
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
-    developmentNeoForge.extendsFrom common
+    developmentForge.extendsFrom common
 
     // Files in this configuration will be bundled into your mod using the Shadow plugin.
     // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
@@ -50,29 +48,29 @@ repositories {
 }
 
 dependencies {
-    neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
+    forge "net.minecraftforge:forge:$rootProject.forge_version"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
-    shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
+    shadowBundle project(path: ':common', configuration: 'transformProductionForge')
 
-    modCompileOnly ("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
-    modCompileOnly ("maven.modrinth:iris:${iris_version}-neoforge")
+    modCompileOnly ("dev.engine-room.flywheel:flywheel-forge-${flywheel_minecraft_version}:${flywheel_forge_version}")
+    modCompileOnly ("maven.modrinth:oculus:${oculus_version}-forge")
 
-//    forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
-    localRuntime 'io.github.douira:glsl-transformer:2.0.1'
-    localRuntime ("maven.modrinth:iris:${iris_version}-neoforge")
-    localRuntime ("maven.modrinth:sodium:${sodium_version}-neoforge")
+    forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
+//    localRuntime 'io.github.douira:glsl-transformer:2.0.1'
+    modLocalRuntime ("maven.modrinth:oculus:${oculus_version}-forge")
+    modLocalRuntime ("maven.modrinth:embeddium:${embeddium_version}-forge")
     modLocalRuntime ("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
-    modLocalRuntime ("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
+    modLocalRuntime ("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}")
 //    modLocalRuntime ("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
-    modLocalRuntime ("com.tterrag.registrate:Registrate:${registrate_version}")
-    modLocalRuntime ("dev.engine-room.vanillin:vanillin-neoforge-${flywheel_minecraft_version}:${vanillin_neoforge_version}")
+    modLocalRuntime("com.tterrag.registrate:Registrate:${registrate_version}")
+    modLocalRuntime ("dev.engine-room.vanillin:vanillin-forge-${flywheel_minecraft_version}:${vanillin_forge_version}")
 }
 
 processResources {
     inputs.property 'version', project.version
 
-    filesMatching('META-INF/neoforge.mods.toml') {
+    filesMatching('META-INF/mods.toml') {
         expand version: project.version
     }
 }

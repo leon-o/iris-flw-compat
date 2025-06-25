@@ -33,7 +33,7 @@ public class MixinModelBlockRenderer {
     @Inject(method = "tesselateBlock", at = @At("HEAD"))
     private void irisflw$tesselateBlock$head(BlockAndTintGetter level, BakedModel model, BlockState state, BlockPos pos, PoseStack poseStack, VertexConsumer consumer, boolean checkSides, RandomSource random, long seed, int packedOverlay, CallbackInfo ci) {
         if(consumer instanceof BlockSensitiveBufferBuilder blockSensitiveBufferBuilder) {
-            blockSensitiveBufferBuilder.beginBlock(irisflw$resolveBlockId(state), (byte) 0, (byte) state.getLightEmission(), pos.getX(), pos.getY(), pos.getZ());
+            blockSensitiveBufferBuilder.beginBlock(irisflw$resolveBlockId(state), (byte) 0, pos.getX(), pos.getY(), pos.getZ());
         }
     }
 

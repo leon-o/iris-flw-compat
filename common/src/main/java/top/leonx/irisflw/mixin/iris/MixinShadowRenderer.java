@@ -5,6 +5,7 @@ import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.impl.event.RenderContextImpl;
 import net.irisshaders.iris.mixin.LevelRendererAccessor;
 import net.irisshaders.iris.shadows.ShadowRenderer;
+import net.irisshaders.iris.uniforms.CapturedRenderingState;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -26,9 +27,23 @@ public abstract class MixinShadowRenderer {
     @Shadow
     private boolean shouldRenderBlockEntities;
 
+    @Shadow(remap = false)
+    @Final
+    private float sunPathRotation;
+
+    @Shadow(remap = false)
+    @Final
+    private float intervalSize;
+
     @Final
     @Shadow
     private RenderBuffers buffers;
+
+    @Shadow(remap = false)
+    public static PoseStack createShadowModelView(float sunPathRotation, float intervalSize)
+    {
+        return null;
+    }
 
     @Inject(method = "renderShadows",at = @At("HEAD"))
     private void injectRenderShadow(LevelRendererAccessor levelRendererAccessor, Camera camera, CallbackInfo ci){
@@ -52,10 +67,9 @@ public abstract class MixinShadowRenderer {
     private void injectRenderShadowBeforeDrawEntities(LevelRendererAccessor levelRenderer, Camera playerCamera, CallbackInfo ci){
         if(shouldRenderBlockEntities)
         {
-            var modelMatrix = ShadowRenderer.MODELVIEW;
-            var projectionMatrix = ShadowRenderer.PROJECTION;
-            var deltaTracker = Minecraft.getInstance().getTimer();
-            var flywheel$renderContext = RenderContextImpl.create((LevelRenderer) levelRenderer, levelRenderer.getLevel(), this.buffers, modelMatrix, projectionMatrix, playerCamera, deltaTracker.getGameTimeDeltaPartialTick(false));
+            var poseStack = createShadowModelView(sunPathRotation, intervalSize);
+            var flywheel$renderContext = RenderContextImpl.create((LevelRenderer) levelRenderer, levelRenderer.getLevel(),
+                    this.buffers, poseStack, ShadowRenderer.PROJECTION, playerCamera, CapturedRenderingState.INSTANCE.getTickDelta());
             VisualizationManager manager = VisualizationManager.get(levelRenderer.getLevel());
             if (manager != null) {
 //                manager.renderDispatcher().onStartLevelRender(flywheel$renderContext);

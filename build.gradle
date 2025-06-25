@@ -1,5 +1,5 @@
 plugins {
-    id 'dev.architectury.loom' version '1.9-SNAPSHOT' apply false
+    id 'dev.architectury.loom' version '1.10-SNAPSHOT' apply false
     id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 }
@@ -20,8 +20,10 @@ subprojects {
     apply plugin: 'maven-publish'
 
     base {
-        if (project.name == "neoforge"){
+        if (project.name == "neoforge") {
             archivesName = "$rootProject.neoforge_archives_name"
+        }else if(project.name == "forge"){
+            archivesName = "$rootProject.forge_archives_name"
         }else if(project.name == "fabric"){
             archivesName = "$rootProject.fabric_archives_name"
         }else{
@@ -80,12 +82,12 @@ subprojects {
         // If you remove this line, sources will not be generated.
         withSourcesJar()
 
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     tasks.withType(JavaCompile).configureEach {
-        it.options.release = 21
+        it.options.release = 17
     }
 
     // Configure Maven publishing.

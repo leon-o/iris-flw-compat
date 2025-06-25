@@ -150,11 +150,11 @@ public class IrisProgramLinker extends ProgramLinker {
             if (isShadow) {
                 override = pipeline.callCreateShadowShader(
                         getFlwShaderName(name, true), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        IrisVertexFormats.TERRAIN, false, false, false, false);
+                        IrisVertexFormats.TERRAIN, false, false, false);
             } else {
                 override = pipeline.callCreateShader(
                         getFlwShaderName(name, false), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        IrisVertexFormats.TERRAIN, FogMode.OFF, false, false, false, false, false);
+                        IrisVertexFormats.TERRAIN, FogMode.OFF, false, false, false, false);
             }
 
         } catch (Exception exception) {
