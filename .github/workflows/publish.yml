@@ -19,7 +19,7 @@ on:
         description: 'Minecraft Version'
         required: true
         type: 'string'
-        default: '1.20.1'
+        default: '1.21.1'
       version:
         description: 'Version'
         required: true
@@ -34,8 +34,8 @@ on:
           - 'beta'
           - 'release'
         default: 'beta'
-      publish_forge:
-        description: 'Publish Forge'
+      publish_neoforge:
+        description: 'Publish NeoForge'
         required: true
         type: 'boolean'
         default: true
@@ -61,7 +61,7 @@ on:
         default: true
 
 env:
-  JAVA_VERSION: 17
+  JAVA_VERSION: 21
 
 permissions:
   contents: write
@@ -84,7 +84,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: "temurin"
-          java-version: 17
+          java-version: 21
 
       - name: Make Gradle Wrapper Executable
         if: ${{ runner.os != 'Windows' }}
@@ -120,7 +120,7 @@ jobs:
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
           java: |
-            Java 17
+            Java 21
           game-versions: |
             ${{inputs.mc_version}}
 
@@ -142,7 +142,7 @@ jobs:
           files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
           java: |
-            Java 17
+            Java 21
           game-versions: |
             ${{inputs.mc_version}}
 
@@ -152,60 +152,60 @@ jobs:
 
           fail-mode: warn
 
-      - name: Publish Forge GitHub Release
-        if: ${{ inputs.publish_forge == true && inputs.publish_github_release == true }}
+      - name: Publish NeoForge GitHub Release
+        if: ${{ inputs.publish_neoforge == true && inputs.publish_github_release == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           github-token: "${{secrets.PUBLISH_TOKEN}}"
 
           name: "${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
-          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          files: neoforge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
 
           fail-mode: warn
 
-      - name: Publish Forge CurseForge
-        if: ${{ inputs.publish_forge == true && inputs.publish_to_curseforge == true }}
+      - name: Publish NeoForge CurseForge
+        if: ${{ inputs.publish_neoforge == true && inputs.publish_to_curseforge == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
           curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
 
-          name: "Forge ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
+          name: "NeoForge ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
-          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          files: neoforge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
           java: |
-            Java 17
+            Java 21
           game-versions: |
             ${{inputs.mc_version}}
 
           dependencies: |
-            Oculus(required){modrinth:oculus}{curseforge:581495}
+            IrisShader(required){modrinth:iris}{curseforge:455508}
             Create(optional){modrithn:create}{curseforge:328085}
 
           fail-mode: warn
 
 
-      - name: Publish Forge Modrinth
-        if: ${{ inputs.publish_forge == true && inputs.publish_to_modrinth == true }}
+      - name: Publish NeoForge Modrinth
+        if: ${{ inputs.publish_neoforge == true && inputs.publish_to_modrinth == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: iris-flw-compat
           modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
 
-          name: "Forge ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
+          name: "NeoForge ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
-          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          files: neoforge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
           java: |
-            Java 17
+            Java 21
           game-versions: |
             ${{inputs.mc_version}}
 
           dependencies: |
-            Oculus(required){modrinth:oculus}{curseforge:581495}
+            IrisShader(required){modrinth:iris}{curseforge:455508}
             Create(optional){modrithn:create}{curseforge:328085}
 
           fail-mode: warn
