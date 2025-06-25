@@ -2,18 +2,18 @@
   "schemaVersion": 1,
   "id": "irisflw",
   "version": "${version}",
+
   "name": "Iris Flywheel Compat",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Allow Flywheel instancing optimization to be enabled when using iris.",
   "authors": [
-    "Me!"
+    "Leon"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": "https://github.com/leon-o/iris-flw-compat"
   },
   "license": "CC0-1.0",
   "icon": "assets/irisflw/icon.png",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "client": [
       "top.leonx.irisflw.fabric.IrisFlwFabric"
