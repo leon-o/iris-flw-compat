@@ -7,6 +7,7 @@ import dev.engine_room.flywheel.backend.compile.core.ShaderCache;
 import dev.engine_room.flywheel.backend.gl.GlObject;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
+import dev.engine_room.flywheel.lib.material.LightShaders;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,8 +35,10 @@ public class IrisCompilationHarness<K> extends CompilationHarness<K> {
     private GlProgram compile(K key) {
         if(key instanceof IrisPipelineCompiler.PipelineProgramKey pipelineKey) {
             programLinker.contextShader = pipelineKey.contextShader();
+            programLinker.lightShader = pipelineKey.light();
         }else{
             programLinker.contextShader = ContextShader.DEFAULT;
+            programLinker.lightShader = LightShaders.SMOOTH_WHEN_EMBEDDED;
         }
         return this.compiler.compile(key, this.sources, this.shaderCache, this.programLinker);
     }
