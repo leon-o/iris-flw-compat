@@ -1,11 +1,13 @@
 package top.leonx.irisflw.backend;
 
+import dev.engine_room.flywheel.api.material.LightShader;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
 import dev.engine_room.flywheel.backend.compile.core.LinkResult;
 import dev.engine_room.flywheel.backend.compile.core.ProgramLinker;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.gl.shader.GlShader;
 import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
+import dev.engine_room.flywheel.lib.material.LightShaders;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gl.blending.AlphaTest;
 import net.irisshaders.iris.gl.blending.AlphaTestFunction;
@@ -52,6 +54,7 @@ public class IrisProgramLinker extends ProgramLinker {
     private GlslTransformerFragPatcher fragPatcher;
 
     public ContextShader contextShader = ContextShader.DEFAULT;
+    public LightShader lightShader = LightShaders.SMOOTH_WHEN_EMBEDDED;
 
     public IrisProgramLinker() {
         environmentDefines = StandardMacros.createStandardEnvironmentDefines();
@@ -125,7 +128,7 @@ public class IrisProgramLinker extends ProgramLinker {
         var vertexRef = sourceRef.getVertexSource().orElseThrow();
         var fragRef = sourceRef.getFragmentSource().orElseThrow();
 
-        String newVertexSource = vertPatcher.patch(vertexRef, vertexSource, isShadow, isEmbedded, IrisFlw.isUsingExtendedVertexFormat());
+        String newVertexSource = vertPatcher.patch(vertexRef, vertexSource, isShadow, isEmbedded, lightShader, IrisFlw.isUsingExtendedVertexFormat());
         newVertexSource = JcppProcessor.glslPreprocessSource(newVertexSource, environmentDefines);
 
         if(PATCH_FRAG)

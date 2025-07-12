@@ -9,6 +9,7 @@
     "Leon"
   ],
   "contact": {
+    "sources": "https://github.com/leon-o/iris-flw-compat"
   },
   "license": "CC0-1.0",
   "icon": "assets/irisflw/icon.png",

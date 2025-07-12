@@ -1,5 +1,7 @@
 package top.leonx.irisflw.transformer;
 
+import dev.engine_room.flywheel.api.material.LightShader;
+import dev.engine_room.flywheel.lib.material.LightShaders;
 import io.github.douira.glsl_transformer.GLSLParser;
 import io.github.douira.glsl_transformer.ast.data.ChildNodeList;
 import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
@@ -318,8 +320,8 @@ public class GlslTransformerVertPatcher {
         };
     }
 
-    public String patch(String irisSource, String flwSource, boolean isShadow, boolean isEmbedded, boolean isExtendedVertexFormat){
-        return transformer.transform(irisSource, new ContextParameter(flwSource, isShadow, isEmbedded, isExtendedVertexFormat));
+    public String patch(String irisSource, String flwSource, boolean isShadow, boolean isEmbedded, LightShader lightShader, boolean isExtendedVertexFormat){
+        return transformer.transform(irisSource, new ContextParameter(flwSource, isShadow, isEmbedded, lightShader, isExtendedVertexFormat));
     }
 
 
@@ -330,6 +332,8 @@ public class GlslTransformerVertPatcher {
 
         public boolean isEmbedded;
 
+        public LightShader lightShader;
+
         public boolean isExtendedVertexFormat;
 
         public String flwVertexTemplate;
@@ -338,13 +342,15 @@ public class GlslTransformerVertPatcher {
 
         public boolean getUseLightLut()
         {
-            return !isShadow && isEmbedded;
+            return !isShadow && (isEmbedded && lightShader == LightShaders.SMOOTH_WHEN_EMBEDDED
+                    || lightShader == LightShaders.FLAT || lightShader == LightShaders.SMOOTH);
         }
 
-        public ContextParameter(String flwVertexTemplate, boolean isShadow, boolean isEmbedded, boolean isExtendedVertexFormat) {
+        public ContextParameter(String flwVertexTemplate, boolean isShadow, boolean isEmbedded, LightShader lightShader, boolean isExtendedVertexFormat) {
             this.flwVertexTemplate = flwVertexTemplate;
             this.isShadow = isShadow;
             this.isEmbedded = isEmbedded;
+            this.lightShader = lightShader;
             this.isExtendedVertexFormat = isExtendedVertexFormat;
         }
     }
