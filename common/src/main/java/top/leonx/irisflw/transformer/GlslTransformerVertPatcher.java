@@ -265,7 +265,7 @@ public class GlslTransformerVertPatcher {
             createVertexBuilder.append("""
                     FlwLightAo _flw_light;
                     flw_light(flw_vertexPos.xyz, flw_vertexNormal, _flw_light);
-                    flw_vertexLight = _flw_light.light;
+                    flw_vertexLight = flw_vertexLight + _flw_light.light;
                     _flw_ao = _flw_light.ao;
                     """);
         }

@@ -13,7 +13,7 @@ public class IrisFlwBackends {
             .engineFactory(level -> new EngineImpl(level, new IrisInstancedDrawManager(IrisInstancingPrograms.get()), 256))
             .priority(2000)
             .supported(() -> GlCompat.SUPPORTS_INSTANCING && IrisInstancingPrograms.allLoaded() && ShadersModHelper.isShaderPackInUse())
-            .register(ResourceLocation.fromNamespaceAndPath(IrisFlw.MOD_ID, "iris_instancing"));
+            .register(ResourceLocation.tryBuild(IrisFlw.MOD_ID, "iris_instancing"));
 
     public static void init()
     {
