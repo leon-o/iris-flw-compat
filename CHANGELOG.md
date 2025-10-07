@@ -1,5 +1,9 @@
 **This version only compatible with _Iris_ 1.8.0 above and _Sodium_.**
 
+### 2.0.5
+- Fix lighting issue of moving contraption.
+- Add compatibility tips for ScalableLux.
+
 ### 2.0.4
 - Fix issue [#211](https://github.com/leon-o/iris-flw-compat/issues/211): Rails lighting issue.
 
