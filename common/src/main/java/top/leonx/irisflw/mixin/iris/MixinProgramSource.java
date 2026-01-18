@@ -29,11 +29,8 @@ public class MixinProgramSource implements ProgramSourceAccessor {
     }
 
     @Inject(remap = false, method = "<init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lnet/irisshaders/iris/shaderpack/programs/ProgramSet;Lnet/irisshaders/iris/shaderpack/properties/ShaderProperties;Lnet/irisshaders/iris/gl/blending/BlendModeOverride;)V",at = @At("TAIL"))
-    private void injectInit(String par1, String par2, String par3, String par4, String par5, String par6, ProgramSet par7, ShaderProperties properties, BlendModeOverride blendModeOverride, CallbackInfo ci){
+    private void injectInit(String name, String vertexSource, String geometrySource, String tessControlSource, String tessEvalSource, String fragmentSource, ProgramSet parent, ShaderProperties properties, BlendModeOverride defaultBlendModeOverride, CallbackInfo ci){
         shaderProperties = properties;
-
-        blendMode = blendModeOverride;
+        blendMode = defaultBlendModeOverride;
     }
-
-
 }

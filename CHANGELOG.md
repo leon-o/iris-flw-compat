@@ -1,5 +1,9 @@
 **This version only compatible with _Iris_ 1.8.0 above and _Sodium_.**
 
+### 2.1.0
+- Support Create 6.0.9 and Flywheel 1.0.6.
+- Notice: This is not compatible with Flywheel below 1.0.6 due to breaking changes.
+
 ### 2.0.5
 - Fix lighting issue of moving contraption.
 - Add compatibility tips for ScalableLux.

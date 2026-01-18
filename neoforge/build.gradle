@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
 }
 
 loom {
@@ -55,6 +55,7 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
+    include ("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
     modCompileOnly ("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
     modCompileOnly ("maven.modrinth:iris:${iris_version}-neoforge")
 
@@ -63,10 +64,10 @@ dependencies {
     localRuntime ("maven.modrinth:iris:${iris_version}-neoforge")
     localRuntime ("maven.modrinth:sodium:${sodium_version}-neoforge")
     modLocalRuntime ("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
-    modLocalRuntime ("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
+    modLocalRuntime ("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}")
     modLocalRuntime ("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
     modLocalRuntime ("com.tterrag.registrate:Registrate:${registrate_version}")
-    modLocalRuntime ("dev.engine-room.vanillin:vanillin-neoforge-${flywheel_minecraft_version}:${vanillin_neoforge_version}")
+//    modLocalRuntime ("dev.engine-room.vanillin:vanillin-neoforge-${flywheel_minecraft_version}:${vanillin_neoforge_version}")
 }
 
 processResources {

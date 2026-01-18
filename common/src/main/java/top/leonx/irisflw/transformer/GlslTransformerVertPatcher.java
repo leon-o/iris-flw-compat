@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class GlslTransformerVertPatcher {
@@ -85,7 +86,7 @@ public class GlslTransformerVertPatcher {
 
     private static final Pattern boxCoordDetector = Pattern.compile("BoxCoord");
 
-    private static final Pattern versionPattern = Pattern.compile("^.*#version\\s+(\\d+)", Pattern.DOTALL);
+    private static final Pattern versionPattern = Pattern.compile("^.*#version\\s+(\\d+)(\\s+\\w+)?", Pattern.DOTALL);
 //    private static final boolean useLightSector = true;
 
     public GlslTransformerVertPatcher() {
@@ -101,15 +102,31 @@ public class GlslTransformerVertPatcher {
                 java.util.regex.Matcher matcher = versionPattern.matcher(input);
                 if (!matcher.find()) {
                     throw new IllegalArgumentException(
-                            "No #version directive found in source code! See debugging.md for more information.");
+                            "No #version directive found in source code!");
                 }
-                var versionNum = Integer.parseInt(matcher.group(1));
-                if (versionNum < 330) {
-                    versionNum = 330;
-                    var ignored = matcher.replaceAll("#version 330");
-                    IrisFlw.LOGGER.warn("GLSL version is lower than 330, set to 330");
+
+                int originalVersion = Integer.parseInt(matcher.group(1));
+                String originalProfile = matcher.groupCount() >= 2 ? matcher.group(2) : null;
+
+                int finalVersion = originalVersion;
+                String finalProfile = "compatibility"; // force compatibility profile
+
+                if (originalVersion < 400) {
+                    finalVersion = 400;
                 }
-                transformer.getLexer().version = Version.fromNumber(versionNum);
+
+                String newVersionLine = "#version " + finalVersion + " compatibility\n";
+
+                input = matcher.replaceAll(newVersionLine);
+
+                transformer.getLexer().version = Version.fromNumber(finalVersion);
+
+                IrisFlw.LOGGER.info("GLSL version adjusted: {} {} to {} compatibility",
+                        originalVersion, (originalProfile != null ? originalProfile : "unspecified"),
+                        finalVersion);
+
+                IrisFlw.LOGGER.info("Parsing GLSL source:\n{}",
+                        input.lines().limit(5).collect(Collectors.joining("\n")));
 
                 return super.parseTranslationUnit(rootInstance, input);
             }
@@ -119,7 +136,7 @@ public class GlslTransformerVertPatcher {
 
         flwTransformer = new SingleASTTransformer<>();
         flwTransformer.setRootSupplier(new RootSupplier(SuperclassNodeIndex::withOrdered, IdentifierIndex::withOnlyExact, ExternalDeclarationIndex::withOnlyExactOrdered));
-        flwTransformer.getLexer().version = Version.GLSL33;
+        flwTransformer.getLexer().version = Version.GLSL40;
     }
 
     private void transform(TranslationUnit tree, Root root, ContextParameter parameter) {
@@ -265,7 +282,7 @@ public class GlslTransformerVertPatcher {
             createVertexBuilder.append("""
                     FlwLightAo _flw_light;
                     flw_light(flw_vertexPos.xyz, flw_vertexNormal, _flw_light);
-                    flw_vertexLight = flw_vertexLight + _flw_light.light;
+                    flw_vertexLight = max(flw_vertexLight, _flw_light.light);
                     _flw_ao = _flw_light.ao;
                     """);
         }

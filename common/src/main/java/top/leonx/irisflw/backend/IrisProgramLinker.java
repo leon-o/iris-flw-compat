@@ -34,6 +34,7 @@ import top.leonx.irisflw.accessors.ProgramSourceAccessor;
 import top.leonx.irisflw.flywheel.IrisFlwCompatGlProgram;
 import top.leonx.irisflw.flywheel.IrisFlwCompatGlProgramBase;
 import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
+import top.leonx.irisflw.mixin.flw.FlwCompilationAccessor;
 import top.leonx.irisflw.transformer.GlslTransformerFragPatcher;
 import top.leonx.irisflw.transformer.GlslTransformerVertPatcher;
 
@@ -184,6 +185,10 @@ public class IrisProgramLinker extends ProgramLinker {
     protected ProgramSource programSourceOverrideVertexSource(String shaderName, ProgramSet programSet, ProgramSource source, String vertexSource, String fragSource) {
         ShaderProperties properties = ((ProgramSourceAccessor) source).getShaderProperties();
         BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) source).getBlendModeOverride();
+
+        FlwCompilationAccessor.invokeDumpSource(vertexSource, source.getName() + "_" + shaderName + '.' + ShaderType.VERTEX.extension);
+        FlwCompilationAccessor.invokeDumpSource(fragSource, source.getName() + "_" + shaderName + '.' + ShaderType.FRAGMENT.extension);
+
         //Get a copy of program
         return new ProgramSource(source.getName() + "_" + shaderName, vertexSource,
                 source.getGeometrySource().orElse(null),

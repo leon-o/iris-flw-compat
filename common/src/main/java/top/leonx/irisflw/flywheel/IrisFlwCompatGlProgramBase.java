@@ -1,15 +1,15 @@
 package top.leonx.irisflw.flywheel;
 
+import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
-import net.irisshaders.iris.shadows.ShadowRenderer;
-import net.irisshaders.iris.uniforms.CapturedRenderingState;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 public abstract class IrisFlwCompatGlProgramBase extends GlProgram {
     public IrisFlwCompatGlProgramBase(int handle) {
         super(handle);
     }
+
+    public abstract void setAdditionUniform(Material material, int baseVertex, int baseInstance);
 
     public abstract void bind();
 
@@ -25,6 +25,11 @@ public abstract class IrisFlwCompatGlProgramBase extends GlProgram {
 
         public Invalid() {
             super(0);
+        }
+
+        @Override
+        public void setAdditionUniform(Material material, int baseVertex, int baseInstance) {
+
         }
 
         @Override

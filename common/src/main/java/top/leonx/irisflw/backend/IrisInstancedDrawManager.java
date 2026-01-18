@@ -2,7 +2,6 @@ package top.leonx.irisflw.backend;
 
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
-import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.material.Transparency;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.ContextShader;
@@ -17,7 +16,6 @@ import dev.engine_room.flywheel.backend.engine.instancing.InstancedLight;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.TextureBuffer;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
-import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -152,14 +150,13 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
             if(program == null) {
                 continue;
             }
+            program.setAdditionUniform(material, drawCall.mesh().baseVertex(), 0);
             program.bind();
 
             environment.setupDraw(program);
 
-            uploadMaterialUniform(program, material);
-
-            program.setUInt("_flw_vertexOffset", drawCall.mesh()
-                    .baseVertex());
+//            uploadMaterialUniform(program, material);
+//            program.setUInt("_flw_vertexOffset", drawCall.mesh().baseVertex());
 
             MaterialRenderState.setup(material);
 
@@ -178,14 +175,10 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
             var environment = groupKey.environment();
 
             var program = programs.get(groupKey.instanceType(), environment.contextShader(), material, mode, isShadow);
+            program.setAdditionUniform(material, drawCall.mesh().baseVertex(), 0);
             program.bind();
 
             environment.setupDraw(program);
-
-            uploadMaterialUniform(program, material);
-
-            program.setUInt("_flw_vertexOffset", drawCall.mesh()
-                    .baseVertex());
 
             MaterialRenderState.setupOit(material);
 
@@ -283,9 +276,10 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
                     for (InstancedDraw draw : instancer.draws()) {
                         CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
                         var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial, PipelineCompiler.OitMode.OFF, isShadow);
+                        program.setAdditionUniform(crumblingMaterial, draw.mesh().baseVertex(), index);
                         program.bind();
-                        program.setInt("_flw_baseInstance", index);
-                        uploadMaterialUniform(program, crumblingMaterial);
+//                        program.setInt("_flw_baseInstance", index);
+//                        uploadMaterialUniform(program, crumblingMaterial);
 
                         MaterialRenderState.setup(crumblingMaterial);
 
@@ -308,9 +302,8 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
         Minecraft.getInstance().levelRenderer.allChanged();
     }
 
-    public static void uploadMaterialUniform(GlProgram program, Material material) {
-        int packedFogAndCutout = MaterialEncoder.packUberShader(material);
-        int packedMaterialProperties = MaterialEncoder.packProperties(material);
-        program.setUVec2("_flw_packedMaterial", packedFogAndCutout, packedMaterialProperties);
+    @Override
+    public MeshPool meshPool() {
+        return this.meshPool;
     }
 }
