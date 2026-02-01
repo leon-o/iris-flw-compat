@@ -35,7 +35,7 @@ public class MixinModelBlockRenderer {
     @Inject(method = "tesselateBlock(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/RandomSource;JILnet/neoforged/neoforge/client/model/data/ModelData;Lnet/minecraft/client/renderer/RenderType;)V", at = @At("HEAD"))
     private void irisflw$tesselateBlock$head(BlockAndTintGetter level, BakedModel model, BlockState state, BlockPos pos, PoseStack poseStack, VertexConsumer consumer, boolean checkSides, RandomSource random, long seed, int packedOverlay, ModelData modelData, RenderType renderType, CallbackInfo ci) {
         if(consumer instanceof BlockSensitiveBufferBuilder blockSensitiveBufferBuilder) {
-            blockSensitiveBufferBuilder.beginBlock(irisflw$resolveBlockId(state), (byte) 0, (byte) state.getLightEmission(), pos.getX(), pos.getY(), pos.getZ());
+            blockSensitiveBufferBuilder.beginBlock(irisflw$resolveBlockId(state), (byte) 0, (byte) state.getLightEmission(level, pos), pos.getX(), pos.getY(), pos.getZ());
         }
     }
 
