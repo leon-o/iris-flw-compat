@@ -1,0 +1,59 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+#issueTrackerURL = ""
+license = "MIT"
+
+[[mods]]
+modId = "irisflw"
+version = "${version}"
+displayName = "Iris Flywheel Compat"
+logoFile = "icon.png"
+authors = "Leon"
+description = '''
+Allow Flywheel instancing optimization to be enabled when using iris.
+'''
+#logoFile = ""
+
+[[accessTransformers]]
+file="accesstransformer.cfg"
+
+[[dependencies.irisflw]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.irisflw]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.irisflw]]
+modId = "flywheel"
+type = "required"
+versionRange = "[1.0.0,)"
+side = "CLIENT"
+
+[[dependencies.irisflw]]
+modId = "sodium"
+type = "required"
+versionRange = "[0.6.9,)"
+side = "CLIENT"
+
+[[dependencies.irisflw]]
+modId = "iris"
+type = "required"
+versionRange = "[1.8.1,)"
+side = "CLIENT"
+
+[[mixins]]
+config = "irisflw.mixins.flw.json"
+
+[[mixins]]
+config = "irisflw.mixins.iris.json"
+
+[[mixins]]
+config = "irisflw.mixins.neoforge.json"

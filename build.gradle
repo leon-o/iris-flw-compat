@@ -1,109 +1,180 @@
 plugins {
-    id 'dev.architectury.loom' version '1.11-SNAPSHOT' apply false
-    id 'architectury-plugin' version '3.4-SNAPSHOT'
-    id 'com.gradleup.shadow' version '8.3.6' apply false
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.140'
+    id 'idea'
 }
 
-architectury {
-    minecraft = project.minecraft_version
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
 }
 
-allprojects {
-    group = rootProject.maven_group
-//    version = "${project.name}${minecraft_version}+${mod_version}"
-    version = "${mod_version}"
+version = mod_version
+group = mod_group_id
+
+repositories {
+    maven { url = "https://maven.parchmentmc.org" }
+    maven {
+        name "tterrag maven"
+        url "https://maven.tterrag.com/"
+    }
+    maven { url "https://maven.createmod.net"}
+    maven {
+        url "https://cursemaven.com"
+    }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
+        url "https://maven.blamejared.com"
+    }
+    maven {
+        name "createmod maven"
+        url "https://maven.createmod.net/"
+    }
+    maven { url = "https://mvn.devos.one/snapshots" } // Registrate
+    maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" } // ForgeConfigAPIPort
 }
 
-subprojects {
-    apply plugin: 'dev.architectury.loom'
-    apply plugin: 'architectury-plugin'
-    apply plugin: 'maven-publish'
+base {
+    archivesName = mod_group_id
+}
 
-    base {
-        if (project.name == "neoforge"){
-            archivesName = "$rootProject.neoforge_archives_name"
-        }else if(project.name == "fabric"){
-            archivesName = "$rootProject.fabric_archives_name"
-        }else{
-            archivesName = "irisflw-$project.name"
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+dependencies {
+    compileOnly("maven.modrinth:iris:$iris_version-neoforge")
+    compileOnly("maven.modrinth:sodium:${sodium_version}-neoforge")
+//    compileOnly("dev.engine-room.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}")
+
+    implementation("io.github.douira:glsl-transformer:2.0.1")
+    jarJar(implementation("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}"))
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
+    compileOnly("maven.modrinth:iris:${iris_version}-neoforge")
+    compileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
+    compileOnly("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}")
+
+    runtimeOnly("io.github.douira:glsl-transformer:2.0.1")
+    runtimeOnly("maven.modrinth:iris:${iris_version}-neoforge")
+    runtimeOnly("maven.modrinth:sodium:${sodium_version}-neoforge")
+    runtimeOnly("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
+    runtimeOnly("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}")
+    runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
+    runtimeOnly("com.tterrag.registrate:Registrate:${registrate_version}")
+}
+
+neoForge {
+    version = project.neoforge_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    runs {
+        client {
+            client()
+
+            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            data()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+
+        // applies to all the run configs above
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            // , 'mixin.debug.export'
+
+            logLevel = org.slf4j.event.Level.DEBUG
         }
     }
 
+    mods {
+
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+dependencies {
+
+}
+
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neoforge_version       : neoforge_version,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+
+// Include the output of "generateModMetadata" as an input directory for the build
+// this works with both building through Gradle and the IDE.
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
     repositories {
-        maven { url = "https://maven.parchmentmc.org" }
         maven {
-            name "tterrag maven"
-            url "https://maven.tterrag.com/"
-        }
-        maven { url "https://maven.createmod.net"}
-        maven {
-            url "https://cursemaven.com"
-        }
-        exclusiveContent {
-            forRepository {
-                maven {
-                    name = "Modrinth"
-                    url = "https://api.modrinth.com/maven"
-                }
-            }
-            filter {
-                includeGroup "maven.modrinth"
-            }
-        }
-        maven {
-            url "https://maven.blamejared.com"
-        }
-        maven {
-            name "createmod maven"
-            url "https://maven.createmod.net/"
-        }
-    }
-
-    loom {
-        silentMojangMappingsLicense()
-        runs.configureEach {
-            vmArg("-Dmixin.debug.export=true")
-        }
-    }
-
-    dependencies {
-        minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
-        //mappings loom.officialMojangMappings()
-        mappings loom.layered() {
-            officialMojangMappings()
-            parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
-        }
-    }
-
-    java {
-        // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-        // if it is present.
-        // If you remove this line, sources will not be generated.
-        withSourcesJar()
-
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
-    tasks.withType(JavaCompile).configureEach {
-        it.options.release = 21
-    }
-
-    // Configure Maven publishing.
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifactId = base.archivesName.get()
-                from components.java
-            }
-        }
-
-        // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-        repositories {
-            // Add repositories to publish to here.
-            // Notice: This block does NOT have the same function as the block in the top level.
-            // The repositories here will be used for publishing your artifact, not for
-            // retrieving dependencies.
+            url "file://${project.projectDir}/repo"
         }
     }
 }
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+// IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
