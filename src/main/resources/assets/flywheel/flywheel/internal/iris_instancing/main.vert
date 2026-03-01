@@ -24,6 +24,10 @@ void main() {
 
     _flw_main(instance, uint(gl_InstanceID), _flw_vertexOffset);
 
+    #ifdef _FLW_CRUMBLING
+    flw_vertexTexCoord = getCrumblingTexCoord();
+    #endif
+
 //    tint = flw_vertexColor;
 //    uv = flw_vertexTexCoord;
 //
