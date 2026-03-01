@@ -24,7 +24,7 @@ on:
         description: 'Version'
         required: true
         type: 'string'
-        default: '2.0.0'
+        default: '2.2.0'
       version_type:
         description: 'Version Type'
         required: true
