@@ -1,0 +1,59 @@
+modLoader = "javafml"
+loaderVersion="${loader_version_range}"
+#issueTrackerURL = ""
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+logoFile = "icon.png"
+authors = "Leon"
+description = '''
+Allow Flywheel instancing optimization to be enabled when using iris.
+'''
+#logoFile = ""
+
+[[accessTransformers]]
+file="accesstransformer.cfg"
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${neoforge_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "flywheel"
+type = "required"
+versionRange = "[1.0.0,)"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "sodium"
+type = "required"
+versionRange = "[0.6.9,)"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "iris"
+type = "required"
+versionRange = "[1.8.1,)"
+side = "CLIENT"
+
+[[mixins]]
+config = "${mod_id}.mixins.flw.json"
+
+[[mixins]]
+config = "${mod_id}.mixins.iris.json"
+
+[[mixins]]
+config = "${mod_id}.mixins.create.json"
