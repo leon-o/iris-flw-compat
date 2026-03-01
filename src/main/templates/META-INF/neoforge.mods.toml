@@ -34,7 +34,7 @@ side = "CLIENT"
 [[dependencies.${mod_id}]]
 modId = "flywheel"
 type = "required"
-versionRange = "[1.0.0,)"
+versionRange = "[1.0.6,)"
 side = "CLIENT"
 
 [[dependencies.${mod_id}]]

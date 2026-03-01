@@ -13,6 +13,9 @@ version = mod_version
 group = mod_group_id
 
 repositories {
+    flatDir {
+        dirs 'libs'
+    }
     maven { url = "https://maven.parchmentmc.org" }
     maven {
         name "tterrag maven"
@@ -45,7 +48,7 @@ repositories {
 }
 
 base {
-    archivesName = mod_group_id
+    archivesName = neoforge_archives_name
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -53,10 +56,32 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 dependencies {
     compileOnly("maven.modrinth:iris:$iris_version-neoforge")
     compileOnly("maven.modrinth:sodium:${sodium_version}-neoforge")
-//    compileOnly("dev.engine-room.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}")
+    //  compileOnly("dev.engine-room.flywheel:flywheel-fabric-${flywheel_minecraft_version}:${flywheel_fabric_version}")
 
     implementation("io.github.douira:glsl-transformer:2.0.1")
-    jarJar(implementation("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}"))
+    implementation("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
+
+    /*
+     * [JarJar Compatibility Hack]
+     * * RATIONALE:
+     * There is a version conflict with the 'Vanillin' mod (also by the Flywheel author).
+     * Because Vanillin is part of the same monorepo, its internal JarJar metadata
+     * refers to Flywheel using the artifact ID "neoforge" instead of the
+     * community-standard "flywheel-neoforge-1.21.1".
+     * * ISSUE:
+     * NeoForge's JarJar system treats these as two different libraries, causing
+     * it to load both 1.0.4 (from Vanillin) and 1.0.6 (ours) simultaneously.
+     * This leads to a mod loading crash as our mod requires [1.0.6,).
+     * * SOLUTION:
+     * We use a local copy of Flywheel 1.0.6 located in /libs, renamed to
+     * "neoforge-1.0.6.jar" to match Vanillin's identifier. This forces
+     * JarJar to perform version negotiation, correctly selecting our 1.0.6
+     * as the higher version.
+     *
+     * NOTICE: The libs/neoforge.jar is actually a copy of the flywheel-neoforge-1.0.6.jar, just renamed to "neoforge.jar" to work around the JarJar version conflict with Vanillin.
+     */
+    jarJar(group: 'dev.engine-room.flywheel', name: 'neoforge', version: '1.0.6')
+
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-${flywheel_minecraft_version}:${flywheel_neoforge_version}")
     compileOnly("maven.modrinth:iris:${iris_version}-neoforge")
     compileOnly("com.simibubi.create:create-${minecraft_version}:${create_version}") { transitive = false }
