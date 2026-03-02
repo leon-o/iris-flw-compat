@@ -39,11 +39,6 @@ on:
         required: true
         type: 'boolean'
         default: true
-      publish_fabric:
-        description: 'Publish Fabric'
-        required: true
-        type: 'boolean'
-        default: true
       publish_to_curseforge:
         description: 'Publish to CurseForge'
         required: true
@@ -108,50 +103,6 @@ jobs:
 
           fail-mode: warn
 
-      - name: Publish Fabric CurseForge
-        if: ${{ inputs.publish_fabric == true && inputs.publish_to_curseforge == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          curseforge-id: 659897
-          curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
-
-          name: "Fabric ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
-          changelog-file: CHANGELOG.md
-          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          java: |
-            Java 21
-          game-versions: |
-            ${{inputs.mc_version}}
-
-          dependencies: |
-            IrisShader(required){modrinth:iris}{curseforge:455508}
-            CreateFabric(optional){modrithn:create-fabric}{curseforge:624165}
-
-          fail-mode: warn
-
-      - name: Publish Fabric Modrinth
-        if: ${{ inputs.publish_fabric == true && inputs.publish_to_modrinth == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          modrinth-id: iris-flw-compat
-          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
-
-          name: "Fabric ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
-          changelog-file: CHANGELOG.md
-          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          java: |
-            Java 21
-          game-versions: |
-            ${{inputs.mc_version}}
-
-          dependencies: |
-            IrisShader(required){modrinth:iris}{curseforge:455508}
-            CreateFabric(optional){modrithn:create-fabric}{curseforge:624165}
-
-          fail-mode: warn
-
       - name: Publish NeoForge GitHub Release
         if: ${{ inputs.publish_neoforge == true && inputs.publish_github_release == true }}
         uses: Kir-Antipov/mc-publish@v3.3
@@ -197,7 +148,7 @@ jobs:
 
           name: "NeoForge ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
-          files: neoforge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          files: build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
           java: |
             Java 21
