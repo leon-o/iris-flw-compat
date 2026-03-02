@@ -125,7 +125,7 @@ jobs:
 
           name: "NeoForge ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
           changelog-file: CHANGELOG.md
-          files: neoforge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
+          files: build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
           version-type: ${{inputs.version_type}}
           java: |
             Java 21
