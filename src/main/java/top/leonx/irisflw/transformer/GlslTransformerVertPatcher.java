@@ -280,32 +280,68 @@ public class GlslTransformerVertPatcher {
 
         if(context.getUseLightLut()) {
             createVertexBuilder.append("FlwLightAo _flw_light;\n");
+            createVertexBuilder.append("_flw_ao = 1.0;\n");
 
             if (context.isSableCompat) {
-                if (context.isEmbedded) {
+                if (context.lightShader == LightShaders.FLAT) {
+                    if (context.isEmbedded) {
+                        createVertexBuilder.append("""
+                                uint _flw_lightSceneId = flw_vertexLightingSceneId;
+                                ivec3 _flw_lightRenderOrigin = _flw_renderOrigin.xyz;
+                                vec4 _flw_lightVertexPos = flw_vertexLightingPos;
+                                if (_flw_lightSceneId != 0u) {
+                                    _flw_lightRenderOrigin = ivec3(0);
+                                }
+                                vec2 _flw_flatLight;
+                                if (flw_lightFetch(_flw_lightSceneId, ivec3(floor(_flw_lightVertexPos.xyz)) + _flw_lightRenderOrigin, _flw_flatLight)) {
+                                    flw_vertexLight = max(flw_vertexLight, _flw_flatLight);
+                                }
+                                flw_vertexLight.y *= flw_skyLightScale;
+                                """);
+                    } else {
+                        createVertexBuilder.append("""
+                                vec2 _flw_flatLight;
+                                if (flw_lightFetch(0u, ivec3(floor(flw_vertexPos.xyz)) + _flw_renderOrigin.xyz, _flw_flatLight)) {
+                                    flw_vertexLight = max(flw_vertexLight, _flw_flatLight);
+                                }
+                                """);
+                    }
+                } else if (context.isEmbedded) {
                     createVertexBuilder.append("""
                             ivec3 _flw_lightRenderOrigin = _flw_renderOrigin.xyz;
                             if (flw_vertexLightingSceneId != 0u) {
                                 _flw_lightRenderOrigin = ivec3(0);
                             }
-                            flw_light(flw_vertexLightingSceneId, flw_vertexLightingPos.xyz, flw_vertexNormal, _flw_lightRenderOrigin, _flw_light);
-                            flw_vertexLight = max(flw_vertexLight, _flw_light.light);
+                            if (flw_light(flw_vertexLightingSceneId, flw_vertexLightingPos.xyz, flw_vertexNormal, _flw_lightRenderOrigin, _flw_light)) {
+                                flw_vertexLight = max(flw_vertexLight, _flw_light.light);
+                                _flw_ao = _flw_light.ao;
+                            }
                             flw_vertexLight.y *= flw_skyLightScale;
-                            _flw_ao = _flw_light.ao;
                             """);
                 } else {
                     createVertexBuilder.append("""
-                            flw_light(0u, flw_vertexPos.xyz, flw_vertexNormal, _flw_renderOrigin.xyz, _flw_light);
-                            flw_vertexLight = max(flw_vertexLight, _flw_light.light);
-                            _flw_ao = _flw_light.ao;
+                            if (flw_light(0u, flw_vertexPos.xyz, flw_vertexNormal, _flw_renderOrigin.xyz, _flw_light)) {
+                                flw_vertexLight = max(flw_vertexLight, _flw_light.light);
+                                _flw_ao = _flw_light.ao;
+                            }
                             """);
                 }
             } else {
-                createVertexBuilder.append("""
-                        flw_light(flw_vertexPos.xyz, flw_vertexNormal, _flw_light);
-                        flw_vertexLight = max(flw_vertexLight, _flw_light.light);
-                        _flw_ao = _flw_light.ao;
-                        """);
+                if (context.lightShader == LightShaders.FLAT) {
+                    createVertexBuilder.append("""
+                            vec2 _flw_flatLight;
+                            if (flw_lightFetch(ivec3(floor(flw_vertexPos.xyz)) + _flw_renderOrigin.xyz, _flw_flatLight)) {
+                                flw_vertexLight = max(flw_vertexLight, _flw_flatLight);
+                            }
+                            """);
+                } else {
+                    createVertexBuilder.append("""
+                            if (flw_light(flw_vertexPos.xyz, flw_vertexNormal, _flw_light)) {
+                                flw_vertexLight = max(flw_vertexLight, _flw_light.light);
+                                _flw_ao = _flw_light.ao;
+                            }
+                            """);
+                }
             }
         }
 

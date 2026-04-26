@@ -2,6 +2,7 @@ package top.leonx.irisflw.flywheel;
 
 import com.mojang.blaze3d.shaders.Uniform;
 import dev.engine_room.flywheel.api.material.Material;
+import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.engine.MaterialEncoder;
 import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
 import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniformInt;
@@ -69,6 +70,7 @@ public class IrisFlwCompatGlProgram extends IrisFlwCompatGlProgramBase {
 
     public void bind() {
         shader.apply();
+        //bindFlywheelSamplers();
         if (RenderLayerEventStateManager.isRenderingShadow()) {
             setProjectionMatrix(ShadowRenderer.PROJECTION);
             setModelViewMatrix(ShadowRenderer.MODELVIEW);
@@ -99,6 +101,18 @@ public class IrisFlwCompatGlProgram extends IrisFlwCompatGlProgramBase {
         }else{
             uniformAtlasSize.set(2048, 2048);
         }
+    }
+
+    private void bindFlywheelSamplers() {
+        setSamplerBinding("flw_diffuseTex", Samplers.DIFFUSE);
+        setSamplerBinding("flw_overlayTex", Samplers.OVERLAY);
+        setSamplerBinding("flw_lightTex", Samplers.LIGHT);
+        setSamplerBinding("_flw_instances", Samplers.INSTANCE_BUFFER);
+        setSamplerBinding("_flw_lightLut", Samplers.LIGHT_LUT);
+        setSamplerBinding("_flw_lightSections", Samplers.LIGHT_SECTIONS);
+        setSamplerBinding("_flw_depthRange", Samplers.DEPTH_RANGE);
+        setSamplerBinding("_flw_coefficients", Samplers.COEFFICIENTS);
+        setSamplerBinding("_flw_blueNoise", Samplers.NOISE);
     }
 
     public void clear() {
