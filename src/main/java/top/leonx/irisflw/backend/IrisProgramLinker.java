@@ -169,7 +169,7 @@ public class IrisProgramLinker extends ProgramLinker {
             return ProgramId.DamagedBlock;
         }
         if (isEmbedded) {
-            return ProgramId.Block;
+            return ProgramId.Terrain;
         }
         return ProgramId.Block;
     }

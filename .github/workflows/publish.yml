@@ -14,7 +14,7 @@ on:
         description: 'Branch'
         required: true
         type: 'string'
-        default: 'main'
+        default: '1.21.1-neoforge'
       mc_version:
         description: 'Minecraft Version'
         required: true
@@ -24,7 +24,7 @@ on:
         description: 'Version'
         required: true
         type: 'string'
-        default: '2.2.0'
+        default: '2.3.0'
       version_type:
         description: 'Version Type'
         required: true
@@ -34,11 +34,6 @@ on:
           - 'beta'
           - 'release'
         default: 'beta'
-      publish_neoforge:
-        description: 'Publish NeoForge'
-        required: true
-        type: 'boolean'
-        default: true
       publish_to_curseforge:
         description: 'Publish to CurseForge'
         required: true
@@ -70,7 +65,7 @@ jobs:
         run: env
 
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
           ref: ${{ inputs.branch }}
@@ -79,7 +74,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
-          java-version: 21
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Make Gradle Wrapper Executable
         if: ${{ runner.os != 'Windows' }}
@@ -88,75 +83,74 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build
-        run: ./gradlew clean build -Pmod_version=${{inputs.version}}
-
-      - name: Publish Fabric GitHub Release
-        if: ${{ inputs.publish_fabric == true && inputs.publish_github_release == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          github-token: "${{secrets.PUBLISH_TOKEN}}"
-
-          name: "${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
-          changelog-file: CHANGELOG.md
-          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-
-          fail-mode: warn
+      - name: Build NeoForge Jar
+        run: ./gradlew clean build -Pmod_version=${{ inputs.version }}
 
       - name: Publish NeoForge GitHub Release
-        if: ${{ inputs.publish_neoforge == true && inputs.publish_github_release == true }}
+        if: ${{ inputs.publish_github_release == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          github-token: "${{secrets.PUBLISH_TOKEN}}"
+          github-token: "${{ secrets.PUBLISH_TOKEN }}"
 
-          name: "${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
+          name: "NeoForge ${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
+          version: "${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
+          github-tag: "${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
+          github-commitish: ${{ inputs.branch }}
           changelog-file: CHANGELOG.md
           files: build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
+          version-type: ${{ inputs.version_type }}
 
           fail-mode: warn
 
       - name: Publish NeoForge CurseForge
-        if: ${{ inputs.publish_neoforge == true && inputs.publish_to_curseforge == true }}
+        if: ${{ inputs.publish_to_curseforge == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
-          curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
+          curseforge-token: "${{ secrets.CURSEFORGE_TOKEN }}"
 
-          name: "NeoForge ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
+          name: "NeoForge ${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
+          version: "${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
           changelog-file: CHANGELOG.md
           files: build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
+          version-type: ${{ inputs.version_type }}
           java: |
             Java 21
+          loaders: |
+            neoforge
           game-versions: |
-            ${{inputs.mc_version}}
+            ${{ inputs.mc_version }}
 
           dependencies: |
             IrisShader(required){modrinth:iris}{curseforge:455508}
-            Create(optional){modrithn:create}{curseforge:328085}
+            Sodium(required){modrinth:sodium}{curseforge:394468}
+            Create(optional){modrinth:create}{curseforge:328085}
 
           fail-mode: warn
 
 
       - name: Publish NeoForge Modrinth
-        if: ${{ inputs.publish_neoforge == true && inputs.publish_to_modrinth == true }}
+        if: ${{ inputs.publish_to_modrinth == true }}
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: iris-flw-compat
-          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
+          modrinth-token: "${{ secrets.MODRINTH_TOKEN }}"
 
-          name: "NeoForge ${{inputs.mc_version}}+${{inputs.version}}-${{inputs.version_type}}"
+          name: "NeoForge ${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
+          version: "${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
           changelog-file: CHANGELOG.md
           files: build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
+          version-type: ${{ inputs.version_type }}
           java: |
             Java 21
+          loaders: |
+            neoforge
           game-versions: |
-            ${{inputs.mc_version}}
+            ${{ inputs.mc_version }}
 
           dependencies: |
             IrisShader(required){modrinth:iris}{curseforge:455508}
-            Create(optional){modrithn:create}{curseforge:328085}
+            Sodium(required){modrinth:sodium}{curseforge:394468}
+            Create(optional){modrinth:create}{curseforge:328085}
 
           fail-mode: warn
