@@ -20,6 +20,7 @@ import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
+import top.leonx.irisflw.flywheel.IrisFlwCompatGlProgramBase;
 import top.leonx.irisflw.flywheel.RenderLayerEventStateManager;
 
 import java.util.ArrayList;
@@ -148,7 +149,7 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
             var environment = groupKey.environment();
 
             var program = programs.get(groupKey.instanceType(), environment.contextShader(), material, PipelineCompiler.OitMode.OFF, isShadow);
-            if(program == null) {
+            if (program == null || program == IrisFlwCompatGlProgramBase.Invalid.INSTANCE) {
                 continue;
             }
             program.setAdditionUniform(material, drawCall.mesh().baseVertex(), 0);
@@ -176,6 +177,9 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
             var environment = groupKey.environment();
 
             var program = programs.get(groupKey.instanceType(), environment.contextShader(), material, mode, isShadow);
+            if (program == null || program == IrisFlwCompatGlProgramBase.Invalid.INSTANCE) {
+                continue;
+            }
             program.setAdditionUniform(material, drawCall.mesh().baseVertex(), 0);
             program.bind();
 
@@ -276,6 +280,9 @@ public class IrisInstancedDrawManager extends DrawManager<InstancedInstancer<?>>
                     for (InstancedDraw draw : instancer.draws()) {
                         CommonCrumbling.applyCrumblingProperties(crumblingMaterial, draw.material());
                         var program = programs.get(shader.instanceType(), ContextShader.CRUMBLING, crumblingMaterial, PipelineCompiler.OitMode.OFF, isShadow);
+                        if (program == null || program == IrisFlwCompatGlProgramBase.Invalid.INSTANCE) {
+                            continue;
+                        }
                         program.setAdditionUniform(crumblingMaterial, draw.mesh().baseVertex(), index);
                         program.bind();
 //                        program.setInt("_flw_baseInstance", index);

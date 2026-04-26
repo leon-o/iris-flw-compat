@@ -170,7 +170,7 @@ public class GlslTransformerVertPatcher {
 
         if (IrisFlw.isUsingExtendedVertexFormat()) {
             replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "at_tangent", "_flw_at_tangent", atTangentDim);
-            replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "mc_Entity", "_flw_v_mc_Entity", atTangentDim);
+            replaceMcEntityReferences(root, mcEntityDim);
             replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "mc_midTexCoord", "_flw_mc_midTexCoord", mcMidTexCoordDim);
             replaceReferenceExpressionsWithCorrectSwizzle(root, transformer, "at_midBlock", "_flw_at_midBlock", atMidBlockDim);
         } else {
@@ -284,7 +284,7 @@ public class GlslTransformerVertPatcher {
             if (context.isSableCompat) {
                 if (context.isEmbedded) {
                     createVertexBuilder.append("""
-                            ivec3 _flw_lightRenderOrigin = flw_renderOrigin;
+                            ivec3 _flw_lightRenderOrigin = _flw_renderOrigin.xyz;
                             if (flw_vertexLightingSceneId != 0u) {
                                 _flw_lightRenderOrigin = ivec3(0);
                             }
@@ -295,7 +295,7 @@ public class GlslTransformerVertPatcher {
                             """);
                 } else {
                     createVertexBuilder.append("""
-                            flw_light(0u, flw_vertexPos.xyz, flw_vertexNormal, flw_renderOrigin, _flw_light);
+                            flw_light(0u, flw_vertexPos.xyz, flw_vertexNormal, _flw_renderOrigin.xyz, _flw_light);
                             flw_vertexLight = max(flw_vertexLight, _flw_light.light);
                             _flw_ao = _flw_light.ao;
                             """);
@@ -337,6 +337,28 @@ public class GlslTransformerVertPatcher {
                         transformer.parseExpression(identifier.getRoot(), getSwizzleFromDimension(expression, dimension)));
             }
         });
+    }
+
+    private void replaceMcEntityReferences(Root root, int dimension) {
+        root.process(root.identifierIndex.getStream("mc_Entity"), identifier -> {
+            var parent = identifier.getParent();
+            if (!(parent instanceof ReferenceExpression)) {
+                return;
+            }
+
+            parent.replaceByAndDelete(
+                    transformer.parseExpression(identifier.getRoot(), getPaddedMcEntityExpression(dimension)));
+        });
+    }
+
+    private String getPaddedMcEntityExpression(int dimension) {
+        return switch (dimension) {
+            case 1 -> "_flw_v_mc_Entity.x";
+            case 2 -> "_flw_v_mc_Entity.xy";
+            case 3 -> "vec3(_flw_v_mc_Entity.xy, 0.0)";
+            case 4 -> "vec4(_flw_v_mc_Entity.xy, 0.0, 1.0)";
+            default -> "_flw_v_mc_Entity";
+        };
     }
 
     private String getSwizzleFromDimension(String identifierName, int dimension) {

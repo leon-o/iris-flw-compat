@@ -11,6 +11,7 @@ import dev.engine_room.flywheel.lib.material.LightShaders;
 import net.irisshaders.iris.Iris;
 import net.irisshaders.iris.gl.blending.AlphaTest;
 import net.irisshaders.iris.gl.blending.AlphaTestFunction;
+import net.irisshaders.iris.gl.blending.AlphaTests;
 import net.irisshaders.iris.gl.blending.BlendModeOverride;
 import net.irisshaders.iris.gl.shader.StandardMacros;
 import net.irisshaders.iris.gl.state.FogMode;
@@ -67,8 +68,14 @@ public class IrisProgramLinker extends ProgramLinker {
     public GlProgram link(List<GlShader> shaders, Consumer<GlProgram> preLink) {
         // this probably doesn't need caching
         LinkResult linkResult = linkInternal(shaders, preLink);
-        if(linkResult == null || linkResult instanceof LinkResult.Failure)
+        if (linkResult == null) {
+            IrisFlw.LOGGER.warn("Skipping Iris/Flywheel shader because no matching Iris program source was available.");
             return IrisFlwCompatGlProgramBase.Invalid.INSTANCE;
+        }
+        if (linkResult instanceof LinkResult.Failure failure) {
+            IrisFlw.LOGGER.error("Skipping Iris/Flywheel shader after link failure: {}", failure.failure());
+            return IrisFlwCompatGlProgramBase.Invalid.INSTANCE;
+        }
         return linkResult.unwrap();
     }
 
@@ -122,6 +129,9 @@ public class IrisProgramLinker extends ProgramLinker {
         var isShadow = RenderLayerEventStateManager.isRenderingShadow();
         var isEmbedded = contextShader == ContextShader.EMBEDDED;
         var isCrumbling = contextShader == ContextShader.CRUMBLING;
+        ProgramId irisProgramId = getIrisProgramId(isShadow, isEmbedded, isCrumbling);
+        AlphaTest fallbackAlpha = !isShadow && isEmbedded ? AlphaTests.ONE_TENTH_ALPHA : AlphaTest.ALWAYS;
+        FogMode fogMode = !isShadow && isEmbedded ? FogMode.PER_VERTEX : FogMode.OFF;
         Optional<ProgramSource> sourceReferenceOpt = getProgramSourceReference(programSet, vertexName, isShadow, isEmbedded, isCrumbling);
         if (sourceReferenceOpt.isEmpty())
             return null;
@@ -143,28 +153,42 @@ public class IrisProgramLinker extends ProgramLinker {
 
         ProgramSource newProgramSource = programSourceOverrideVertexSource(shaderName, programSet, sourceRef, newVertexSource, newFragSource);
         ((ProgramDirectivesAccessor) newProgramSource.getDirectives()).setFlwAlphaTestOverride(
-                new AlphaTest(AlphaTestFunction.GREATER, 0.5f));
-        return createWorldProgramBySource(shaderName, isShadow, newPipeline, newProgramSource);
+                !isShadow && isEmbedded ? AlphaTests.ONE_TENTH_ALPHA : new AlphaTest(AlphaTestFunction.GREATER, 0.5f));
+        return createWorldProgramBySource(shaderName, isShadow, newPipeline, newProgramSource, irisProgramId, fallbackAlpha, fogMode);
     }
 
     private static boolean linkSuccessful(int handle) {
         return glGetProgrami(handle, GL_LINK_STATUS) == GL_TRUE;
     }
-    protected LinkResult createWorldProgramBySource(String name, boolean isShadow, IrisRenderingPipelineAccessor pipeline, ProgramSource processedSource) {
+
+    private static ProgramId getIrisProgramId(boolean isShadow, boolean isEmbedded, boolean isCrumbling) {
+        if (isShadow) {
+            return ProgramId.Shadow;
+        }
+        if (isCrumbling) {
+            return ProgramId.DamagedBlock;
+        }
+        if (isEmbedded) {
+            return ProgramId.Block;
+        }
+        return ProgramId.Block;
+    }
+
+    protected LinkResult createWorldProgramBySource(String name, boolean isShadow, IrisRenderingPipelineAccessor pipeline, ProgramSource processedSource, ProgramId programId, AlphaTest fallbackAlpha, FogMode fogMode) {
         ShaderInstance override = null;
         try {
             if (isShadow) {
                 override = pipeline.callCreateShadowShader(
-                        getFlwShaderName(name, true), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
+                        getFlwShaderName(name, true), processedSource, programId, fallbackAlpha,
                         IrisVertexFormats.TERRAIN, false, false, false, false);
             } else {
                 override = pipeline.callCreateShader(
-                        getFlwShaderName(name, false), processedSource, ProgramId.Block, AlphaTest.ALWAYS,
-                        IrisVertexFormats.TERRAIN, FogMode.OFF, false, false, false, false, false);
+                        getFlwShaderName(name, false), processedSource, programId, fallbackAlpha,
+                        IrisVertexFormats.TERRAIN, fogMode, false, false, false, false, false);
             }
 
         } catch (Exception exception) {
-            IrisFlw.LOGGER.error("Fail to compile shader", exception);
+            IrisFlw.LOGGER.error("Fail to compile shader {} with Iris program id {}", name, programId, exception);
             return LinkResult.failure(exception.toString());
         }
 
@@ -223,8 +247,7 @@ public class IrisProgramLinker extends ProgramLinker {
             {
                 refProgramId = ProgramId.DamagedBlock;
             }else if(isEmbedded){
-                // Temporarily hardcoded, maybe configurable in the future
-                refProgramId = ProgramId.Terrain;
+                refProgramId = ProgramId.Block;
             }
             var refProgram = resolver.resolve(refProgramId).orElse(null);
             if(refProgram==null)
@@ -233,7 +256,7 @@ public class IrisProgramLinker extends ProgramLinker {
             ShaderProperties properties = ((ProgramSourceAccessor) refProgram).getShaderProperties();
             BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) refProgram).getBlendModeOverride();
 
-            var name = crumbling ? "gbuffer_flw_damagedblock" : (isEmbedded ? "gbuffer_flw_terrain" : "gbuffer_flw_block");
+            var name = crumbling ? "gbuffer_flw_damagedblock" : (isEmbedded ? "gbuffer_flw_moving_block" : "gbuffer_flw_block");
             return Optional.of(new ProgramSource(name,
                     refProgram.getVertexSource().orElseThrow(),
                     refProgram.getGeometrySource().orElse(null),
