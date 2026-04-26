@@ -104,6 +104,11 @@ public class IrisPipelineCompiler {
                                 comp.define("_FLW_DEBUG");
                             }
                         })
+                        .onCompile((key, comp) -> {
+                            if (IrisFlw.isSableLoaded()) {
+                                comp.define("IRISFLW_SABLE_COMPAT");
+                            }
+                        })
                         .withResource(API_IMPL_VERT)
                         .withComponent(key -> new InstanceStructComponent(key.instanceType()))
                         .withResource(key -> key.instanceType()
@@ -145,6 +150,11 @@ public class IrisPipelineCompiler {
                         .onCompile((key, comp) -> {
                             if (key.debugEnabled()) {
                                 comp.define("_FLW_DEBUG");
+                            }
+                        })
+                        .onCompile((key, comp) -> {
+                            if (IrisFlw.isSableLoaded()) {
+                                comp.define("IRISFLW_SABLE_COMPAT");
                             }
                         })
                         .onCompile((key, comp) -> {

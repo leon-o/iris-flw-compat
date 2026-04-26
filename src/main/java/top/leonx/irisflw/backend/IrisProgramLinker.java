@@ -130,7 +130,8 @@ public class IrisProgramLinker extends ProgramLinker {
         var vertexRef = sourceRef.getVertexSource().orElseThrow();
         var fragRef = sourceRef.getFragmentSource().orElseThrow();
 
-        String newVertexSource = vertPatcher.patch(vertexRef, vertexSource, isShadow, isEmbedded, lightShader, IrisFlw.isUsingExtendedVertexFormat());
+        String newVertexSource = vertPatcher.patch(vertexRef, vertexSource, isShadow, isEmbedded, lightShader,
+                IrisFlw.isUsingExtendedVertexFormat(), IrisFlw.isSableLoaded());
         newVertexSource = JcppProcessor.glslPreprocessSource(newVertexSource, environmentDefines);
 
         if(PATCH_FRAG)

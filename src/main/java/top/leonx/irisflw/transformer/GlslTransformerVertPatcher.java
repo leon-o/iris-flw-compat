@@ -279,12 +279,34 @@ public class GlslTransformerVertPatcher {
         }
 
         if(context.getUseLightLut()) {
-            createVertexBuilder.append("""
-                    FlwLightAo _flw_light;
-                    flw_light(flw_vertexPos.xyz, flw_vertexNormal, _flw_light);
-                    flw_vertexLight = max(flw_vertexLight, _flw_light.light);
-                    _flw_ao = _flw_light.ao;
-                    """);
+            createVertexBuilder.append("FlwLightAo _flw_light;\n");
+
+            if (context.isSableCompat) {
+                if (context.isEmbedded) {
+                    createVertexBuilder.append("""
+                            ivec3 _flw_lightRenderOrigin = flw_renderOrigin;
+                            if (flw_vertexLightingSceneId != 0u) {
+                                _flw_lightRenderOrigin = ivec3(0);
+                            }
+                            flw_light(flw_vertexLightingSceneId, flw_vertexLightingPos.xyz, flw_vertexNormal, _flw_lightRenderOrigin, _flw_light);
+                            flw_vertexLight = max(flw_vertexLight, _flw_light.light);
+                            flw_vertexLight.y *= flw_skyLightScale;
+                            _flw_ao = _flw_light.ao;
+                            """);
+                } else {
+                    createVertexBuilder.append("""
+                            flw_light(0u, flw_vertexPos.xyz, flw_vertexNormal, flw_renderOrigin, _flw_light);
+                            flw_vertexLight = max(flw_vertexLight, _flw_light.light);
+                            _flw_ao = _flw_light.ao;
+                            """);
+                }
+            } else {
+                createVertexBuilder.append("""
+                        flw_light(flw_vertexPos.xyz, flw_vertexNormal, _flw_light);
+                        flw_vertexLight = max(flw_vertexLight, _flw_light.light);
+                        _flw_ao = _flw_light.ao;
+                        """);
+            }
         }
 
         createVertexBuilder.append("\n}");
@@ -337,8 +359,8 @@ public class GlslTransformerVertPatcher {
         };
     }
 
-    public String patch(String irisSource, String flwSource, boolean isShadow, boolean isEmbedded, LightShader lightShader, boolean isExtendedVertexFormat){
-        return transformer.transform(irisSource, new ContextParameter(flwSource, isShadow, isEmbedded, lightShader, isExtendedVertexFormat));
+    public String patch(String irisSource, String flwSource, boolean isShadow, boolean isEmbedded, LightShader lightShader, boolean isExtendedVertexFormat, boolean isSableCompat){
+        return transformer.transform(irisSource, new ContextParameter(flwSource, isShadow, isEmbedded, lightShader, isExtendedVertexFormat, isSableCompat));
     }
 
 
@@ -353,6 +375,8 @@ public class GlslTransformerVertPatcher {
 
         public boolean isExtendedVertexFormat;
 
+        public boolean isSableCompat;
+
         public String flwVertexTemplate;
 
         public TranslationUnit flwTree;
@@ -363,12 +387,13 @@ public class GlslTransformerVertPatcher {
                     || lightShader == LightShaders.FLAT || lightShader == LightShaders.SMOOTH);
         }
 
-        public ContextParameter(String flwVertexTemplate, boolean isShadow, boolean isEmbedded, LightShader lightShader, boolean isExtendedVertexFormat) {
+        public ContextParameter(String flwVertexTemplate, boolean isShadow, boolean isEmbedded, LightShader lightShader, boolean isExtendedVertexFormat, boolean isSableCompat) {
             this.flwVertexTemplate = flwVertexTemplate;
             this.isShadow = isShadow;
             this.isEmbedded = isEmbedded;
             this.lightShader = lightShader;
             this.isExtendedVertexFormat = isExtendedVertexFormat;
+            this.isSableCompat = isSableCompat;
         }
     }
 

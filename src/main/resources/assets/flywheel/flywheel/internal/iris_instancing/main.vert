@@ -8,9 +8,14 @@ uniform int _flw_baseInstance = 0;
 #ifdef FLW_EMBEDDED
 uniform mat4 _flw_modelMatrixUniform;
 uniform mat3 _flw_normalMatrixUniform;
+#ifdef IRISFLW_SABLE_COMPAT
+uniform uint _flw_lightingSceneUniform;
+uniform float _flw_lightingSkyLightScaleUniform;
+uniform mat4 _flw_lightingSceneMatrixUniform;
+#endif
 #endif
 
-uniform uint _flw_vertexOffset;
+uniform uint _flw_baseVertex;
 
 void main() {
     _flw_unpackMaterialProperties(_flw_packedMaterial.y, flw_material);
@@ -20,9 +25,14 @@ void main() {
     #ifdef FLW_EMBEDDED
     _flw_modelMatrix = _flw_modelMatrixUniform;
     _flw_normalMatrix = _flw_normalMatrixUniform;
+    #ifdef IRISFLW_SABLE_COMPAT
+    _flw_lightingSceneId = _flw_lightingSceneUniform;
+    _flw_skyLightScale = _flw_lightingSkyLightScaleUniform;
+    _flw_lightingSceneMatrix = _flw_lightingSceneMatrixUniform;
+    #endif
     #endif
 
-    _flw_main(instance, uint(gl_InstanceID), _flw_vertexOffset);
+    _flw_main(instance, uint(gl_InstanceID), _flw_baseVertex);
 
     #ifdef _FLW_CRUMBLING
     flw_vertexTexCoord = getCrumblingTexCoord();

@@ -1,6 +1,7 @@
 package top.leonx.irisflw;
 
 import net.irisshaders.iris.api.v0.IrisApi;
+import net.neoforged.fml.ModList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.leonx.irisflw.backend.IrisFlwBackends;
@@ -18,5 +19,9 @@ public final class IrisFlw {
 
     public static boolean isUsingExtendedVertexFormat() {
         return isShaderPackInUse();
+    }
+
+    public static boolean isSableLoaded() {
+        return ModList.get().isLoaded("sable");
     }
 }
