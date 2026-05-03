@@ -142,6 +142,9 @@ public class GlslTransformerVertPatcher {
     private void transform(TranslationUnit tree, Root root, ContextParameter parameter) {
         var vertexTemplate = parameter.flwVertexTemplate;
         var processedFlwSource = JcppProcessor.glslPreprocessSource(vertexTemplate, List.of(new StringPair("VERTEX_SHADER", "1")));
+        if (parameter.isSableCompat) {
+            processedFlwSource = makeUnsignedUniformBlocksVeilFriendly(processedFlwSource);
+        }
         parameter.flwTree = flwTransformer.parseSeparateTranslationUnit(processedFlwSource);
 
         var predefinesStats = ProcessFlywheelPredefine(tree, parameter);
@@ -185,6 +188,38 @@ public class GlslTransformerVertPatcher {
         {
             root.replaceReferenceExpressionsReport(transformer, "gl_MultiTexCoord1", String.format("(vec4(%s*256.0,0,1))", flw_vertexLight));
         }
+    }
+
+    private String makeUnsignedUniformBlocksVeilFriendly(String source) {
+        return source
+                .replace("uint useMin;", "int useMin;")
+                .replace("uint flw_ticks;", "int flw_ticks;")
+                .replace("uint flw_systemMillis;", "int flw_systemMillis;")
+                .replace("uint flw_cameraInFluid;", "int flw_cameraInFluid;")
+                .replace("uint flw_cameraInBlock;", "int flw_cameraInBlock;")
+                .replace("uint _flw_debugMode;", "int _flw_debugMode;")
+                .replace("uint flw_fovOption;", "int flw_fovOption;")
+                .replace("uint flw_biomeBlendOption;", "int flw_biomeBlendOption;")
+                .replace("uint flw_smoothLightingOption;", "int flw_smoothLightingOption;")
+                .replace("uint flw_viewBobbingOption;", "int flw_viewBobbingOption;")
+                .replace("uint flw_highContrastOption;", "int flw_highContrastOption;")
+                .replace("uint flw_textBackgroundForChatOnlyOption;", "int flw_textBackgroundForChatOnlyOption;")
+                .replace("uint flw_hideLightningFlashesOption;", "int flw_hideLightningFlashesOption;")
+                .replace("uint flw_playerEyeInFluid;", "int flw_playerEyeInFluid;")
+                .replace("uint flw_playerEyeInBlock;", "int flw_playerEyeInBlock;")
+                .replace("uint flw_playerCrouching;", "int flw_playerCrouching;")
+                .replace("uint flw_playerSleeping;", "int flw_playerSleeping;")
+                .replace("uint flw_playerSwimming;", "int flw_playerSwimming;")
+                .replace("uint flw_playerFallFlying;", "int flw_playerFallFlying;")
+                .replace("uint flw_shiftKeyDown;", "int flw_shiftKeyDown;")
+                .replace("uint flw_gameMode;", "int flw_gameMode;")
+                .replace("uint flw_levelDay;", "int flw_levelDay;")
+                .replace("uint flw_levelHasSkyLight;", "int flw_levelHasSkyLight;")
+                .replace("uint flw_moonPhase;", "int flw_moonPhase;")
+                .replace("uint flw_isRaining;", "int flw_isRaining;")
+                .replace("uint flw_isThundering;", "int flw_isThundering;")
+                .replace("uint flw_constantAmbientLight;", "int flw_constantAmbientLight;")
+                .replace("uint flw_dimension;", "int flw_dimension;");
     }
 
     private static void RemoveOriginalAttributes(Root root, Map<String, Integer> attrVectorDims) {

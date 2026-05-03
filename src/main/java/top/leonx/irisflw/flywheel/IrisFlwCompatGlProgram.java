@@ -2,7 +2,6 @@ package top.leonx.irisflw.flywheel;
 
 import com.mojang.blaze3d.shaders.Uniform;
 import dev.engine_room.flywheel.api.material.Material;
-import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.engine.MaterialEncoder;
 import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
 import net.caffeinemc.mods.sodium.client.gl.shader.uniform.GlUniformInt;
@@ -26,15 +25,19 @@ public class IrisFlwCompatGlProgram extends IrisFlwCompatGlProgramBase {
     protected GlUniformMcMatrix3f uniformNormalMatrix;
     protected GlUniformMcMatrix4f uniformModelViewProjMat;
     protected GlUniformInt2v uniformAtlasSize;
-    protected GlUniformUInt uniformFlwBaseVertex;
+    protected GlUniformInt uniformFlwBaseVertexInt;
+    protected GlUniformUInt uniformFlwBaseVertexUInt;
     protected GlUniformInt uniformFlwInstance;
-    protected GlUniformUInt2v uniformPackedMaterial;
+    protected GlUniformInt2v uniformPackedMaterialInt;
+    protected GlUniformUInt2v uniformPackedMaterialUInt;
 //    protected GlUniformInt uniformBlockEntity;
 //    protected GlUniformInt uniformEntity;
+    private final boolean signedFlywheelUniforms;
 
     public IrisFlwCompatGlProgram(ShaderInstance shader, ShaderType type, String name) {
         super(shader.getId());
         this.shader = shader;
+        this.signedFlywheelUniforms = IrisFlw.isSableLoaded();
         int progId = shader.getId();
 
         //ModelViewMat may be removed if the shader doesn't use it.
@@ -49,9 +52,16 @@ public class IrisFlwCompatGlProgram extends IrisFlwCompatGlProgramBase {
         uniformNormalMatrix = new GlUniformMcMatrix3f(GL20.glGetUniformLocation(progId, "iris_NormalMat"));
         uniformModelViewProjMat = new GlUniformMcMatrix4f(GL20.glGetUniformLocation(progId, "flw_ModelViewProjMat"));
         uniformAtlasSize = new GlUniformInt2v(GL20.glGetUniformLocation(progId, "atlasSize"));
-        uniformFlwBaseVertex = new GlUniformUInt(GL20.glGetUniformLocation(progId, "_flw_baseVertex"));
+        int flwBaseVertexLocation = GL20.glGetUniformLocation(progId, "_flw_baseVertex");
+        int packedMaterialLocation = GL20.glGetUniformLocation(progId, "_flw_packedMaterial");
+        if (signedFlywheelUniforms) {
+            uniformFlwBaseVertexInt = new GlUniformInt(flwBaseVertexLocation);
+            uniformPackedMaterialInt = new GlUniformInt2v(packedMaterialLocation);
+        } else {
+            uniformFlwBaseVertexUInt = new GlUniformUInt(flwBaseVertexLocation);
+            uniformPackedMaterialUInt = new GlUniformUInt2v(packedMaterialLocation);
+        }
         uniformFlwInstance = new GlUniformInt(GL20.glGetUniformLocation(progId, "_flw_baseInstance"));
-        uniformPackedMaterial = new GlUniformUInt2v(GL20.glGetUniformLocation(progId, "_flw_packedMaterial"));
         // todo: add these uniforms
         // uniformBlockEntity = new GlUniformInt(GL20.glGetUniformLocation(progId, "blockEntityId"));
         // uniformEntity = new GlUniformInt(GL20.glGetUniformLocation(progId, "entityId"));
@@ -70,7 +80,6 @@ public class IrisFlwCompatGlProgram extends IrisFlwCompatGlProgramBase {
 
     public void bind() {
         shader.apply();
-        //bindFlywheelSamplers();
         if (RenderLayerEventStateManager.isRenderingShadow()) {
             setProjectionMatrix(ShadowRenderer.PROJECTION);
             setModelViewMatrix(ShadowRenderer.MODELVIEW);
@@ -79,7 +88,7 @@ public class IrisFlwCompatGlProgram extends IrisFlwCompatGlProgramBase {
             setModelViewMatrix((Matrix4f) CapturedRenderingState.INSTANCE.getGbufferModelView());
         }
 
-        uniformFlwBaseVertex.set(baseVertex);
+        setFlwBaseVertex(baseVertex);
         uniformFlwInstance.set(baseInstance);
 
         if(material != null)
@@ -97,22 +106,35 @@ public class IrisFlwCompatGlProgram extends IrisFlwCompatGlProgramBase {
 
             int packedFogAndCutout = MaterialEncoder.packUberShader(material);
             int packedMaterialProperties = MaterialEncoder.packProperties(material);
-            uniformPackedMaterial.set(packedFogAndCutout, packedMaterialProperties);
+            setPackedMaterial(packedFogAndCutout, packedMaterialProperties);
         }else{
             uniformAtlasSize.set(2048, 2048);
         }
     }
 
-    private void bindFlywheelSamplers() {
-        setSamplerBinding("flw_diffuseTex", Samplers.DIFFUSE);
-        setSamplerBinding("flw_overlayTex", Samplers.OVERLAY);
-        setSamplerBinding("flw_lightTex", Samplers.LIGHT);
-        setSamplerBinding("_flw_instances", Samplers.INSTANCE_BUFFER);
-        setSamplerBinding("_flw_lightLut", Samplers.LIGHT_LUT);
-        setSamplerBinding("_flw_lightSections", Samplers.LIGHT_SECTIONS);
-        setSamplerBinding("_flw_depthRange", Samplers.DEPTH_RANGE);
-        setSamplerBinding("_flw_coefficients", Samplers.COEFFICIENTS);
-        setSamplerBinding("_flw_blueNoise", Samplers.NOISE);
+    private void setFlwBaseVertex(int baseVertex) {
+        if (signedFlywheelUniforms) {
+            uniformFlwBaseVertexInt.set(baseVertex);
+        } else {
+            uniformFlwBaseVertexUInt.set(baseVertex);
+        }
+    }
+
+    private void setPackedMaterial(int packedFogAndCutout, int packedMaterialProperties) {
+        if (signedFlywheelUniforms) {
+            uniformPackedMaterialInt.set(packedFogAndCutout, packedMaterialProperties);
+        } else {
+            uniformPackedMaterialUInt.set(packedFogAndCutout, packedMaterialProperties);
+        }
+    }
+
+    @Override
+    public void setUInt(String glslName, int value) {
+        if (signedFlywheelUniforms && "_flw_lightingSceneUniform".equals(glslName)) {
+            setInt(glslName, value);
+            return;
+        }
+        super.setUInt(glslName, value);
     }
 
     public void clear() {

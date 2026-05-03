@@ -2,23 +2,33 @@
 #include "flywheel:internal/packed_material.glsl"
 #include "flywheel:internal/instancing/light.glsl"
 
-uniform uvec2 _flw_packedMaterial;
+#ifdef IRISFLW_SABLE_COMPAT
+#define IRISFLW_UNIFORM_UINT int
+#define IRISFLW_UNIFORM_UVEC2 ivec2
+#define IRISFLW_UNIFORM_TO_UINT(value) uint(value)
+#else
+#define IRISFLW_UNIFORM_UINT uint
+#define IRISFLW_UNIFORM_UVEC2 uvec2
+#define IRISFLW_UNIFORM_TO_UINT(value) value
+#endif
+
+uniform IRISFLW_UNIFORM_UVEC2 _flw_packedMaterial;
 uniform int _flw_baseInstance = 0;
 
 #ifdef FLW_EMBEDDED
 uniform mat4 _flw_modelMatrixUniform;
 uniform mat3 _flw_normalMatrixUniform;
 #ifdef IRISFLW_SABLE_COMPAT
-uniform uint _flw_lightingSceneUniform;
+uniform IRISFLW_UNIFORM_UINT _flw_lightingSceneUniform;
 uniform float _flw_lightingSkyLightScaleUniform;
 uniform mat4 _flw_lightingSceneMatrixUniform;
 #endif
 #endif
 
-uniform uint _flw_baseVertex;
+uniform IRISFLW_UNIFORM_UINT _flw_baseVertex;
 
 void main() {
-    _flw_unpackMaterialProperties(_flw_packedMaterial.y, flw_material);
+    _flw_unpackMaterialProperties(IRISFLW_UNIFORM_TO_UINT(_flw_packedMaterial.y), flw_material);
 
     FlwInstance instance = _flw_unpackInstance(_flw_baseInstance + gl_InstanceID);
 
@@ -26,13 +36,13 @@ void main() {
     _flw_modelMatrix = _flw_modelMatrixUniform;
     _flw_normalMatrix = _flw_normalMatrixUniform;
     #ifdef IRISFLW_SABLE_COMPAT
-    _flw_lightingSceneId = _flw_lightingSceneUniform;
+    _flw_lightingSceneId = IRISFLW_UNIFORM_TO_UINT(_flw_lightingSceneUniform);
     _flw_skyLightScale = _flw_lightingSkyLightScaleUniform;
     _flw_lightingSceneMatrix = _flw_lightingSceneMatrixUniform;
     #endif
     #endif
 
-    _flw_main(instance, uint(gl_InstanceID), _flw_baseVertex);
+    _flw_main(instance, uint(gl_InstanceID), IRISFLW_UNIFORM_TO_UINT(_flw_baseVertex));
 
     #ifdef _FLW_CRUMBLING
     flw_vertexTexCoord = getCrumblingTexCoord();
