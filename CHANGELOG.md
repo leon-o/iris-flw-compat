@@ -1,5 +1,8 @@
 **This version only compatible with _Iris_ 1.8.0 above and _Sodium_.**
 
+### 2.3.1
+- Fixed Sable embedded Flywheel rendering issues and Veil's "Unsupported Uniform Type: unsigned int" error.
+
 ### 2.3.0
 - Fixed compatibility issues with Sable and Create Aeronautics.
 
