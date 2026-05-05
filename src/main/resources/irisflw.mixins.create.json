@@ -7,7 +7,8 @@
     "MixinNeoForgePonderClient",
     "MixinCreateClientEvents",
     "MixinModelBlockRenderer",
-    "MixinOutlineParams"
+    "MixinOutlineParams",
+    "MixinTransparentGhostBlockRenderer"
   ],
   "injectors": {
     "defaultRequire": 1
