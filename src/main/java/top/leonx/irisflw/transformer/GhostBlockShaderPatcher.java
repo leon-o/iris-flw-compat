@@ -1,6 +1,8 @@
 package top.leonx.irisflw.transformer;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import io.github.douira.glsl_transformer.ast.node.TranslationUnit;
+import io.github.douira.glsl_transformer.ast.node.external_declaration.FunctionDefinition;
 import io.github.douira.glsl_transformer.ast.query.RootSupplier;
 import io.github.douira.glsl_transformer.ast.transform.ASTInjectionPoint;
 import io.github.douira.glsl_transformer.ast.transform.JobParameters;
@@ -21,6 +23,7 @@ import top.leonx.irisflw.IrisFlw;
 import top.leonx.irisflw.accessors.IrisRenderingPipelineAccessor;
 import top.leonx.irisflw.accessors.ProgramSourceAccessor;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -192,16 +195,22 @@ public final class GhostBlockShaderPatcher {
                 63.0/64.0, 31.0/64.0, 55.0/64.0, 23.0/64.0, 61.0/64.0, 29.0/64.0, 53.0/64.0, 21.0/64.0
             );""";
 
-        /** Interleaved Gradient Noise — no visible pattern, no texture needed. */
+        /** Interleaved Gradient Noise with temporal dithering.
+         *  {@code frameTimeCounter} is Iris's accumulated time uniform (seconds),
+         *  available in all shaderpack programs. The golden ratio (φ⁻¹)
+         *  creates a well-distributed temporal sequence — each pixel gets a
+         *  different noise threshold each frame, smoothing out the dither
+         *  pattern when the scene is static. */
         private static final String IGN_FUNC = """
             float _if_noise(vec2 p) {
-                return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715))));
+                return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715)) + frameTimeCounter * 0.61803398874989484820));
             }""";
 
-        private static final String BAYER_DISCARD = """
-            int _if_bx = int(mod(gl_FragCoord.x, 8.0));
-            int _if_by = int(mod(gl_FragCoord.y, 8.0));
-            if (_if_alpha <= _if_bayer[_if_by * 8 + _if_bx]) discard;""";
+        private static final String[] BAYER_DISCARD = List.of(
+                "int _if_bx = int(mod(gl_FragCoord.x, 8.0));",
+                "int _if_by = int(mod(gl_FragCoord.y, 8.0));",
+                "if (_if_alpha <= _if_bayer[_if_by * 8 + _if_bx]) discard;"
+        ).toArray(new String[3]);
 
         private static final String IGN_DISCARD = """
             if (_if_alpha <= _if_noise(gl_FragCoord.xy)) discard;""";
@@ -222,8 +231,20 @@ public final class GhostBlockShaderPatcher {
                     });
                 } else {
                     t.setTransformation((tree, root, params) -> {
-                        tree.parseAndInjectNodes(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
-                                "in float _if_alpha;", IGN_FUNC);
+                        var mainDef = tree.getOneMainDefinitionBody().getParent();
+                        if(root.identifierIndex.get("frameTimeCounter").isEmpty())
+                        {
+                            tree.parseAndInjectNode(t, ASTInjectionPoint.BEFORE_DECLARATIONS, "uniform float frameTimeCounter;");
+                        }
+                        if (mainDef instanceof FunctionDefinition) {
+                            int mainIdx = tree.getChildren().indexOf(mainDef);
+
+                            tree.getChildren().add(mainIdx++,
+                                    t.parseExternalDeclaration(root, "in float _if_alpha;"));
+
+                            tree.getChildren().add(mainIdx,
+                                    t.parseExternalDeclaration(root, IGN_FUNC));
+                        }
                         tree.appendMainFunctionBody(t, IGN_DISCARD);
                     });
                 }
