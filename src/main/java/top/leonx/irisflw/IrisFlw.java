@@ -34,8 +34,10 @@ public final class IrisFlw {
         return IrisFlwConfig.CLIENT.useDithering.get();
     }
 
-    /** Returns the configured dithering method: "IGN" or "BAYER". */
+    /** Returns the configured dithering method: "IGN" or "BAYER".
+     *  Falls back to IGN on any unrecognized value. */
     public static String ditheringMethod() {
-        return IrisFlwConfig.CLIENT.ditheringMethod.get();
+        String method = IrisFlwConfig.CLIENT.ditheringMethod.get();
+        return "BAYER".equalsIgnoreCase(method) ? "BAYER" : "IGN";
     }
 }

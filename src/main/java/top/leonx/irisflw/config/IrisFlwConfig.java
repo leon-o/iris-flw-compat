@@ -1,6 +1,5 @@
 package top.leonx.irisflw.config;
 
-import java.util.List;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.*;
 import org.apache.commons.lang3.tuple.Pair;
@@ -29,7 +28,7 @@ public class IrisFlwConfig {
                             "\n  IGN  — Interleaved Gradient Noise (default). No visible pattern, no texture needed." +
                             "\n  BAYER — 8×8 Bayer matrix. Deterministic, but shows cross-hatch pattern." +
                             "\nOnly effective when useDithering=true.")
-                    .defineInList("ditheringMethod", "IGN", List.of("IGN", "BAYER"));
+                    .define("ditheringMethod", "IGN");
         }
     }
 
