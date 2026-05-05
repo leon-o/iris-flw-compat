@@ -24,4 +24,9 @@ public final class IrisFlw {
     public static boolean isSableLoaded() {
         return ModList.get().isLoaded("sable");
     }
+
+    /** If true, ghost block preview uses Bayer ordered dithering with patched
+     *  gbuffers_block shader and renders during the gbuffer pass (AFTER_SOLID_BLOCKS).
+     *  If false, uses alpha-blended terrain shader at AFTER_BLOCK_ENTITIES. */
+    public static boolean useBayerDithering = true;
 }

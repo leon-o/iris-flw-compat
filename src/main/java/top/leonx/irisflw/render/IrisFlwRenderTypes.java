@@ -5,7 +5,8 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
-import top.leonx.irisflw.backend.GhostBlockShaderPatcher;
+import top.leonx.irisflw.IrisFlw;
+import top.leonx.irisflw.transformer.GhostBlockShaderPatcher;
 
 /**
  * Custom RenderType for ghost translucent rendering when IrisFlw INSTANCING is active.
@@ -57,9 +58,11 @@ public final class IrisFlwRenderTypes {
   );
 
   public static RenderType ghostTranslucent() {
-    ShaderInstance patched = GhostBlockShaderPatcher.getShader();
-    if (patched != null) {
-      return GHOST_BAYER;
+    if (IrisFlw.useBayerDithering) {
+      ShaderInstance patched = GhostBlockShaderPatcher.getShader();
+      if (patched != null) {
+        return GHOST_BAYER;
+      }
     }
     return GHOST_SOLID_FALLBACK;
   }
