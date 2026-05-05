@@ -21,7 +21,7 @@ public class MixinTransparentGhostBlockRenderer {
       method = "render",
       at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;translucent()Lnet/minecraft/client/renderer/RenderType;")
   )
-  private static RenderType irisflw$RenderTypeTranslucent() {
+  private RenderType irisflw$RenderTypeTranslucent() {
     try {
       if (BackendManager.currentBackend() == IrisFlwBackends.INSTANCING) {
         return IrisFlwRenderTypes.ghostTranslucent();

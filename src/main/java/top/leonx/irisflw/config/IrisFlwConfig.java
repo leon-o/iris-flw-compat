@@ -4,6 +4,8 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.*;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.List;
+
 public class IrisFlwConfig {
     public static final Client CLIENT;
     public static final ModConfigSpec CLIENT_SPEC;
