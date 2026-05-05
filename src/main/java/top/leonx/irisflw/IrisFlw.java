@@ -5,6 +5,7 @@ import net.neoforged.fml.ModList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.leonx.irisflw.backend.IrisFlwBackends;
+import top.leonx.irisflw.config.IrisFlwConfig;
 
 public final class IrisFlw {
     public static final String MOD_ID = "irisflw";
@@ -25,8 +26,16 @@ public final class IrisFlw {
         return ModList.get().isLoaded("sable");
     }
 
-    /** If true, ghost block preview uses Bayer ordered dithering with patched
-     *  gbuffers_block shader and renders during the gbuffer pass (AFTER_SOLID_BLOCKS).
+    /** If true, ghost block preview uses screen-door dithering with patched
+     *  gbuffers_block shader. Dithering method is controlled by
+     *  {@link IrisFlwConfig.Client#ditheringMethod}.
      *  If false, uses alpha-blended terrain shader at AFTER_BLOCK_ENTITIES. */
-    public static boolean useBayerDithering = true;
+    public static boolean useDithering() {
+        return IrisFlwConfig.CLIENT.useDithering.get();
+    }
+
+    /** Returns the configured dithering method: "IGN" or "BAYER". */
+    public static String ditheringMethod() {
+        return IrisFlwConfig.CLIENT.ditheringMethod.get();
+    }
 }

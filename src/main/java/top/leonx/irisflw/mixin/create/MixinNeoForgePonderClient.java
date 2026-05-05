@@ -22,8 +22,8 @@ public class MixinNeoForgePonderClient {
     private static void irisflw$OnRenderWorld(RenderLevelStageEvent event, CallbackInfo ci) {
         if (BackendManager.currentBackend() != IrisFlwBackends.INSTANCING) return;
 
-        if (IrisFlw.useBayerDithering) {
-            // Bayer ON: render ghost blocks at gbuffer pass (AFTER_SOLID_BLOCKS)
+        if (IrisFlw.useDithering()) {
+            // Dithering ON: render ghost blocks at gbuffer pass (AFTER_SOLID_BLOCKS)
             // so the gbuffer data lands in the correct framebuffer for deferred shaderpacks.
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
                 WorldRenderingPipeline p = Iris.getPipelineManager().getPipelineNullable();
@@ -38,7 +38,7 @@ public class MixinNeoForgePonderClient {
                 ci.cancel();
             }
         } else {
-            // Bayer OFF: original timing (AFTER_BLOCK_ENTITIES)
+            // Dithering OFF: original timing (AFTER_BLOCK_ENTITIES)
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
                 PonderClient.onRenderWorld(event.getPoseStack());
                 ci.cancel();

@@ -11,9 +11,10 @@ import top.leonx.irisflw.transformer.GhostBlockShaderPatcher;
 /**
  * Custom RenderType for ghost translucent rendering when IrisFlw INSTANCING is active.
  * <p>
- * Primary path: uses a Bayer-dithered gbuffers_block shader (patched via Iris pipeline).
- * Bayer ordered dithering creates a screen-door translucency effect using discard instead
- * of alpha blend — works with both forward (BSL) and deferred (Photon) rendering.
+ * Primary path: uses a screen-door dithered gbuffers_block shader (patched via Iris pipeline).
+ * The dithering method (IGN or Bayer) is controlled by {@code ditheringMethod} in irisflw.toml.
+ * Dithering creates translucency using discard instead of alpha blend — works with both
+ * forward (BSL) and deferred (Photon) rendering.
  * <p>
  * Fallback path: uses RENDERTYPE_SOLID_SHADER (Iris → gbuffers_terrain) with
  * TRANSLUCENT_TRANSPARENCY for alpha blend at the OpenGL level.
@@ -58,7 +59,7 @@ public final class IrisFlwRenderTypes {
   );
 
   public static RenderType ghostTranslucent() {
-    if (IrisFlw.useBayerDithering) {
+    if (IrisFlw.useDithering()) {
       ShaderInstance patched = GhostBlockShaderPatcher.getShader();
       if (patched != null) {
         return GHOST_BAYER;

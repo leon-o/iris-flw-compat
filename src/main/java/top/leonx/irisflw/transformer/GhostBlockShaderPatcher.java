@@ -26,12 +26,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Creates a patched ShaderInstance for ghost block rendering with Bayer dithering.
+ * Creates a patched ShaderInstance for ghost block rendering with screen-door dithering.
  * <p>
  * Takes the shaderpack's gbuffers_block program, injects a custom alpha varying
  * ({@code _if_alpha}) into both vertex and fragment shaders, and compiles through
  * Iris's shader pipeline. The alpha varying carries the ghost block's vertex color
- * alpha for Bayer ordered dithering.
+ * alpha for ordered dithering. Supported methods: IGN (Interleaved Gradient Noise),
+ * BAYER (8×8 matrix).
  */
 public final class GhostBlockShaderPatcher {
     private static final Logger LOGGER = IrisFlw.LOGGER;
@@ -78,7 +79,7 @@ public final class GhostBlockShaderPatcher {
             String fragSource = ref.getFragmentSource().orElseThrow();
 
             String patchedVert = VertexPatcher.patch(vertexSource);
-            String patchedFrag = FragmentPatcher.patch(fragSource);
+            String patchedFrag = FragmentPatcher.patch(fragSource, IrisFlw.ditheringMethod());
 
             ShaderProperties properties = ((ProgramSourceAccessor) ref).getShaderProperties();
             BlendModeOverride blendModeOverride = ((ProgramSourceAccessor) ref).getBlendModeOverride();
@@ -97,7 +98,7 @@ public final class GhostBlockShaderPatcher {
                     ProgramId.Block, AlphaTest.ALWAYS, DefaultVertexFormat.BLOCK,
                     FogMode.OFF, false, false, false, false, false);
 
-            LOGGER.info("Created Bayer-dithered ghost block shader");
+            LOGGER.info("Created dithered ghost block shader");
             return cachedShader;
         } catch (Exception e) {
             LOGGER.error("Failed to create Bayer-dithered ghost block shader", e);
@@ -178,7 +179,7 @@ public final class GhostBlockShaderPatcher {
     public static final class FragmentPatcher {
         private FragmentPatcher() {}
 
-        /** Bayer 8×8 matrix at global scope. */
+        /** Bayer 8×8 matrix. */
         private static final String BAYER_MATRIX = """
             const float _if_bayer[64] = float[64](
                 0.0/64.0, 32.0/64.0,  8.0/64.0, 40.0/64.0,  2.0/64.0, 34.0/64.0, 10.0/64.0, 42.0/64.0,
@@ -191,23 +192,44 @@ public final class GhostBlockShaderPatcher {
                 63.0/64.0, 31.0/64.0, 55.0/64.0, 23.0/64.0, 61.0/64.0, 29.0/64.0, 53.0/64.0, 21.0/64.0
             );""";
 
-        public static String patch(String fragmentSource) {
+        /** Interleaved Gradient Noise — no visible pattern, no texture needed. */
+        private static final String IGN_FUNC = """
+            float _if_noise(vec2 p) {
+                return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715))));
+            }""";
+
+        private static final String BAYER_DISCARD = """
+            int _if_bx = int(mod(gl_FragCoord.x, 8.0));
+            int _if_by = int(mod(gl_FragCoord.y, 8.0));
+            if (_if_alpha <= _if_bayer[_if_by * 8 + _if_bx]) discard;""";
+
+        private static final String IGN_DISCARD = """
+            if (_if_alpha <= _if_noise(gl_FragCoord.xy)) discard;""";
+
+        /** @param method "IGN" or "BAYER" */
+        public static String patch(String fragmentSource, String method) {
+            boolean isBayer = "BAYER".equalsIgnoreCase(method);
             try {
                 final SingleASTTransformer<ParseParams> t;
                 t = new SingleASTTransformer<>() {{
                     setRootSupplier(RootSupplier.PREFIX_UNORDERED_ED_EXACT);
                 }};
-                t.setTransformation((tree, root, params) -> {
-                    tree.parseAndInjectNodes(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
-                            "in float _if_alpha;", BAYER_MATRIX);
-                    tree.appendMainFunctionBody(t,
-                            "int _if_bx = int(mod(gl_FragCoord.x, 8.0));",
-                            "int _if_by = int(mod(gl_FragCoord.y, 8.0));",
-                            "if (_if_alpha <= _if_bayer[_if_by * 8 + _if_bx]) discard;");
-                });
+                if (isBayer) {
+                    t.setTransformation((tree, root, params) -> {
+                        tree.parseAndInjectNodes(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
+                                "in float _if_alpha;", BAYER_MATRIX);
+                        tree.appendMainFunctionBody(t, BAYER_DISCARD);
+                    });
+                } else {
+                    t.setTransformation((tree, root, params) -> {
+                        tree.parseAndInjectNodes(t, ASTInjectionPoint.BEFORE_DECLARATIONS,
+                                "in float _if_alpha;", IGN_FUNC);
+                        tree.appendMainFunctionBody(t, IGN_DISCARD);
+                    });
+                }
                 return t.transform(fragmentSource, new ParseParams());
             } catch (Exception e) {
-                LOGGER.warn("FragmentPatcher: AST injection failed", e);
+                LOGGER.warn("FragmentPatcher: AST injection failed for method={}", method, e);
                 return fragmentSource;
             }
         }
