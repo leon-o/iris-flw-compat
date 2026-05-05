@@ -4,22 +4,42 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
+import top.leonx.irisflw.backend.GhostBlockShaderPatcher;
 
 /**
  * Custom RenderType for ghost translucent rendering when IrisFlw INSTANCING is active.
- * Uses RENDERTYPE_SOLID_SHADER (Iris maps to gbuffers_terrain) with TRANSLUCENT_TRANSPARENCY
- * for alpha blending at the OpenGL level. Block vertex format matches what GhostBlockRenderer
- * outputs via BakedModelBufferer.
  * <p>
- * Strategy: gbuffers_terrain is the most universally stable shaderpack program — ALL
- * shaderpacks handle terrain rendering correctly. The solid shader multiplies vertex color
- * alpha into the output, and TRANSLUCENT_TRANSPARENCY handles the alpha blend in GL.
- * No custom shader files needed — uses built-in RENDERTYPE_SOLID_SHADER.
+ * Primary path: uses a Bayer-dithered gbuffers_block shader (patched via Iris pipeline).
+ * Bayer ordered dithering creates a screen-door translucency effect using discard instead
+ * of alpha blend — works with both forward (BSL) and deferred (Photon) rendering.
+ * <p>
+ * Fallback path: uses RENDERTYPE_SOLID_SHADER (Iris → gbuffers_terrain) with
+ * TRANSLUCENT_TRANSPARENCY for alpha blend at the OpenGL level.
  */
 public final class IrisFlwRenderTypes {
   private IrisFlwRenderTypes() {}
 
-  private static final RenderType GHOST_TRANSLUCENT = RenderType.create(
+  /** Bayer-dithered ghost translucent (primary path). */
+  private static final RenderType GHOST_BAYER = RenderType.create(
+      "irisflw:ghost_translucent",
+      DefaultVertexFormat.BLOCK,
+      VertexFormat.Mode.QUADS,
+      256,
+      false,
+      true,
+      RenderType.CompositeState.builder()
+          .setShaderState(new RenderStateShard.ShaderStateShard(GhostBlockShaderPatcher::getShader))
+          .setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
+          .setTransparencyState(RenderStateShard.NO_TRANSPARENCY)
+          .setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
+          .setLightmapState(RenderStateShard.LIGHTMAP)
+          .setOverlayState(RenderStateShard.OVERLAY)
+          .createCompositeState(false)
+  );
+
+  /** Fallback: RENDERTYPE_SOLID_SHADER with alpha blend (Plan 2). */
+  private static final RenderType GHOST_SOLID_FALLBACK = RenderType.create(
       "irisflw:ghost_translucent",
       DefaultVertexFormat.BLOCK,
       VertexFormat.Mode.QUADS,
@@ -37,6 +57,10 @@ public final class IrisFlwRenderTypes {
   );
 
   public static RenderType ghostTranslucent() {
-    return GHOST_TRANSLUCENT;
+    ShaderInstance patched = GhostBlockShaderPatcher.getShader();
+    if (patched != null) {
+      return GHOST_BAYER;
+    }
+    return GHOST_SOLID_FALLBACK;
   }
 }
