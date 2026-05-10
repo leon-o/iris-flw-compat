@@ -5,50 +5,23 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-name: Publish Jar
+name: Publish Release
 
 on:
+  push:
+    tags:
+      - '*+*-*'
   workflow_dispatch:
     inputs:
-      branch:
-        description: 'Branch'
-        required: true
-        type: 'string'
-        default: '1.21.1-neoforge'
-      mc_version:
-        description: 'Minecraft Version'
-        required: true
-        type: 'string'
-        default: '1.21.1'
-      version:
-        description: 'Version'
-        required: true
-        type: 'string'
-        default: '2.3.0'
       version_type:
-        description: 'Version Type'
+        description: 'Version type (for manual runs without a tag)'
         required: true
-        type: 'choice'
+        type: choice
         options:
           - 'alpha'
           - 'beta'
           - 'release'
-        default: 'beta'
-      publish_to_curseforge:
-        description: 'Publish to CurseForge'
-        required: true
-        type: 'boolean'
-        default: false
-      publish_to_modrinth:
-        description: 'Publish to Modrinth'
-        required: true
-        type: 'boolean'
-        default: false
-      publish_github_release:
-        description: 'Publish GitHub Release'
-        required: true
-        type: 'boolean'
-        default: true
+        default: 'release'
 
 env:
   JAVA_VERSION: 21
@@ -57,18 +30,13 @@ permissions:
   contents: write
 
 jobs:
-  build:
-
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Check Environment Variables
-        run: env
-
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: true
-          ref: ${{ inputs.branch }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -76,81 +44,177 @@ jobs:
           distribution: "temurin"
           java-version: ${{ env.JAVA_VERSION }}
 
-      - name: Make Gradle Wrapper Executable
-        if: ${{ runner.os != 'Windows' }}
+      - name: Make Gradle Wrapper executable
+        if: runner.os != 'Windows'
         run: chmod +x ./gradlew
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build NeoForge Jar
-        run: ./gradlew clean build -Pmod_version=${{ inputs.version }}
+      # --- Version extraction: tag push ---
+      - name: Extract version from tag
+        if: github.event_name == 'push'
+        id: tag-version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          
+          if [[ "$TAG" =~ ^(.+)\+(.+)-(alpha|beta|release)$ ]]; then
+            echo "mc_version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "mod_version=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+            echo "version_type=${BASH_REMATCH[3]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Tag '$TAG' does not match expected format: <mc_version>+<mod_version>-<version_type>"
+            exit 1
+          fi
 
-      - name: Publish NeoForge GitHub Release
-        if: ${{ inputs.publish_github_release == true }}
+      # --- Version extraction: manual dispatch ---
+      - name: Read version from gradle.properties
+        if: github.event_name == 'workflow_dispatch'
+        id: manual-version
+        run: |
+          MC_VERSION=$(grep '^minecraft_version[[:space:]]*=' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          MOD_VERSION=$(grep '^mod_version[[:space:]]*=' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          VERSION_TYPE="${{ inputs.version_type }}"
+          echo "tag=${MC_VERSION}+${MOD_VERSION}-${VERSION_TYPE}" >> "$GITHUB_OUTPUT"
+          echo "mc_version=$MC_VERSION" >> "$GITHUB_OUTPUT"
+          echo "mod_version=$MOD_VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_type=$VERSION_TYPE" >> "$GITHUB_OUTPUT"
+
+      # --- Unify version outputs ---
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "mc_version=${{ steps.tag-version.outputs.mc_version }}" >> "$GITHUB_OUTPUT"
+            echo "mod_version=${{ steps.tag-version.outputs.mod_version }}" >> "$GITHUB_OUTPUT"
+            echo "version_type=${{ steps.tag-version.outputs.version_type }}" >> "$GITHUB_OUTPUT"
+            echo "tag=${{ steps.tag-version.outputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "mc_version=${{ steps.manual-version.outputs.mc_version }}" >> "$GITHUB_OUTPUT"
+            echo "mod_version=${{ steps.manual-version.outputs.mod_version }}" >> "$GITHUB_OUTPUT"
+            echo "version_type=${{ steps.manual-version.outputs.version_type }}" >> "$GITHUB_OUTPUT"
+            echo "tag=${{ steps.manual-version.outputs.tag }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # --- Validation ---
+      - name: Validate version consistency
+        run: |
+          GRADLE_MC=$(grep '^minecraft_version[[:space:]]*=' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          GRADLE_MOD=$(grep '^mod_version[[:space:]]*=' gradle.properties | cut -d'=' -f2 | tr -d ' ')
+          
+          if [ "${{ steps.version.outputs.mc_version }}" != "$GRADLE_MC" ]; then
+            echo "::error::Tag MC version (${{ steps.version.outputs.mc_version }}) does not match gradle.properties minecraft_version ($GRADLE_MC)"
+            exit 1
+          fi
+          
+          if [ "${{ steps.version.outputs.mod_version }}" != "$GRADLE_MOD" ]; then
+            echo "::error::Tag mod version (${{ steps.version.outputs.mod_version }}) does not match gradle.properties mod_version ($GRADLE_MOD)"
+            exit 1
+          fi
+          
+          echo "Version consistency validated: ${{ steps.version.outputs.mc_version }}+${{ steps.version.outputs.mod_version }}-${{ steps.version.outputs.version_type }}"
+
+      # --- Build ---
+      - name: Build mod JAR
+        run: ./gradlew clean build
+
+      # --- Artifact validation ---
+      - name: Validate build artifacts
+        id: artifact
+        run: |
+          JAR=$(find build/libs -maxdepth 1 -name "*.jar" ! -name "*-dev.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" ! -name "*-shadow.jar" | head -n 1)
+          
+          if [ -z "$JAR" ]; then
+            echo "::error::No valid JAR artifact found in build/libs/"
+            exit 1
+          fi
+          
+          if [ ! -s "$JAR" ]; then
+            echo "::error::JAR artifact is empty: $JAR"
+            exit 1
+          fi
+          
+          echo "jar_path=$JAR" >> "$GITHUB_OUTPUT"
+          echo "Found artifact: $JAR"
+
+      # --- Changelog extraction ---
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          MOD_VERSION="${{ steps.version.outputs.mod_version }}"
+          
+          # Extract section for this version (format: "### X.Y.Z" headers)
+          NOTES=$(awk '/^### '"$MOD_VERSION"'$/ {found=1; next} /^### [0-9]+\./ {found=0} found' CHANGELOG.md)
+          
+          if [ -z "$NOTES" ]; then
+            echo "::error::No changelog entry found for version $MOD_VERSION in CHANGELOG.md"
+            exit 1
+          fi
+          
+          {
+            echo "content<<EOF"
+            echo "$NOTES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # --- Publish: GitHub Release (tag push only) ---
+      - name: Publish GitHub Release
+        if: github.event_name == 'push'
         uses: Kir-Antipov/mc-publish@v3.3
         with:
-          github-token: "${{ secrets.PUBLISH_TOKEN }}"
-
-          name: "NeoForge ${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
-          version: "${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
-          github-tag: "${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
-          github-commitish: ${{ inputs.branch }}
-          changelog-file: CHANGELOG.md
-          files: build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{ inputs.version_type }}
-
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: "NeoForge ${{ steps.version.outputs.mc_version }}+${{ steps.version.outputs.mod_version }}-${{ steps.version.outputs.version_type }}"
+          version: "${{ steps.version.outputs.mc_version }}+${{ steps.version.outputs.mod_version }}-${{ steps.version.outputs.version_type }}"
+          github-tag: "${{ steps.version.outputs.tag }}"
+          github-commitish: ${{ github.sha }}
+          changelog: ${{ steps.changelog.outputs.content }}
+          files: ${{ steps.artifact.outputs.jar_path }}
+          version-type: ${{ steps.version.outputs.version_type }}
           fail-mode: warn
 
-      - name: Publish NeoForge CurseForge
-        if: ${{ inputs.publish_to_curseforge == true }}
+      # --- Publish: CurseForge ---
+      - name: Publish to CurseForge
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           curseforge-id: 659897
-          curseforge-token: "${{ secrets.CURSEFORGE_TOKEN }}"
-
-          name: "NeoForge ${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
-          version: "${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
-          changelog-file: CHANGELOG.md
-          files: build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{ inputs.version_type }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          name: "NeoForge ${{ steps.version.outputs.mc_version }}+${{ steps.version.outputs.mod_version }}-${{ steps.version.outputs.version_type }}"
+          version: "${{ steps.version.outputs.mc_version }}+${{ steps.version.outputs.mod_version }}-${{ steps.version.outputs.version_type }}"
+          changelog: ${{ steps.changelog.outputs.content }}
+          files: ${{ steps.artifact.outputs.jar_path }}
+          version-type: ${{ steps.version.outputs.version_type }}
           java: |
             Java 21
           loaders: |
             neoforge
           game-versions: |
-            ${{ inputs.mc_version }}
-
+            ${{ steps.version.outputs.mc_version }}
           dependencies: |
             IrisShader(required){modrinth:iris}{curseforge:455508}
             Sodium(required){modrinth:sodium}{curseforge:394468}
             Create(optional){modrinth:create}{curseforge:328085}
-
           fail-mode: warn
 
-
-      - name: Publish NeoForge Modrinth
-        if: ${{ inputs.publish_to_modrinth == true }}
+      # --- Publish: Modrinth ---
+      - name: Publish to Modrinth
         uses: Kir-Antipov/mc-publish@v3.3
         with:
           modrinth-id: iris-flw-compat
-          modrinth-token: "${{ secrets.MODRINTH_TOKEN }}"
-
-          name: "NeoForge ${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
-          version: "${{ inputs.mc_version }}+${{ inputs.version }}-${{ inputs.version_type }}"
-          changelog-file: CHANGELOG.md
-          files: build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{ inputs.version_type }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          name: "NeoForge ${{ steps.version.outputs.mc_version }}+${{ steps.version.outputs.mod_version }}-${{ steps.version.outputs.version_type }}"
+          version: "${{ steps.version.outputs.mc_version }}+${{ steps.version.outputs.mod_version }}-${{ steps.version.outputs.version_type }}"
+          changelog: ${{ steps.changelog.outputs.content }}
+          files: ${{ steps.artifact.outputs.jar_path }}
+          version-type: ${{ steps.version.outputs.version_type }}
           java: |
             Java 21
           loaders: |
             neoforge
           game-versions: |
-            ${{ inputs.mc_version }}
-
+            ${{ steps.version.outputs.mc_version }}
           dependencies: |
             IrisShader(required){modrinth:iris}{curseforge:455508}
             Sodium(required){modrinth:sodium}{curseforge:394468}
             Create(optional){modrinth:create}{curseforge:328085}
-
           fail-mode: warn
